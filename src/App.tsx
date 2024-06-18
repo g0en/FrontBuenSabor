@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import SideBar from "./components/common/SideBar";
 import MainLayout from "./components/layout/MainLayout";
 import Dashboard from "./screens/Dashboard";
 import Categoria from "./screens/CategoriaList";
@@ -9,11 +8,12 @@ import Empleado from "./screens/EmpleadosList";
 import Roles from "./screens/RolesList";
 import ArticuloInsumo from "./screens/ArticuloInsumoList";
 import UnidadMedida from "./screens/UnidadMedidaList";
+import Empresa from "./screens/EmpresaList";
+import Sucursal from "./screens/SucursalList";
 
 function App() {
   return (
     <BrowserRouter>
-      <SideBar />
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
@@ -25,6 +25,8 @@ function App() {
           <Route path="insumos" element={<ArticuloInsumo />} />
           <Route path="unidad-medida" element={<UnidadMedida />} />
         </Route>
+        <Route path="/empresa" element={<Empresa />} />
+        <Route path="empresa/:idSucursal" element={<Sucursal />} />
       </Routes>
     </BrowserRouter>
   );

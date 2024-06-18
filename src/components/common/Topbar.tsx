@@ -7,7 +7,7 @@ const Topbar = () => {
     <AppBar
       position="fixed"
       sx={{
-        width: `calc(100% - ${sizeConfigs.sidebar.width})`,
+        width: `calc(100% - 0)`,
         ml: sizeConfigs.sidebar.width,
         boxShadow: "unset",
         backgroundColor: colorConfigs.topbar.bg,
@@ -16,7 +16,6 @@ const Topbar = () => {
     >
       <Toolbar>
         <Typography variant="h6">
-          React sidebar with dropdown
         </Typography>
       </Toolbar>
     </AppBar>
