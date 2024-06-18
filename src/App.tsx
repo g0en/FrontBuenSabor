@@ -26,7 +26,7 @@ function App() {
           <Route path="unidad-medida" element={<UnidadMedida />} />
         </Route>
         <Route path="empresa" element={<Empresa />} />
-        <Route path="empresa/:idSucursal" element={<Sucursal />} />
+        <Route path="empresa/:idEmpresa" element={<Sucursal />} />
       </Routes>
     </BrowserRouter>
   );

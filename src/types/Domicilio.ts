@@ -1,4 +1,5 @@
 import Base from "./Base";
+import Localidad from "./Localidad";
 
 export default interface Domicilio extends Base{
     calle: string,
@@ -6,5 +7,5 @@ export default interface Domicilio extends Base{
     cp: number,
     piso: number,
     nroDpto: number,
-    localidadId: number
+    localidad: Localidad | null
 }

@@ -69,7 +69,6 @@ function EmpresaList() {
 
     useEffect(() => {
         getAllEmpresa();
-        console.log(empresas);
     }, []);
 
     return (

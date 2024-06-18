@@ -8,5 +8,5 @@ export default interface Sucursal extends Base{
     horarioCierre: string,
     esCasaMatriz: boolean,
     domicilio: Domicilio,
-    empresa: Empresa
+    empresa: Empresa | null
 }
