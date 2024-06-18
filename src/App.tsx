@@ -25,7 +25,7 @@ function App() {
           <Route path="insumos" element={<ArticuloInsumo />} />
           <Route path="unidad-medida" element={<UnidadMedida />} />
         </Route>
-        <Route path="/empresa" element={<Empresa />} />
+        <Route path="empresa" element={<Empresa />} />
         <Route path="empresa/:idSucursal" element={<Sucursal />} />
       </Routes>
     </BrowserRouter>

@@ -1,9 +1,10 @@
 import Empresa from "../types/Empresa";
 
-export async function EmpresaCreate(){
+export async function EmpresaCreate(empresa: Empresa){
 	const urlServer = 'http://localhost:8080/empresa';
 	const response = await fetch(urlServer, {
 		method: 'POST',
+		body: JSON.stringify(empresa),
         headers: {
 			'Content-type': 'application/json',
 			'Access-Control-Allow-Origin':'*'
@@ -39,10 +40,11 @@ export async function EmpresaGetById(id: number){
 	return await response.json() as Empresa;
 }
 
-export async function EmpresaUpdate(id: number){
-	const urlServer = 'http://localhost:8080/empresa/' + id;
+export async function EmpresaUpdate(empresa: Empresa){
+	const urlServer = 'http://localhost:8080/empresa/' + empresa.id;
 	const response = await fetch(urlServer, {
 		method: 'PUT',
+		body: JSON.stringify(empresa),
         headers: {
 			'Content-type': 'application/json',
 			'Access-Control-Allow-Origin':'*'
