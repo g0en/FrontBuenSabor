@@ -51,10 +51,10 @@ function SideBar() {
                             direction="row"
                             justifyContent="center"
                         >
-                            <Avatar src={avatarImage} />
+                            <Avatar src={avatarImage} sx={{width: 100, height: 100}}/>
                         </Stack>
                     </Toolbar>
-                    <ListItemButton>
+                    <ListItemButton component={Link} to="/dashboard">
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -73,7 +73,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openProducts} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to="/dashboard" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to="/productos" sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -91,7 +91,7 @@ function SideBar() {
                             </ListItemButton>
                         </List>
                     </Collapse>
-                    <ListItemButton>
+                    <ListItemButton component={Link} to="/promociones">
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -110,7 +110,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openEmpleados} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to="/dashboard" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to="/empleados" sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -118,7 +118,7 @@ function SideBar() {
                                 </ListItemIcon>
                                 <ListItemText primary="Lista de Empleados" />
                             </ListItemButton>
-                            <ListItemButton component={Link} to="/categorias" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to="/roles" sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -128,7 +128,7 @@ function SideBar() {
                             </ListItemButton>
                         </List>
                     </Collapse>
-                    <ListItemButton>
+                    <ListItemButton component={Link} to="/insumos">
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -136,7 +136,7 @@ function SideBar() {
                         </ListItemIcon>
                         <ListItemText primary="Insumos" />
                     </ListItemButton>
-                    <ListItemButton>
+                    <ListItemButton component={Link} to="/unidad-medida">
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
