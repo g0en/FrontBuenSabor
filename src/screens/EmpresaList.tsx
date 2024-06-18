@@ -1,7 +1,10 @@
+import Topbar from "../components/common/Topbar";
+
 function Empresa(){
     return (
         <>
-            <h1>Empresa</h1>
+            <Topbar></Topbar>
+            
         </>
     )
 }
