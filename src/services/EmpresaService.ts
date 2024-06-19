@@ -53,3 +53,17 @@ export async function EmpresaUpdate(empresa: Empresa){
 	});
 	return await response.json() as Empresa;
 }
+
+export async function EmpresaAddSucursal(idEmpresa: number, idSucursal: number){
+	const urlServer = 'http://localhost:8080/empresa/addSucursal/' + idEmpresa + "/" + idSucursal;
+	const response = await fetch(urlServer, {
+		method: 'PUT',
+		//body: JSON.stringify(empresa),
+        headers: {
+			'Content-type': 'application/json',
+			'Access-Control-Allow-Origin':'*'
+		},
+        mode: 'cors'
+	});
+	return await response.json() as Empresa;
+}

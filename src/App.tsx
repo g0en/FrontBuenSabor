@@ -16,14 +16,14 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="productos" element={<ArticuloManufacturado />} />
-          <Route path="categorias" element={<Categoria />} />
-          <Route path="promociones" element={<Promocion />} />
-          <Route path="empleados" element={<Empleado />} />
-          <Route path="roles" element={<Roles />} />
-          <Route path="insumos" element={<ArticuloInsumo />} />
-          <Route path="unidad-medida" element={<UnidadMedida />} />
+          <Route path="dashboard/:idSucursal" element={<Dashboard />} />
+          <Route path="productos/:idSucursal" element={<ArticuloManufacturado />} />
+          <Route path="categorias/:idSucursal" element={<Categoria />} />
+          <Route path="promociones/:idSucursal" element={<Promocion />} />
+          <Route path="empleados/:idSucursal" element={<Empleado />} />
+          <Route path="roles/:idSucursal" element={<Roles />} />
+          <Route path="insumos/:idSucursal" element={<ArticuloInsumo />} />
+          <Route path="unidad-medida/:idSucursal" element={<UnidadMedida />} />
         </Route>
         <Route path="empresa" element={<Empresa />} />
         <Route path="empresa/:idEmpresa" element={<Sucursal />} />

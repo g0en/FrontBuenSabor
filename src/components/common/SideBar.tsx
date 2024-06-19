@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Avatar, Collapse, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Stack, Toolbar } from "@mui/material";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -20,6 +20,7 @@ import avatarImage from '../../assets/images/logo.png'
 function SideBar() {
     const [openProducts, setOpenProducts] = useState(false);
     const [openEmpleados, setOpenEmpleados] = useState(false);
+    const { idSucursal } = useParams();
 
     const handleProductsClick = () => {
         setOpenProducts(!openProducts);
@@ -54,7 +55,7 @@ function SideBar() {
                             <Avatar src={avatarImage} sx={{width: 100, height: 100}}/>
                         </Stack>
                     </Toolbar>
-                    <ListItemButton component={Link} to="/dashboard">
+                    <ListItemButton component={Link} to={"/dashboard/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -73,7 +74,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openProducts} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to="/productos" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/productos/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -81,7 +82,7 @@ function SideBar() {
                                 </ListItemIcon>
                                 <ListItemText primary="Lista de Productos" />
                             </ListItemButton>
-                            <ListItemButton component={Link} to="/categorias" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/categorias/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -91,7 +92,7 @@ function SideBar() {
                             </ListItemButton>
                         </List>
                     </Collapse>
-                    <ListItemButton component={Link} to="/promociones">
+                    <ListItemButton component={Link} to={"/promociones/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -110,7 +111,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openEmpleados} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to="/empleados" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/empleados/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -118,7 +119,7 @@ function SideBar() {
                                 </ListItemIcon>
                                 <ListItemText primary="Lista de Empleados" />
                             </ListItemButton>
-                            <ListItemButton component={Link} to="/roles" sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/roles/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -128,7 +129,7 @@ function SideBar() {
                             </ListItemButton>
                         </List>
                     </Collapse>
-                    <ListItemButton component={Link} to="/insumos">
+                    <ListItemButton component={Link} to={"/insumos/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -136,7 +137,7 @@ function SideBar() {
                         </ListItemIcon>
                         <ListItemText primary="Insumos" />
                     </ListItemButton>
-                    <ListItemButton component={Link} to="/unidad-medida">
+                    <ListItemButton component={Link} to={"/unidad-medida/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
