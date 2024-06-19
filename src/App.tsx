@@ -10,12 +10,17 @@ import ArticuloInsumo from "./screens/ArticuloInsumoList";
 import UnidadMedida from "./screens/UnidadMedidaList";
 import Empresa from "./screens/EmpresaList";
 import Sucursal from "./screens/SucursalList";
+import PreLayout from "./components/layout/PreLayout";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
+        <Route element={<PreLayout />}>
+          <Route path="/" element={<Empresa />} />
+          <Route path="empresa/:idEmpresa" element={<Sucursal />} />
+        </Route>
+        <Route element={<MainLayout />}>
           <Route path="dashboard/:idSucursal" element={<Dashboard />} />
           <Route path="productos/:idSucursal" element={<ArticuloManufacturado />} />
           <Route path="categorias/:idSucursal" element={<Categoria />} />
@@ -25,8 +30,6 @@ function App() {
           <Route path="insumos/:idSucursal" element={<ArticuloInsumo />} />
           <Route path="unidad-medida/:idSucursal" element={<UnidadMedida />} />
         </Route>
-        <Route path="empresa" element={<Empresa />} />
-        <Route path="empresa/:idEmpresa" element={<Sucursal />} />
       </Routes>
     </BrowserRouter>
   );
