@@ -18,7 +18,6 @@ function CategoriaList() {
     const [currentCategoria, setCurrentCategoria] = useState<Categoria>({ ...emptyCategoria });
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
     const [open, setOpen] = useState(false);
-    const [openEditModal, setOpenEditModal] = useState(false);
     const { idEmpresa } = useParams();
     const { idSucursal } = useParams();
 
@@ -41,6 +40,7 @@ function CategoriaList() {
     const updateCategoria = async (categoria: Categoria) => {
         await CategoriaUpdate(categoria);
         getAllCategoriaByEmpresa();
+        setOpen(false); // Close the modal after update
     };
 
     const deleteCategoria = async (idCategoria: number) => {
@@ -54,22 +54,17 @@ function CategoriaList() {
         getAllSucursal();
     }, []);
 
-    const handleOpen = () => {
-        setCurrentCategoria({ ...emptyCategoria });
+    const handleOpen = (categoria?: Categoria) => {
+        if (categoria) {
+            setCurrentCategoria(categoria);
+        } else {
+            setCurrentCategoria({ ...emptyCategoria });
+        }
         setOpen(true);
     };
 
     const handleClose = () => {
         setOpen(false);
-    };
-
-    const handleOpenEditModal = (categoria: Categoria) => {
-        setCurrentCategoria({ ...categoria });
-        setOpenEditModal(true);
-    };
-
-    const handleCloseEditModal = () => {
-        setOpenEditModal(false);
     };
 
     const handleCategoriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,12 +115,11 @@ function CategoriaList() {
     };
 
     const handleSubmit = () => {
-        createCategoria(currentCategoria);
-    };
-
-    const handleUpdateCategoria = () => {
-        updateCategoria(currentCategoria);
-        setOpenEditModal(false);
+        if (currentCategoria.id === null) {
+            createCategoria(currentCategoria);
+        } else {
+            updateCategoria(currentCategoria);
+        }
     };
 
     const renderCategorias = (categorias: Categoria[], level: number = 0) => {
@@ -139,7 +133,7 @@ function CategoriaList() {
                             {categoria.esInsumo && <Chip label="Es Insumo" size="small" color="secondary" sx={{ ml: 1 }} />}
                         </Typography>
                     </ListItemText>
-                    <IconButton edge="end" aria-label="edit" onClick={() => handleOpenEditModal(categoria)}>
+                    <IconButton edge="end" aria-label="edit" onClick={() => handleOpen(categoria)}>
                         <EditIcon />
                     </IconButton>
                     <IconButton edge="end" aria-label="delete" onClick={() => categoria.id !== null && deleteCategoria(categoria.id)}>
@@ -162,7 +156,7 @@ function CategoriaList() {
                 <Typography variant="h5" gutterBottom>
                     Categorías
                 </Typography>
-                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen} sx={{ mb: 2 }}>
+                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()} sx={{ mb: 2 }}>
                     Agregar Categoría
                 </Button>
                 <List>
@@ -177,9 +171,9 @@ function CategoriaList() {
                 </List>
             </Box>
             <Modal open={open} onClose={handleClose}>
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '70%', maxWidth: 600, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: 700, maxHeight: '80vh', bgcolor: 'background.paper', boxShadow: 24, p: 4, overflowY: 'auto' }}>
                     <Typography variant="h6" gutterBottom>
-                        Crear Categoría
+                        {currentCategoria.id === null ? 'Crear Categoría' : 'Editar Categoría'}
                     </Typography>
                     <TextField
                         fullWidth
@@ -240,31 +234,7 @@ function CategoriaList() {
                             Cancelar
                         </Button>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>
-                            Crear
-                        </Button>
-                    </Box>
-                </Box>
-            </Modal>
-
-            <Modal open={openEditModal} onClose={handleCloseEditModal}>
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '70%', maxWidth: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
-                    <Typography variant="h6" gutterBottom>
-                        Editar Categoría
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        label="Denominación"
-                        name="denominacion"
-                        value={currentCategoria.denominacion}
-                        onChange={handleCategoriaChange}
-                        margin="normal"
-                    />
-                    <Box mt={2} display="flex" justifyContent="flex-end">
-                        <Button variant="contained" color="secondary" onClick={handleCloseEditModal} sx={{ mr: 2 }}>
-                            Cancelar
-                        </Button>
-                        <Button variant="contained" color="primary" onClick={handleUpdateCategoria}>
-                            Actualizar
+                            {currentCategoria.id === null ? 'Crear' : 'Actualizar'}
                         </Button>
                     </Box>
                 </Box>
