@@ -21,6 +21,7 @@ function SideBar() {
     const [openProducts, setOpenProducts] = useState(false);
     const [openEmpleados, setOpenEmpleados] = useState(false);
     const { idSucursal } = useParams();
+    const { idEmpresa } = useParams();
 
     const handleProductsClick = () => {
         setOpenProducts(!openProducts);
@@ -55,7 +56,7 @@ function SideBar() {
                             <Avatar src={avatarImage} sx={{width: 100, height: 100}}/>
                         </Stack>
                     </Toolbar>
-                    <ListItemButton component={Link} to={"/dashboard/" + idSucursal}>
+                    <ListItemButton component={Link} to={"/dashboard/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -74,7 +75,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openProducts} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to={"/productos/" + idSucursal} sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/productos/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -82,7 +83,7 @@ function SideBar() {
                                 </ListItemIcon>
                                 <ListItemText primary="Lista de Productos" />
                             </ListItemButton>
-                            <ListItemButton component={Link} to={"/categorias/" + idSucursal} sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/categorias/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -92,7 +93,7 @@ function SideBar() {
                             </ListItemButton>
                         </List>
                     </Collapse>
-                    <ListItemButton component={Link} to={"/promociones/" + idSucursal}>
+                    <ListItemButton component={Link} to={"/promociones/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -111,7 +112,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openEmpleados} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to={"/empleados/" + idSucursal} sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/empleados/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -119,7 +120,7 @@ function SideBar() {
                                 </ListItemIcon>
                                 <ListItemText primary="Lista de Empleados" />
                             </ListItemButton>
-                            <ListItemButton component={Link} to={"/roles/" + idSucursal} sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/roles/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
@@ -129,7 +130,7 @@ function SideBar() {
                             </ListItemButton>
                         </List>
                     </Collapse>
-                    <ListItemButton component={Link} to={"/insumos/" + idSucursal}>
+                    <ListItemButton component={Link} to={"/insumos/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
@@ -137,7 +138,7 @@ function SideBar() {
                         </ListItemIcon>
                         <ListItemText primary="Insumos" />
                     </ListItemButton>
-                    <ListItemButton component={Link} to={"/unidad-medida/" + idSucursal}>
+                    <ListItemButton component={Link} to={"/unidad-medida/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>

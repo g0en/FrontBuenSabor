@@ -63,7 +63,6 @@ function SucursalList() {
     const getLocalidadesByProvincias = async (id:number) =>{
         const localidades: Localidad[] = await LocalidadGetAllByProvincia(id);
         return localidades;
-        //setLocalidades(localidades);
     }
 
     const getEmpresaById = async (id:number) => {
@@ -77,7 +76,7 @@ function SucursalList() {
     }, []);
 
     const redirectDashboard = (id: number) => {
-        navigate('/dashboard/' + id);
+        navigate('/dashboard/' + idEmpresa + "/" + id);
     } 
 
     const handleOpen = (sucursal?: Sucursal) => {
