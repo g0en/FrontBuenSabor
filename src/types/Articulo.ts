@@ -8,5 +8,5 @@ export default interface Articulo extends Base{
     precioVenta: number,
     imagenes: Imagen[],
     unidadMedida: UnidadMedida,
-    categoria: Categoria
+    categoria: Categoria | null
 }

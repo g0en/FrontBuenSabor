@@ -66,3 +66,19 @@ export async function ArticuloInsumoUpdate(articuloInsumo: ArticuloInsumo){
 	});
 	return await response.json() as ArticuloInsumo;
 }
+
+export async function ArticuloInsumoDelete(id: number){
+	const urlServer = 'http://localhost:8080/articuloInsumo/' + id;
+	const response = await fetch(urlServer, {
+		method: 'DELETE',
+        headers: {
+			'Content-type': 'application/json',
+			'Access-Control-Allow-Origin':'*'
+		},
+        mode: 'cors'
+	});
+	const status = response.status;
+    const data = await response.json();
+
+    return { status, data };
+}

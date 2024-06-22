@@ -21,11 +21,11 @@ export async function CloudinaryUpload(file: File){
 	return await response.json();
 }
 
-export async function CloudinaryDelete(publicId: string) {
-    const urlServer = `http://localhost:8080/cloudinary/delete?public_id=${publicId}`;
+export async function CloudinaryDelete(publicId: string, id: number) {
+    const urlServer = `http://localhost:8080/imagenes/deleteImg?publicId=${publicId}&id=${id}`;
 
     const response = await fetch(urlServer, {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
             'Content-type': 'application/json',
             'Access-Control-Allow-Origin': '*'
