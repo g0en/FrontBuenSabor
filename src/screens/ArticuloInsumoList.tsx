@@ -31,7 +31,9 @@ function ArticuloInsumoList() {
     const [unidadMedidas, setUnidadMedidas] = useState<UnidadMedida[]>([]);
     const { idSucursal, idEmpresa } = useParams();
     const [open, setOpen] = useState(false);
+    const [view, setView] = useState(false);
     const [file, setFile] = useState<File | null>(null);
+    const [imagenSeleccionada, setImagenSeleccionada] = useState<string | ArrayBuffer | null>(null);
 
     const getAllArticuloInsumoBySucursal = async () => {
         const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
@@ -63,8 +65,19 @@ function ArticuloInsumoList() {
     };
 
     const cloudinaryFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]; // Obtener el primer archivo seleccionado
         if (event.target.files) {
             setFile(event.target.files[0]);
+        }
+
+        if (file) {
+            // Crear un objeto URL temporal para mostrar la imagen
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Actualizar el estado de imagenSeleccionada con la URL base64
+                setImagenSeleccionada(reader.result);
+            };
+            reader.readAsDataURL(file); // Leer el archivo como URL base64
         }
     };
 
@@ -89,20 +102,40 @@ function ArticuloInsumoList() {
         } catch (error) {
             console.error('Error deleting the file', error);
         }
+
+        setView(true);
     };
+
+    const handleView = (articulo?: ArticuloInsumo) => {
+        if (articulo) {
+            setCurrentArticuloInsumo(articulo);
+            setImagenSeleccionada(articulo.imagenes[0].url);
+        }
+
+        setView(true);
+    }
 
     const handleEdit = (articulo?: ArticuloInsumo) => {
         if (articulo) {
             setCurrentArticuloInsumo(articulo);
+            setImagenSeleccionada(articulo.imagenes[0].url);
         } else {
             setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
         }
+
         setOpen(true);
     };
 
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
+        setImagenSeleccionada(null);
+        setOpen(true)
+    };
 
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        setView(false);
+    };
 
     const handleDelete = async (articulo: ArticuloInsumo) => {
         const imagenes = articulo.imagenes;
@@ -160,7 +193,31 @@ function ArticuloInsumoList() {
 
     const handleSubmit = async () => {
         if (currentArticuloInsumo.id > 0) {
+            if (currentArticuloInsumo.imagenes[0].url !== imagenSeleccionada) {
+                /*const imagenes = currentArticuloInsumo.imagenes;
+
+                try {
+                    for (let i = 0; i < imagenes.length; i++) {
+                        const match = imagenes[i].url.match(/.*\/([^/?]+).*$/);
+                        if (match) {
+                            const publicId = match[1];
+                            console.log(publicId);
+                            cloudinaryDelete(publicId, imagenes[i].id);
+                        }
+                    }
+                } catch (error) {
+                    console.log("Error al eliminar la imagen de cloudinary.")
+                }
+
+                const imagenesNuevas = await cloudinaryUpload();
+
+                if (imagenesNuevas && imagenesNuevas?.length > 0) {
+                    currentArticuloInsumo.imagenes = imagenesNuevas;
+                }*/
+            }
+
             await updateArticuloInsumo(currentArticuloInsumo);
+
         } else {
             const imagenes = await cloudinaryUpload();
             if (imagenes && imagenes?.length > 0) {
@@ -168,6 +225,7 @@ function ArticuloInsumoList() {
             }
 
             await createArticuloInsumo(currentArticuloInsumo);
+            setCurrentArticuloInsumo(emptyArticuloInsumo);
         }
         handleClose();
     };
@@ -221,7 +279,7 @@ function ArticuloInsumoList() {
                                         <IconButton aria-label="edit" onClick={() => handleEdit(articulo)}>
                                             <Edit />
                                         </IconButton>
-                                        <IconButton aria-label="view">
+                                        <IconButton aria-label="view" onClick={() => handleView(articulo)}>
                                             <Visibility />
                                         </IconButton>
                                         <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
@@ -233,6 +291,40 @@ function ArticuloInsumoList() {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <Modal open={view} onClose={handleClose}>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '40%', // Ancho del modal
+                        maxWidth: 800, // Máximo ancho del modal
+                        maxHeight: '80vh',
+                        overflow: 'auto',
+                        bgcolor: 'background.paper',
+                        p: 4,
+                        borderRadius: 8, // Borde redondeado del modal
+                    }}
+                >
+                    <Typography variant="h6" gutterBottom>
+                        {currentArticuloInsumo.denominacion}
+                    </Typography>
+                    {imagenSeleccionada && (
+                        <div style={{ textAlign: 'center' }}>
+                            <img
+                                src={typeof imagenSeleccionada === 'string' ? imagenSeleccionada : URL.createObjectURL(new Blob([imagenSeleccionada as ArrayBuffer]))}
+                                alt="Imagen seleccionada"
+                                style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
+                            />
+                        </div>
+                    )}
+                    <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
+                        Cerrar
+                    </Button>
+                </Box>
+            </Modal>
 
             <Modal open={open} onClose={handleClose}>
                 <Box sx={{ width: 800, maxHeight: '80vh', overflow: 'auto', p: 4, bgcolor: 'background.paper', m: 'auto', mt: '5%' }}>
@@ -293,7 +385,23 @@ function ArticuloInsumoList() {
                     </Box>
                     <Box mt={3} mb={3}>
                         <Typography variant="subtitle1">Seleccione una imagen:</Typography>
-                        <input type="file" accept="image/*" onChange={cloudinaryFileChange} />
+                        <label htmlFor="upload-button">
+                            <input
+                                style={{ display: 'none' }}
+                                id="upload-button"
+                                type="file"
+                                accept="image/*"
+                                onChange={cloudinaryFileChange}
+                            />
+                            <Button variant="contained" component="span">
+                                Subir Imagen
+                            </Button>
+                        </label>
+                        {imagenSeleccionada && (
+                            <div>
+                                <img src={typeof imagenSeleccionada === 'string' ? imagenSeleccionada : URL.createObjectURL(new Blob([imagenSeleccionada as ArrayBuffer]))} alt="Imagen seleccionada" style={{ maxWidth: '10%', marginTop: '10px' }} />
+                            </div>
+                        )}
                     </Box>
                     <TextField
                         label="Precio de Compra"
