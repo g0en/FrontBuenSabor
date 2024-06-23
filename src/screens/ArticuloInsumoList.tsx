@@ -29,12 +29,9 @@ function ArticuloInsumoList() {
     const [currentArticuloInsumo, setCurrentArticuloInsumo] = useState<ArticuloInsumo>({ ...emptyArticuloInsumo });
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [unidadMedidas, setUnidadMedidas] = useState<UnidadMedida[]>([]);
-    const [imagenes, setImagenes] = useState<Imagen[]>([]);
     const { idSucursal, idEmpresa } = useParams();
     const [open, setOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
-    const [uploadedUrl, setUploadedUrl] = useState<string>('');
-    const [publicId, setPublicId] = useState<string>('');
 
     const getAllArticuloInsumoBySucursal = async () => {
         const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
@@ -75,25 +72,20 @@ function ArticuloInsumoList() {
         if (!file) return;
 
         try {
-            const response = await CloudinaryUpload(file);
-            setUploadedUrl(response.urls[0]);
-            console.log("creado url: " + uploadedUrl);
-            setPublicId(response.public_id);
-            console.log("creado pid: " + publicId);
+            const imagenes: Imagen[] = await CloudinaryUpload(file);
+            return imagenes;
         } catch (error) {
             console.error('Error uploading the file', error);
         }
     };
 
 
-    const cloudinaryDelete = async (id: number) => {
-        
+    const cloudinaryDelete = async (publicId: string, id: number) => {
+
         if (!publicId) return;
 
         try {
-            await CloudinaryDelete(publicId, id);
-            setUploadedUrl('');
-            setPublicId('');
+            await CloudinaryDelete(publicId, id.toString());
         } catch (error) {
             console.error('Error deleting the file', error);
         }
@@ -113,9 +105,24 @@ function ArticuloInsumoList() {
     const handleClose = () => setOpen(false);
 
     const handleDelete = async (articulo: ArticuloInsumo) => {
-        await deleteArticuloInsumo(articulo.id);
-        //await cloudinaryDelete(articulo.id);
-        //window.location.reload();
+        const imagenes = articulo.imagenes;
+
+        try {
+            deleteArticuloInsumo(articulo.id);
+
+            for (let i = 0; i < imagenes.length; i++) {
+                const match = imagenes[i].url.match(/.*\/([^/?]+).*$/);
+                if (match) {
+                    const publicId = match[1];
+                    console.log(publicId);
+                    await cloudinaryDelete(publicId, imagenes[i].id);
+                }
+            }
+
+            window.location.reload();
+        } catch (error) {
+            console.log("Error al eliminar el articulo.")
+        }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,12 +162,12 @@ function ArticuloInsumoList() {
         if (currentArticuloInsumo.id > 0) {
             await updateArticuloInsumo(currentArticuloInsumo);
         } else {
-            cloudinaryUpload();
-            const img: Imagen = { id: 0, eliminado: false, url: uploadedUrl };
-            setImagenes([...imagenes, img]);
-            currentArticuloInsumo.imagenes = imagenes;
+            const imagenes = await cloudinaryUpload();
+            if (imagenes && imagenes?.length > 0) {
+                currentArticuloInsumo.imagenes = imagenes;
+            }
+
             await createArticuloInsumo(currentArticuloInsumo);
-            setImagenes([]);
         }
         handleClose();
     };
