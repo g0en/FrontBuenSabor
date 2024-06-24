@@ -110,8 +110,7 @@ function ArticuloInsumoList() {
         } catch (error) {
             console.error('Error deleting the file', error);
         }
-
-        setView(true);
+        
     };
 
     const handleView = (articulo?: ArticuloInsumo) => {
