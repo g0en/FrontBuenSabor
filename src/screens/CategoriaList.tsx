@@ -3,27 +3,32 @@ import { useParams } from "react-router-dom";
 import { Box, Typography, List, ListItem, ListItemText, IconButton, Chip, Button, Modal, TextField, Checkbox, FormControlLabel, Divider } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SideBar from "../components/common/SideBar";
 import Categoria from "../types/Categoria";
-import { CategoriaByEmpresaGetAll, CategoriaCreate, CategoriaUpdate, CategoriaDelete } from "../services/CategoriaService";
+import { CategoriaByEmpresaGetAll, CategoriaCreate, CategoriaUpdate, CategoriaBaja } from "../services/CategoriaService";
 import { SucursalGetByEmpresaId } from "../services/SucursalService";
 import Sucursal from "../types/Sucursal";
+import { CategoriaDelete } from "../services/CategoriaService";
+import CategoriaGetDto from "../types/CategoriaGetDto";
 
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 
 function CategoriaList() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [currentCategoria, setCurrentCategoria] = useState<Categoria>({ ...emptyCategoria });
+    const [categoriaGet, setCategoriaGet] = useState<CategoriaGetDto[]>([]);
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
     const [open, setOpen] = useState(false);
     const { idEmpresa } = useParams();
     const { idSucursal } = useParams();
 
     const getAllCategoriaByEmpresa = async () => {
-        const categorias: Categoria[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
+        const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
         setCategorias(categorias);
+        setCategoriaGet(categorias);
     };
 
     const getAllSucursal = async () => {
@@ -43,8 +48,14 @@ function CategoriaList() {
         setOpen(false); // Close the modal after update
     };
 
+    const bajaCategoria = async (idCategoria: number) => {
+        await CategoriaBaja(idCategoria, Number(idSucursal));
+        getAllCategoriaByEmpresa();
+        window.location.reload();
+    };
+
     const deleteCategoria = async (idCategoria: number) => {
-        await CategoriaDelete(idCategoria, Number(idSucursal));
+        await CategoriaDelete(idCategoria);
         getAllCategoriaByEmpresa();
         window.location.reload();
     };
@@ -123,19 +134,28 @@ function CategoriaList() {
     };
 
     const renderCategorias = (categorias: Categoria[], level: number = 0) => {
-        return categorias.map(categoria => (
+        return categorias.filter(c => c.id !== null).map(categoria => (
             <React.Fragment key={categoria.id}>
                 <Divider />
                 <ListItem sx={{ pl: level * 2 }}>
                     <ListItemText>
                         <Typography variant="body1">
                             {categoria.denominacion}
-                            {categoria.esInsumo && <Chip label="Es Insumo" size="small" color="secondary" sx={{ ml: 1 }} />}
+                            {level === 0 && (
+                                categoria.esInsumo ?
+                                    <Chip label="Insumo" size="small" color="secondary" sx={{ ml: 1 }} /> :
+                                    <Chip label="Manufacturado" size="small" color="error" sx={{ ml: 1 }} />
+                            )}
                         </Typography>
                     </ListItemText>
                     <IconButton edge="end" aria-label="edit" onClick={() => handleOpen(categoria)}>
                         <EditIcon />
                     </IconButton>
+                    {level === 0 && (
+                        <IconButton edge="end" aria-label="baja" onClick={() => categoria.id !== null && bajaCategoria(categoria.id)}>
+                            <ArrowCircleDownIcon />
+                        </IconButton>
+                    )}
                     <IconButton edge="end" aria-label="delete" onClick={() => categoria.id !== null && deleteCategoria(categoria.id)}>
                         <DeleteIcon />
                     </IconButton>
