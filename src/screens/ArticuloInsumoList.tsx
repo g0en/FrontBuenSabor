@@ -3,6 +3,8 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button, Modal, Box, TextField, MenuItem, FormControlLabel, Switch,
     Typography
 } from "@mui/material";
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { Edit, Visibility, Delete, Check } from "@mui/icons-material";
 import SideBar from "../components/common/SideBar";
 import ArticuloInsumo from "../types/ArticuloInsumo";
@@ -32,8 +34,9 @@ function ArticuloInsumoList() {
     const { idSucursal, idEmpresa } = useParams();
     const [open, setOpen] = useState(false);
     const [view, setView] = useState(false);
-    const [file, setFile] = useState<File | null>(null);
-    const [imagenSeleccionada, setImagenSeleccionada] = useState<string | ArrayBuffer | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
+    const [images, setImages] = useState<string[]>([]);
+    const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
     const getAllArticuloInsumoBySucursal = async () => {
         const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
@@ -65,30 +68,35 @@ function ArticuloInsumoList() {
     };
 
     const cloudinaryFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]; // Obtener el primer archivo seleccionado
-        if (event.target.files) {
-            setFile(event.target.files[0]);
-        }
+        const selectedFiles = event.target.files;
+        if (selectedFiles) {
+            const newFiles = Array.from(selectedFiles);
+            setFiles(prevFiles => [...prevFiles, ...newFiles]);
 
-        if (file) {
-            // Crear un objeto URL temporal para mostrar la imagen
-            const reader = new FileReader();
-            reader.onload = () => {
-                // Actualizar el estado de imagenSeleccionada con la URL base64
-                setImagenSeleccionada(reader.result);
-            };
-            reader.readAsDataURL(file); // Leer el archivo como URL base64
+            newFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    setImages(prevImages => [...prevImages, reader.result as string]);
+                };
+                reader.readAsDataURL(file);
+            });
         }
     };
 
-    const cloudinaryUpload = async () => {
-        if (!file) return;
+    const removeImage = (index: number) => {
+        setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+        setImages(prevImages => prevImages.filter((_, i) => i !== index));
+    };
+
+    const cloudinaryUpload = async (): Promise<Imagen[]> => {
+        if (files.length === 0) return [];
 
         try {
-            const imagenes: Imagen[] = await CloudinaryUpload(file);
-            return imagenes;
+            const imagenes = await Promise.all(files.map(file => CloudinaryUpload(file)));
+            return imagenes.flat(); // Aplana el array de arrays
         } catch (error) {
-            console.error('Error uploading the file', error);
+            console.error('Error uploading the files', error);
+            return [];
         }
     };
 
@@ -109,16 +117,25 @@ function ArticuloInsumoList() {
     const handleView = (articulo?: ArticuloInsumo) => {
         if (articulo) {
             setCurrentArticuloInsumo(articulo);
-            setImagenSeleccionada(articulo.imagenes[0].url);
+            setImages(articulo.imagenes.map(imagen => imagen.url));
+            setCurrentImageIndex(0); // Reset the current image index
         }
 
         setView(true);
-    }
+    };
+
+    const handleNextImage = () => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    };
+
+    const handlePreviousImage = () => {
+        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    };
 
     const handleEdit = (articulo?: ArticuloInsumo) => {
         if (articulo) {
             setCurrentArticuloInsumo(articulo);
-            setImagenSeleccionada(articulo.imagenes[0].url);
+            setImages(articulo.imagenes.map(imagen => imagen.url));
         } else {
             setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
         }
@@ -128,7 +145,7 @@ function ArticuloInsumoList() {
 
     const handleOpen = () => {
         setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
-        setImagenSeleccionada(null);
+        setImages([]);
         setOpen(true)
     };
 
@@ -138,25 +155,33 @@ function ArticuloInsumoList() {
     };
 
     const handleDelete = async (articulo: ArticuloInsumo) => {
-        const imagenes = articulo.imagenes;
+        const imagenes: Imagen[] = articulo.imagenes;
 
         try {
             deleteArticuloInsumo(articulo.id);
 
+        } catch (error) {
+            console.log("Error al eliminar el articulo.")
+        }
+
+        deleteImages(imagenes);
+        window.location.reload();
+    };
+
+    const deleteImages = async (imagenes: Imagen[]) => {
+        try {
             for (let i = 0; i < imagenes.length; i++) {
                 const match = imagenes[i].url.match(/.*\/([^/?]+).*$/);
                 if (match) {
                     const publicId = match[1];
-                    console.log(publicId);
-                    await cloudinaryDelete(publicId, imagenes[i].id);
+                    console.log(imagenes[i].url);
+                    cloudinaryDelete(publicId, imagenes[i].id);
                 }
             }
-
-            window.location.reload();
         } catch (error) {
-            console.log("Error al eliminar el articulo.")
+            console.log("Error al eliminar las imagenes")
         }
-    };
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -192,41 +217,34 @@ function ArticuloInsumoList() {
     };
 
     const handleSubmit = async () => {
+        const imagenes = await cloudinaryUpload();
+        const imagenesExistentes = currentArticuloInsumo.imagenes;
+        if (imagenes && imagenes?.length > 0) {
+            currentArticuloInsumo.imagenes = imagenes;
+        }
+
         if (currentArticuloInsumo.id > 0) {
-            if (currentArticuloInsumo.imagenes[0].url !== imagenSeleccionada) {
-                /*const imagenes = currentArticuloInsumo.imagenes;
 
-                try {
-                    for (let i = 0; i < imagenes.length; i++) {
-                        const match = imagenes[i].url.match(/.*\/([^/?]+).*$/);
-                        if (match) {
-                            const publicId = match[1];
-                            console.log(publicId);
-                            cloudinaryDelete(publicId, imagenes[i].id);
-                        }
-                    }
-                } catch (error) {
-                    console.log("Error al eliminar la imagen de cloudinary.")
-                }
-
-                const imagenesNuevas = await cloudinaryUpload();
-
-                if (imagenesNuevas && imagenesNuevas?.length > 0) {
-                    currentArticuloInsumo.imagenes = imagenesNuevas;
-                }*/
+            try {
+                deleteImages(imagenesExistentes);
+                await updateArticuloInsumo(currentArticuloInsumo);
+                setCurrentArticuloInsumo(emptyArticuloInsumo);
+            } catch (error) {
+                console.log("Error al actualizar un articulo insumo");
+                deleteImages(imagenes);
             }
-
-            await updateArticuloInsumo(currentArticuloInsumo);
 
         } else {
-            const imagenes = await cloudinaryUpload();
-            if (imagenes && imagenes?.length > 0) {
-                currentArticuloInsumo.imagenes = imagenes;
-            }
 
-            await createArticuloInsumo(currentArticuloInsumo);
-            setCurrentArticuloInsumo(emptyArticuloInsumo);
+            try {
+                await createArticuloInsumo(currentArticuloInsumo);
+                setCurrentArticuloInsumo(emptyArticuloInsumo);
+            } catch (error) {
+                console.log("Error al crear un articulo insumo");
+                deleteImages(imagenes);
+            }
         }
+
         handleClose();
     };
 
@@ -306,23 +324,33 @@ function ArticuloInsumoList() {
                         bgcolor: 'background.paper',
                         p: 4,
                         borderRadius: 8, // Borde redondeado del modal
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                 >
-                    <Typography variant="h6" gutterBottom>
+                    <Typography variant="h6" gutterBottom align="center">
                         {currentArticuloInsumo.denominacion}
                     </Typography>
-                    {imagenSeleccionada && (
-                        <div style={{ textAlign: 'center' }}>
+                    {images.length > 0 && (
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
+                                <ArrowBackIosIcon />
+                            </IconButton>
                             <img
-                                src={typeof imagenSeleccionada === 'string' ? imagenSeleccionada : URL.createObjectURL(new Blob([imagenSeleccionada as ArrayBuffer]))}
-                                alt="Imagen seleccionada"
+                                src={images[currentImageIndex]}
+                                alt={`Imagen ${currentImageIndex}`}
                                 style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
                             />
-                        </div>
+                            <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
+                                <ArrowForwardIosIcon />
+                            </IconButton>
+                        </Box>
                     )}
-                    <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
-                        Cerrar
-                    </Button>
+                    <Box display="flex" justifyContent="flex-end" mt={2}>
+                        <Button variant="contained" color="secondary" onClick={handleClose}>
+                            Cerrar
+                        </Button>
+                    </Box>
                 </Box>
             </Modal>
 
@@ -384,23 +412,31 @@ function ArticuloInsumoList() {
                         </TextField>
                     </Box>
                     <Box mt={3} mb={3}>
-                        <Typography variant="subtitle1">Seleccione una imagen:</Typography>
+                        <Typography variant="subtitle1">Seleccione imágenes:</Typography>
                         <label htmlFor="upload-button">
                             <input
                                 style={{ display: 'none' }}
                                 id="upload-button"
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 onChange={cloudinaryFileChange}
                             />
                             <Button variant="contained" component="span">
-                                Subir Imagen
+                                Subir Imágenes
                             </Button>
                         </label>
-                        {imagenSeleccionada && (
-                            <div>
-                                <img src={typeof imagenSeleccionada === 'string' ? imagenSeleccionada : URL.createObjectURL(new Blob([imagenSeleccionada as ArrayBuffer]))} alt="Imagen seleccionada" style={{ maxWidth: '10%', marginTop: '10px' }} />
-                            </div>
+                        {images.length > 0 && (
+                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                {images.map((image, index) => (
+                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                        <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                        <IconButton onClick={() => removeImage(index)} size="small">
+                                            <Delete />
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                            </Box>
                         )}
                     </Box>
                     <TextField
