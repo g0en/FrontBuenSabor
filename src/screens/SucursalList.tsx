@@ -14,6 +14,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import Provincia from "../types/Provincia";
 import Localidad from "../types/Localidad";
 import Empresa from "../types/Empresa";
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: 0 };
 
@@ -48,12 +52,29 @@ function SucursalList() {
     };
 
     const createSucursal = async (sucursal: Sucursal) => {
-       await SucursalCreate(sucursal);
-    }
-
+        await SucursalCreate(sucursal);
+        return MySwal.fire({
+            title: 'Sucursal creada',
+            text: 'La sucursal se ha creado correctamente',
+            icon: 'success',
+            showConfirmButton: true,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
+    
     const updateSucursal = async (sucursal: Sucursal) => {
         await SucursalUpdate(sucursal);
-    }
+        return MySwal.fire({
+            title: 'Sucursal actualizada',
+            text: 'La sucursal se ha actualizado correctamente',
+            icon: 'success',
+            showConfirmButton: true,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
+    
 
     const getAllProvincias = async() =>{
         const provincias: Provincia[] = await ProvinciaGetAll();
@@ -142,16 +163,28 @@ function SucursalList() {
         setCurrentSucursal(prev => ({ ...prev, [name]: checked }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        
         if (currentSucursal.id > 0) {
             updateSucursal(currentSucursal);
         } else {
             currentSucursal.empresa = currentEmpresa;
             createSucursal(currentSucursal);
         }
-        handleClose();
-        window.location.reload();
+        handleClose();  // Cerrar el modal antes de mostrar SweetAlert2
+        const result = await MySwal.fire({
+            title: 'Guardando cambios...',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+                MySwal.showLoading();
+            }
+        });
+        if (result.isConfirmed || result.dismiss) {
+            window.location.reload();
+        }
     };
+    
 
     return (
         <>
