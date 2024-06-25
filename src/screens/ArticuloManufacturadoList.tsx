@@ -3,8 +3,11 @@ import { useParams } from "react-router-dom";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     IconButton, Typography, Button, Box, Dialog, DialogTitle, DialogContent,
-    DialogActions, TextField, MenuItem
+    DialogActions, TextField, MenuItem, Card, CardContent, CardActions,
+    Modal
 } from "@mui/material";
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -45,6 +48,10 @@ function ArticuloManufacturadoList() {
     const [insumos, setInsumos] = useState<ArticuloInsumo[]>([]);
     const [detalles, setDetalles] = useState<ArticuloManufacturadoDetalle[]>([]);
     const [search, setSearch] = useState("");
+    const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
+    const [view, setView] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+    const [text, setText] = useState("Crear");
 
     const getAllArticuloManufacturadoBySucursal = async () => {
         const articulosManufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
@@ -115,7 +122,11 @@ function ArticuloManufacturadoList() {
             newFiles.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = () => {
+                    const newImage = reader.result as string;
                     setImages(prevImages => [...prevImages, reader.result as string]);
+                    if (currentArticuloManufacturado.id > 0) {
+                        setArticuloImages(prevImages => [...prevImages, { id: 0, eliminado: false, url: newImage }]);
+                    }
                 };
                 reader.readAsDataURL(file);
             });
@@ -123,8 +134,11 @@ function ArticuloManufacturadoList() {
     };
 
     const removeImage = (index: number) => {
-        setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-        setImages(prevImages => prevImages.filter((_, i) => i !== index));
+        if (currentArticuloManufacturado.id > 0) {
+            setArticuloImages(articuloImages.filter(img => img.id !== index));
+        } else {
+            setImages(prevImages => prevImages.filter((_, i) => i !== index));
+        }
     };
 
     const cloudinaryUpload = async (): Promise<Imagen[]> => {
@@ -157,6 +171,24 @@ function ArticuloManufacturadoList() {
         getAllUnidadMedida();
     }, [idSucursal, idEmpresa]);
 
+    const handleView = (articulo?: ArticuloManufacturado) => {
+        if (articulo) {
+            setCurrentArticuloManufacturado(articulo);
+            setImages(articulo.imagenes.map(imagen => imagen.url));
+            setCurrentImageIndex(0); // Reset the current image index
+        }
+
+        setView(true);
+    };
+
+    const handleNextImage = () => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    };
+
+    const handlePreviousImage = () => {
+        setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    };
+
     const handleOpenModal = () => {
         setOpenModal(true);
         setModalStep(1);
@@ -165,22 +197,23 @@ function ArticuloManufacturadoList() {
     };
 
     const handleOpenEditModal = async (articulo: ArticuloManufacturado) => {
-        setCurrentArticuloManufacturado(articulo);
-        if (articulo.articuloManufacturadoDetalles !== null) {
-            setDetalles(articulo.articuloManufacturadoDetalles);
+        if (articulo) {
+            setCurrentArticuloManufacturado(articulo);
+            if (articulo.articuloManufacturadoDetalles !== null) {
+                setDetalles(articulo.articuloManufacturadoDetalles);
+            }
+            setImages(articulo.imagenes.map(imagen => imagen.url));
+            setArticuloImages(articulo.imagenes);
+        } else {
+            setCurrentArticuloManufacturado({ ...emptyArticuloManufacturado });
+            setImages([]);
+            setFiles([]);
+            setArticuloImages([]);
         }
-        setImages(articulo.imagenes.map(imagen => imagen.url));
 
-        const imageUrls = articulo.imagenes.map(imagen => imagen.url);
-        const imageFiles = await Promise.all(imageUrls.map(async (url) => {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const filename = url.split('/').pop();
-            return new File([blob], filename || 'image.jpg', { type: blob.type });
-        }));
-        setFiles(imageFiles);
         setOpenModal(true);
         setModalStep(1);
+        setText("Actualizar");
         getAllArticuloInsumoBySucursal();
     }
 
@@ -190,6 +223,8 @@ function ArticuloManufacturadoList() {
         setInsumos([]);
         setDetalles([]);
         setFiles([]);
+        setText("Crear");
+        setView(false);
     };
 
     const handleNextStep = () => {
@@ -248,10 +283,15 @@ function ArticuloManufacturadoList() {
 
     const handleSubmit = async () => {
         const imagenes = await cloudinaryUpload();
-        const imagenesExistentes = currentArticuloManufacturado.imagenes;
+
         if (imagenes && imagenes?.length > 0) {
-            currentArticuloManufacturado.imagenes = imagenes;
+            imagenes.forEach(imagen => {
+                articuloImages.push(imagen);
+            });
         }
+
+        currentArticuloManufacturado.imagenes = articuloImages;
+        currentArticuloManufacturado.articuloManufacturadoDetalles = detalles;
 
         if (currentArticuloManufacturado.id > 0) {
             try {
@@ -260,7 +300,7 @@ function ArticuloManufacturadoList() {
                     deleteImages(imagenes);
                     return;
                 }
-                deleteImages(imagenesExistentes);
+
                 setCurrentArticuloManufacturado(emptyArticuloManufacturado);
             } catch (error) {
                 console.log("Error al actualizar un articulo manufacturado.");
@@ -268,7 +308,6 @@ function ArticuloManufacturadoList() {
 
         } else {
             try {
-                currentArticuloManufacturado.articuloManufacturadoDetalles = detalles;
                 const data = await createArticuloManufacturado(currentArticuloManufacturado);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
@@ -327,7 +366,7 @@ function ArticuloManufacturadoList() {
                                             <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton aria-label="view">
+                                            <IconButton aria-label="view" onClick={() => handleView(articulo)}>
                                                 <VisibilityIcon />
                                             </IconButton>
                                             <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
@@ -340,6 +379,62 @@ function ArticuloManufacturadoList() {
                     </Table>
                 </TableContainer>
             </Box>
+
+            <Modal open={view} onClose={handleCloseModal}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '40%', // Ancho del modal
+                            maxWidth: 800, // Máximo ancho del modal
+                            maxHeight: '80vh',
+                            overflow: 'auto',
+                            bgcolor: 'background.paper',
+                            p: 4,
+                            borderRadius: 8, // Borde redondeado del modal
+                            display: 'flex',
+                            flexDirection: 'column',
+                        }}
+                    >
+                        <Typography variant="h5" gutterBottom align="center">
+                            {currentArticuloManufacturado.denominacion}
+                        </Typography>
+                        {images.length > 0 && (
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
+                                    <ArrowBackIosIcon />
+                                </IconButton>
+                                <img
+                                    src={images[currentImageIndex]}
+                                    alt={`Imagen ${currentImageIndex}`}
+                                    style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
+                                />
+                                <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
+                                    <ArrowForwardIosIcon />
+                                </IconButton>
+                            </Box>
+                        )}
+                        <Typography variant="h6" gutterBottom>
+                            Descripcion:
+                        </Typography>
+                        <Typography variant="body2" gutterBottom mb={3}>
+                            {currentArticuloManufacturado.descripcion}
+                        </Typography>
+                        <Typography variant="h6" gutterBottom>
+                            Preparación:
+                        </Typography>
+                        <Typography variant="body2" gutterBottom>
+                            {currentArticuloManufacturado.preparacion}
+                        </Typography>
+                        <Box display="flex" justifyContent="flex-end" mt={2}>
+                            <Button variant="contained" color="secondary" onClick={handleCloseModal}>
+                                Cerrar
+                            </Button>
+                        </Box>
+                    </Box>
+                </Modal>
 
             {/* Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
@@ -414,25 +509,42 @@ function ArticuloManufacturadoList() {
                                         Subir Imágenes
                                     </Button>
                                 </label>
-                                {images.length > 0 && (
-                                    <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                        {images.map((image, index) => (
-                                            <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                                <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                                <IconButton onClick={() => removeImage(index)} size="small">
-                                                    <Delete />
-                                                </IconButton>
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                )}
+                                {currentArticuloManufacturado.id > 0 ?
+                                    images.length > 0 && (
+                                        <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                            {articuloImages.map((image, index) => (
+                                                !image.eliminado && (
+                                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                        <img src={image.url} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                        <IconButton onClick={() => removeImage(image.id)} size="small">
+                                                            <Delete />
+                                                        </IconButton>
+                                                    </Box>
+                                                )
+                                            ))}
+                                        </Box>
+                                    )
+                                    :
+                                    images.length > 0 && (
+                                        <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                            {images.map((image, index) => (
+                                                <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                    <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                    <IconButton onClick={() => removeImage(index)} size="small">
+                                                        <Delete />
+                                                    </IconButton>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    )
+                                }
                             </Box>
                             <TextField
                                 name="precioVenta"
                                 label="Precio de Venta"
                                 fullWidth
                                 margin="normal"
-                                type="number"
+                                type="decimal"
                                 value={currentArticuloManufacturado.precioVenta}
                                 onChange={handleChange}
                             />
@@ -441,7 +553,7 @@ function ArticuloManufacturadoList() {
                                 label="Tiempo Estimado (minutos)"
                                 fullWidth
                                 margin="normal"
-                                type="number"
+                                type="decimal"
                                 value={currentArticuloManufacturado.tiempoEstimadoMinutos}
                                 onChange={handleChange}
                             />
@@ -481,40 +593,53 @@ function ArticuloManufacturadoList() {
                                 value={search}
                                 onChange={searcher}
                             />
-                            <Table>
-                                <TableBody>
-                                    {results.map((insumo) => (
-                                        <TableRow key={insumo.id}>
-                                            <TableCell>
-                                                <img src={insumo.imagenes[0].url} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}></img>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography variant="body1">{insumo.denominacion}</Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button variant="contained" color="success" onClick={() => handleAgregar(insumo)}>Agregar</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            <TableContainer component={Paper}>
+                                <Table>
+                                    <TableBody>
+                                        {results.map((insumo) => (
+                                            <TableRow key={insumo.id}>
+                                                <TableCell>
+                                                    <img src={insumo.imagenes.length > 0 ? insumo.imagenes[0].url : ''} alt={`Imagen de ${insumo.denominacion}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Typography variant="body1">{insumo.denominacion}</Typography>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button variant="contained" color="success" onClick={() => handleAgregar(insumo)}>Agregar</Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
                             <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
                                 Detalles Agregados
                             </Typography>
-                            <div>
+                            <Grid container spacing={2}>
                                 {detalles.map((detalle, index) => (
-                                    <div key={index}>
-                                        <Typography variant="body1">Nombre: {detalle.articuloInsumo.denominacion}</Typography>
-                                        <TextField
-                                            type="number"
-                                            value={detalle.cantidad}
-                                            onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
-                                            label="Cantidad"
-                                        />
-                                        <Button variant="contained" color="error" onClick={() => handleEliminar(index)}>Eliminar</Button>
-                                    </div>
+                                    <Grid item xs={12} sm={6} md={4} key={index}>
+                                        <Card>
+                                            <CardContent>
+                                                <Typography variant="body1" gutterBottom mb={2}>
+                                                    {detalle.articuloInsumo.denominacion}
+                                                </Typography>
+                                                <TextField
+                                                    type="decimal"
+                                                    value={detalle.cantidad}
+                                                    onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
+                                                    label="Cantidad"
+                                                    fullWidth
+                                                />
+                                            </CardContent>
+                                            <CardActions>
+                                                <Button variant="contained" color="error" onClick={() => handleEliminar(index)} fullWidth>
+                                                    Eliminar
+                                                </Button>
+                                            </CardActions>
+                                        </Card>
+                                    </Grid>
                                 ))}
-                            </div>
+                            </Grid>
                         </Box>
                     )}
                 </DialogContent>
@@ -526,7 +651,7 @@ function ArticuloManufacturadoList() {
                         <Button variant="contained" color="primary" onClick={handleNextStep}>Siguiente</Button>
                     )}
                     {modalStep === 3 && (
-                        <Button variant="contained" color="primary" onClick={handleSubmit}>Crear Manufacturado</Button>
+                        <Button variant="contained" color="primary" onClick={handleSubmit}>{text} Manufacturado</Button>
                     )}
                 </DialogActions>
             </Dialog>

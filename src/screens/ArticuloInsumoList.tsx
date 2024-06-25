@@ -77,7 +77,9 @@ function ArticuloInsumoList() {
                 reader.onload = () => {
                     const newImage = reader.result as string;
                     setImages(prevImages => [...prevImages, reader.result as string]);
-                    setArticuloImages(prevImages => [...prevImages, { id: 0, eliminado: false, url: newImage }]);
+                    if(currentArticuloInsumo.id > 0){
+                        setArticuloImages(prevImages => [...prevImages, { id: 0, eliminado: false, url: newImage }]);
+                    }
                 };
                 reader.readAsDataURL(file);
             });
@@ -85,9 +87,9 @@ function ArticuloInsumoList() {
     };
 
     const removeImage = (index: number) => {
-        if(currentArticuloInsumo.id > 0){
+        if (currentArticuloInsumo.id > 0) {
             setArticuloImages(articuloImages.filter(img => img.id !== index));
-        }else{
+        } else {
             setImages(prevImages => prevImages.filter((_, i) => i !== index));
         }
 
@@ -153,6 +155,7 @@ function ArticuloInsumoList() {
 
     const handleOpen = () => {
         setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
+        setArticuloImages([]);
         setImages([]);
         setOpen(true)
     };
@@ -363,7 +366,7 @@ function ArticuloInsumoList() {
                             flexDirection: 'column',
                         }}
                     >
-                        <Typography variant="h6" gutterBottom align="center">
+                        <Typography variant="h5" gutterBottom align="center">
                             {currentArticuloInsumo.denominacion}
                         </Typography>
                         {images.length > 0 && (
@@ -461,81 +464,86 @@ function ArticuloInsumoList() {
                                     Subir Imágenes
                                 </Button>
                             </label>
-                            {currentArticuloInsumo.id > 0 ? 
-                            images.length > 0 && (
-                                <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                    {articuloImages.map((image, index) => (
-                                        !image.eliminado && (
+                            {currentArticuloInsumo.id > 0 ?
+                                images.length > 0 && (
+                                    <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                        {articuloImages.map((image, index) => (
+                                            !image.eliminado && (
+                                                <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                    <img src={image.url} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                    <IconButton onClick={() => removeImage(image.id)} size="small">
+                                                        <Delete />
+                                                    </IconButton>
+                                                </Box>
+                                            )
+                                        ))}
+                                    </Box>
+                                )
+                                :
+                                images.length > 0 && (
+                                    <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                        {images.map((image, index) => (
                                             <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                                <img src={image.url} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                                <IconButton onClick={() => removeImage(image.id)} size="small">
+                                                <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                <IconButton onClick={() => removeImage(index)} size="small">
                                                     <Delete />
                                                 </IconButton>
                                             </Box>
-                                        )
-                                    ))}
-                                </Box>
-                            )
-                            : 
-                            images.length > 0 && (
-                                <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                    {images.map((image, index) => (
-                                        <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                            <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                            <IconButton onClick={() => removeImage(index)} size="small">
-                                                <Delete />
-                                            </IconButton>
-                                        </Box>
-                                    ))}
-                                </Box>
-                            )
+                                        ))}
+                                    </Box>
+                                )
                             }
                         </Box>
-                        <TextField
-                            label="Precio de Compra"
-                            name="precioCompra"
-                            type="number"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.precioCompra}
-                            onChange={handleInputChange}
-                        />
-                        <TextField
-                            label="Precio de Venta"
-                            name="precioVenta"
-                            type="number"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.precioVenta}
-                            onChange={handleInputChange}
-                        />
-                        <TextField
-                            label="Stock Actual"
-                            name="stockActual"
-                            type="number"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.stockActual}
-                            onChange={handleInputChange}
-                        />
-                        <TextField
-                            label="Stock Minimo"
-                            name="stockMinimo"
-                            type="number"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.stockMinimo}
-                            onChange={handleInputChange}
-                        />
-                        <TextField
-                            label="Stock Maximo"
-                            name="stockMaximo"
-                            type="number"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.stockMaximo}
-                            onChange={handleInputChange}
-                        />
+                        <Box display="flex">
+                            <TextField
+                                label="Precio de Compra"
+                                name="precioCompra"
+                                type="decimal"
+                                fullWidth
+                                margin="normal"
+                                value={currentArticuloInsumo.precioCompra}
+                                onChange={handleInputChange}
+                            />
+                            <TextField
+                                label="Precio de Venta"
+                                name="precioVenta"
+                                type="decimal"
+                                disabled={currentArticuloInsumo.esParaElaborar}
+                                fullWidth
+                                margin="normal"
+                                value={currentArticuloInsumo.precioVenta}
+                                onChange={handleInputChange}
+                            />
+                        </Box>
+                        <Box display="flex" mb="20px">
+                            <TextField
+                                label="Stock Actual"
+                                name="stockActual"
+                                type="decimal"
+                                fullWidth
+                                margin="normal"
+                                value={currentArticuloInsumo.stockActual}
+                                onChange={handleInputChange}
+                            />
+                            <TextField
+                                label="Stock Minimo"
+                                name="stockMinimo"
+                                type="decimal"
+                                fullWidth
+                                margin="normal"
+                                value={currentArticuloInsumo.stockMinimo}
+                                onChange={handleInputChange}
+                            />
+                            <TextField
+                                label="Stock Maximo"
+                                name="stockMaximo"
+                                type="decimal"
+                                fullWidth
+                                margin="normal"
+                                value={currentArticuloInsumo.stockMaximo}
+                                onChange={handleInputChange}
+                            />
+                        </Box>
                         <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
                             Cancelar
                         </Button>
