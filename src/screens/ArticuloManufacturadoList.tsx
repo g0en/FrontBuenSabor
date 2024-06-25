@@ -21,6 +21,10 @@ import { Delete } from "@mui/icons-material";
 import Imagen from "../types/Imagen";
 import { CloudinaryUpload } from "../services/CloudinaryService";
 import { CloudinaryDelete } from "../services/CloudinaryService";
+import ArticuloInsumo from "../types/ArticuloInsumo";
+import { ArticuloInsumoFindBySucursal } from "../services/ArticuloInsumoService";
+import ArticuloManufacturadoDetalle from "../types/ArticuloManufacturadoDetalle";
+import { ArticuloManufacturadoUpdate } from "../services/ArticuloManufacturadoService";
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -38,6 +42,9 @@ function ArticuloManufacturadoList() {
     const { idSucursal, idEmpresa } = useParams();
     const [openModal, setOpenModal] = useState(false);
     const [modalStep, setModalStep] = useState(1);
+    const [insumos, setInsumos] = useState<ArticuloInsumo[]>([]);
+    const [detalles, setDetalles] = useState<ArticuloManufacturadoDetalle[]>([]);
+    const [search, setSearch] = useState("");
 
     const getAllArticuloManufacturadoBySucursal = async () => {
         const articulosManufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
@@ -60,12 +67,30 @@ function ArticuloManufacturadoList() {
     };
 
     const updateArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        await ArticuloManufacturadoCreate(articulo);
+        await ArticuloManufacturadoUpdate(articulo);
         await getAllArticuloManufacturadoBySucursal();
     };
 
     const deleteArticuloManufacturado = async (id: number) => {
         return ArticuloManufacturadoDelete(id);
+    }
+
+    const getAllArticuloInsumoBySucursal = async () => {
+        const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
+        setInsumos(articulosInsumo);
+    };
+
+    const searcher = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+    }
+
+    let results = [];
+
+    if (!search) {
+        results = insumos;
+    } else {
+        results = insumos.filter((insumo) =>
+            insumo.denominacion.toLowerCase().includes(search.toLocaleLowerCase()));
     }
 
     const deleteImages = async (imagenes: Imagen[]) => {
@@ -138,11 +163,27 @@ function ArticuloManufacturadoList() {
         setOpenModal(true);
         setModalStep(1);
         setImages([]);
+        getAllArticuloInsumoBySucursal();
     };
+
+    const handleOpenEditModal = (articulo: ArticuloManufacturado) => {
+        setCurrentArticuloManufacturado(articulo);
+        if(articulo.articuloManufacturadoDetalles !== null){
+            setDetalles(articulo.articuloManufacturadoDetalles);
+        }
+        setImages(articulo.imagenes.map(imagen => imagen.url));
+        console.log(articulo);
+        setOpenModal(true);
+        setModalStep(1);
+        getAllArticuloInsumoBySucursal();
+    }
 
     const handleCloseModal = () => {
         setOpenModal(false);
         setCurrentArticuloManufacturado({ ...emptyArticuloManufacturado });
+        setInsumos([]);
+        setDetalles([]);
+        setFiles([]);
     };
 
     const handleNextStep = () => {
@@ -157,17 +198,45 @@ function ArticuloManufacturadoList() {
         setCurrentArticuloManufacturado({ ...currentArticuloManufacturado, [e.target.name]: e.target.value });
     };
 
+    const handleAgregar = (insumo: ArticuloInsumo) => {
+        const nuevoDetalle = {
+            id: 0,
+            eliminado: false,
+            cantidad: 1,
+            articuloInsumo: insumo
+        };
+        setDetalles([...detalles, nuevoDetalle]);
+    };
+
+    const handleCantidadChange = (index: number, cantidad: number) => {
+        const nuevosDetalles = [...detalles];
+        nuevosDetalles[index].cantidad = cantidad;
+        setDetalles(nuevosDetalles);
+    };
+
+    const handleEliminar = (index: number) => {
+        const nuevosDetalles = detalles.filter((_, i) => i !== index);
+        setDetalles(nuevosDetalles);
+    };
+
     const handleDelete = async (articulo: ArticuloManufacturado) => {
         const imagenes: Imagen[] = articulo.imagenes;
 
         try {
-            deleteArticuloManufacturado(articulo.id);
-
+            const data = await deleteArticuloManufacturado(articulo.id);
+            if (data.status !== 200) {
+                return;
+            }
         } catch (error) {
-            console.log("Error al eliminar el articulo.")
+            console.log("Error al crear un Articulo Manufacturado.");
         }
 
-        deleteImages(imagenes);
+        try{
+            await deleteImages(imagenes);
+        }catch(error){
+            console.log("Error al subir las Imagenes.");
+        }
+
         window.location.reload();
     }
 
@@ -179,7 +248,6 @@ function ArticuloManufacturadoList() {
         }
 
         if (currentArticuloManufacturado.id > 0) {
-
             try {
                 deleteImages(imagenesExistentes);
                 await updateArticuloManufacturado(currentArticuloManufacturado);
@@ -190,8 +258,8 @@ function ArticuloManufacturadoList() {
             }
 
         } else {
-
             try {
+                currentArticuloManufacturado.articuloManufacturadoDetalles = detalles;
                 await createArticuloManufacturado(currentArticuloManufacturado);
                 setCurrentArticuloManufacturado(emptyArticuloManufacturado);
             } catch (error) {
@@ -228,26 +296,27 @@ function ArticuloManufacturadoList() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {articulosManufacturados.map((articulo) => (
-                                <TableRow key={articulo.id}>
-                                    <TableCell align="center">{articulo.denominacion}</TableCell>
-                                    <TableCell align="center">{articulo.unidadMedida.denominacion}</TableCell>
-                                    <TableCell align="center">{articulo.precioVenta}</TableCell>
-                                    <TableCell align="center">{articulo.tiempoEstimadoMinutos}</TableCell>
-                                    <TableCell align="center">{articulo.categoria && articulo.categoria.denominacion}</TableCell>
-                                    <TableCell align="center">
-                                        <IconButton aria-label="edit">
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="view">
-                                            <VisibilityIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {articulosManufacturados.filter(articulo => !articulo.eliminado)
+                                .map((articulo) => (
+                                    <TableRow key={articulo.id}>
+                                        <TableCell align="center">{articulo.denominacion}</TableCell>
+                                        <TableCell align="center">{articulo.unidadMedida.denominacion}</TableCell>
+                                        <TableCell align="center">{articulo.precioVenta}</TableCell>
+                                        <TableCell align="center">{articulo.tiempoEstimadoMinutos}</TableCell>
+                                        <TableCell align="center">{articulo.categoria && articulo.categoria.denominacion}</TableCell>
+                                        <TableCell align="center">
+                                            <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)}>
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton aria-label="view">
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -255,7 +324,7 @@ function ArticuloManufacturadoList() {
 
             {/* Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
-                <DialogTitle>Crear Articulo Manufacturado</DialogTitle>
+                {currentArticuloManufacturado.id > 0 ? <DialogTitle>Actualizar Articulo Manufacturado</DialogTitle> : <DialogTitle>Crear Articulo Manufacturado</DialogTitle>}
                 <DialogContent dividers>
                     {modalStep === 1 && (
                         <Box>
@@ -312,33 +381,33 @@ function ArticuloManufacturadoList() {
                                 </Grid>
                             </Box>
                             <Box mt={3} mb={3}>
-                        <Typography variant="subtitle1">Seleccione imágenes:</Typography>
-                        <label htmlFor="upload-button">
-                            <input
-                                style={{ display: 'none' }}
-                                id="upload-button"
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={cloudinaryFileChange}
-                            />
-                            <Button variant="contained" component="span">
-                                Subir Imágenes
-                            </Button>
-                        </label>
-                        {images.length > 0 && (
-                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                {images.map((image, index) => (
-                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                        <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                        <IconButton onClick={() => removeImage(index)} size="small">
-                                            <Delete />
-                                        </IconButton>
+                                <Typography variant="subtitle1">Seleccione imágenes:</Typography>
+                                <label htmlFor="upload-button">
+                                    <input
+                                        style={{ display: 'none' }}
+                                        id="upload-button"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={cloudinaryFileChange}
+                                    />
+                                    <Button variant="contained" component="span">
+                                        Subir Imágenes
+                                    </Button>
+                                </label>
+                                {images.length > 0 && (
+                                    <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                        {images.map((image, index) => (
+                                            <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                <IconButton onClick={() => removeImage(index)} size="small">
+                                                    <Delete />
+                                                </IconButton>
+                                            </Box>
+                                        ))}
                                     </Box>
-                                ))}
+                                )}
                             </Box>
-                        )}
-                    </Box>
                             <TextField
                                 name="precioVenta"
                                 label="Precio de Venta"
@@ -390,9 +459,43 @@ function ArticuloManufacturadoList() {
                                 label="Buscar Insumo"
                                 fullWidth
                                 margin="normal"
-                                //value={currentArticuloManufacturado.buscarInsumo}
-                                onChange={handleChange}
+                                value={search}
+                                onChange={searcher}
                             />
+                            <Table>
+                                <TableBody>
+                                    {results.map((insumo) => (
+                                        <TableRow key={insumo.id}>
+                                            <TableCell>
+                                                <img src={insumo.imagenes[0].url} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}></img>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body1">{insumo.denominacion}</Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button variant="contained" color="success" onClick={() => handleAgregar(insumo)}>Agregar</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                            <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+                                Detalles Agregados
+                            </Typography>
+                            <div>
+                                {detalles.map((detalle, index) => (
+                                    <div key={index}>
+                                        <Typography variant="body1">Nombre: {detalle.articuloInsumo.denominacion}</Typography>
+                                        <TextField
+                                            type="number"
+                                            value={detalle.cantidad}
+                                            onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
+                                            label="Cantidad"
+                                        />
+                                        <Button variant="contained" color="error" onClick={() => handleEliminar(index)}>Eliminar</Button>
+                                    </div>
+                                ))}
+                            </div>
                         </Box>
                     )}
                 </DialogContent>
@@ -404,7 +507,7 @@ function ArticuloManufacturadoList() {
                         <Button variant="contained" color="primary" onClick={handleNextStep}>Siguiente</Button>
                     )}
                     {modalStep === 3 && (
-                        <Button variant="contained" color="error" onClick={handleSubmit}>Crear Manufacturado</Button>
+                        <Button variant="contained" color="primary" onClick={handleSubmit}>Crear Manufacturado</Button>
                     )}
                 </DialogActions>
             </Dialog>

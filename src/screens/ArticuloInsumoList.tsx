@@ -110,7 +110,7 @@ function ArticuloInsumoList() {
         } catch (error) {
             console.error('Error deleting the file', error);
         }
-        
+
     };
 
     const handleView = (articulo?: ArticuloInsumo) => {
@@ -150,6 +150,7 @@ function ArticuloInsumoList() {
 
     const handleClose = () => {
         setOpen(false);
+        setFiles([]);
         setView(false);
     };
 
@@ -157,13 +158,20 @@ function ArticuloInsumoList() {
         const imagenes: Imagen[] = articulo.imagenes;
 
         try {
-            deleteArticuloInsumo(articulo.id);
-
+            const data = await deleteArticuloInsumo(articulo.id);
+            if (data.status !== 200) {
+                return;
+            }
         } catch (error) {
-            console.log("Error al eliminar el articulo.")
+            console.log("Error al crear un Articulo Insumo.");
         }
 
-        deleteImages(imagenes);
+        try {
+            await deleteImages(imagenes);
+        } catch (error) {
+            console.log("Error al subir las Imagenes.");
+        }
+
         window.location.reload();
     };
 
@@ -256,241 +264,243 @@ function ArticuloInsumoList() {
     return (
         <>
             <SideBar />
-            <Typography variant="h5" gutterBottom>
-                Articulos Insumos
-            </Typography>
-            <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Nombre</TableCell>
-                            <TableCell>Precio Compra</TableCell>
-                            <TableCell>Precio Venta</TableCell>
-                            <TableCell>Unidad de Medida</TableCell>
-                            <TableCell>Stock Actual</TableCell>
-                            <TableCell>Stock Mínimo</TableCell>
-                            <TableCell>Stock Máximo</TableCell>
-                            <TableCell>Para Elaborar</TableCell>
-                            <TableCell>Categoría</TableCell>
-                            <TableCell>Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {articulosInsumo
-                            .filter(articulo => !articulo.eliminado)
-                            .map((articulo) => (
-                                <TableRow key={articulo.id}>
-                                    <TableCell>{articulo.denominacion}</TableCell>
-                                    <TableCell>{articulo.precioCompra}</TableCell>
-                                    <TableCell>{articulo.precioVenta}</TableCell>
-                                    <TableCell>{articulo.unidadMedida?.denominacion}</TableCell>
-                                    <TableCell>{articulo.stockActual}</TableCell>
-                                    <TableCell>{articulo.stockMinimo}</TableCell>
-                                    <TableCell>{articulo.stockMaximo}</TableCell>
-                                    <TableCell>
-                                        {articulo.esParaElaborar ? <Check color="success" /> : ""}
-                                    </TableCell>
-                                    <TableCell>{articulo.categoria?.denominacion}</TableCell>
-                                    <TableCell>
-                                        <IconButton aria-label="edit" onClick={() => handleEdit(articulo)}>
-                                            <Edit />
-                                        </IconButton>
-                                        <IconButton aria-label="view" onClick={() => handleView(articulo)}>
-                                            <Visibility />
-                                        </IconButton>
-                                        <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
-                                            <Delete />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Box p={0} ml={3}>
+                <Typography variant="h5" gutterBottom>
+                    Articulos Insumos
+                </Typography>
+                <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Nombre</TableCell>
+                                <TableCell>Precio Compra</TableCell>
+                                <TableCell>Precio Venta</TableCell>
+                                <TableCell>Unidad de Medida</TableCell>
+                                <TableCell>Stock Actual</TableCell>
+                                <TableCell>Stock Mínimo</TableCell>
+                                <TableCell>Stock Máximo</TableCell>
+                                <TableCell>Para Elaborar</TableCell>
+                                <TableCell>Categoría</TableCell>
+                                <TableCell>Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {articulosInsumo
+                                .filter(articulo => !articulo.eliminado)
+                                .map((articulo) => (
+                                    <TableRow key={articulo.id}>
+                                        <TableCell>{articulo.denominacion}</TableCell>
+                                        <TableCell>{articulo.precioCompra}</TableCell>
+                                        <TableCell>{articulo.precioVenta}</TableCell>
+                                        <TableCell>{articulo.unidadMedida?.denominacion}</TableCell>
+                                        <TableCell>{articulo.stockActual}</TableCell>
+                                        <TableCell>{articulo.stockMinimo}</TableCell>
+                                        <TableCell>{articulo.stockMaximo}</TableCell>
+                                        <TableCell>
+                                            {articulo.esParaElaborar ? <Check color="success" /> : ""}
+                                        </TableCell>
+                                        <TableCell>{articulo.categoria?.denominacion}</TableCell>
+                                        <TableCell>
+                                            <IconButton aria-label="edit" onClick={() => handleEdit(articulo)}>
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton aria-label="view" onClick={() => handleView(articulo)}>
+                                                <Visibility />
+                                            </IconButton>
+                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
+                                                <Delete />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
-            <Modal open={view} onClose={handleClose}>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '40%', // Ancho del modal
-                        maxWidth: 800, // Máximo ancho del modal
-                        maxHeight: '80vh',
-                        overflow: 'auto',
-                        bgcolor: 'background.paper',
-                        p: 4,
-                        borderRadius: 8, // Borde redondeado del modal
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}
-                >
-                    <Typography variant="h6" gutterBottom align="center">
-                        {currentArticuloInsumo.denominacion}
-                    </Typography>
-                    {images.length > 0 && (
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                            <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
-                                <ArrowBackIosIcon />
-                            </IconButton>
-                            <img
-                                src={images[currentImageIndex]}
-                                alt={`Imagen ${currentImageIndex}`}
-                                style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
-                            />
-                            <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
-                                <ArrowForwardIosIcon />
-                            </IconButton>
-                        </Box>
-                    )}
-                    <Box display="flex" justifyContent="flex-end" mt={2}>
-                        <Button variant="contained" color="secondary" onClick={handleClose}>
-                            Cerrar
-                        </Button>
-                    </Box>
-                </Box>
-            </Modal>
-
-            <Modal open={open} onClose={handleClose}>
-                <Box sx={{ width: 800, maxHeight: '80vh', overflow: 'auto', p: 4, bgcolor: 'background.paper', m: 'auto', mt: '5%' }}>
-                    <Typography variant="h6" gutterBottom>
-                        {currentArticuloInsumo.id === 0 ? 'Crear Articulo Insumo' : 'Actualizar Articulo Insumo'}
-                    </Typography>
-                    <TextField
-                        label="Denominacion"
-                        name="denominacion"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.denominacion}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        select
-                        label="Unidad de Medida"
-                        name="unidadMedida"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.unidadMedida.id || ''}
-                        onChange={(e) => handleSelectChange(e, 'unidadMedida')}
+                <Modal open={view} onClose={handleClose}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '40%', // Ancho del modal
+                            maxWidth: 800, // Máximo ancho del modal
+                            maxHeight: '80vh',
+                            overflow: 'auto',
+                            bgcolor: 'background.paper',
+                            p: 4,
+                            borderRadius: 8, // Borde redondeado del modal
+                            display: 'flex',
+                            flexDirection: 'column',
+                        }}
                     >
-                        {unidadMedidas.map((unidad) => (
-                            <MenuItem key={unidad.id} value={unidad.id}>
-                                {unidad.denominacion}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <Box display="flex" alignItems="center">
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={currentArticuloInsumo.esParaElaborar}
-                                    onChange={handleSwitchChange}
-                                    name="esParaElaborar"
+                        <Typography variant="h6" gutterBottom align="center">
+                            {currentArticuloInsumo.denominacion}
+                        </Typography>
+                        {images.length > 0 && (
+                            <Box display="flex" justifyContent="center" alignItems="center">
+                                <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
+                                    <ArrowBackIosIcon />
+                                </IconButton>
+                                <img
+                                    src={images[currentImageIndex]}
+                                    alt={`Imagen ${currentImageIndex}`}
+                                    style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
                                 />
-                            }
-                            label="¿Es para elaborar?"
+                                <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
+                                    <ArrowForwardIosIcon />
+                                </IconButton>
+                            </Box>
+                        )}
+                        <Box display="flex" justifyContent="flex-end" mt={2}>
+                            <Button variant="contained" color="secondary" onClick={handleClose}>
+                                Cerrar
+                            </Button>
+                        </Box>
+                    </Box>
+                </Modal>
+
+                <Modal open={open} onClose={handleClose}>
+                    <Box sx={{ width: 800, maxHeight: '80vh', overflow: 'auto', p: 4, bgcolor: 'background.paper', m: 'auto', mt: '5%' }}>
+                        <Typography variant="h6" gutterBottom>
+                            {currentArticuloInsumo.id === 0 ? 'Crear Articulo Insumo' : 'Actualizar Articulo Insumo'}
+                        </Typography>
+                        <TextField
+                            label="Denominacion"
+                            name="denominacion"
+                            fullWidth
+                            margin="normal"
+                            value={currentArticuloInsumo.denominacion}
+                            onChange={handleInputChange}
                         />
                         <TextField
                             select
-                            label="Categoría"
-                            name="categoria"
+                            label="Unidad de Medida"
+                            name="unidadMedida"
                             fullWidth
                             margin="normal"
-                            value={currentArticuloInsumo.categoria?.id || ''}
-                            onChange={(e) => handleSelectChange(e, 'categoria')}
+                            value={currentArticuloInsumo.unidadMedida.id || ''}
+                            onChange={(e) => handleSelectChange(e, 'unidadMedida')}
                         >
-                            {categorias
-                                .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
-                                .map((categoria) => (
-                                    <MenuItem key={categoria.id} value={categoria.id !== null ? Number(categoria.id) : 0}>
-                                        {categoria.denominacion}
-                                    </MenuItem>
-                                ))}
+                            {unidadMedidas.map((unidad) => (
+                                <MenuItem key={unidad.id} value={unidad.id}>
+                                    {unidad.denominacion}
+                                </MenuItem>
+                            ))}
                         </TextField>
-                    </Box>
-                    <Box mt={3} mb={3}>
-                        <Typography variant="subtitle1">Seleccione imágenes:</Typography>
-                        <label htmlFor="upload-button">
-                            <input
-                                style={{ display: 'none' }}
-                                id="upload-button"
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={cloudinaryFileChange}
+                        <Box display="flex" alignItems="center">
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={currentArticuloInsumo.esParaElaborar}
+                                        onChange={handleSwitchChange}
+                                        name="esParaElaborar"
+                                    />
+                                }
+                                label="¿Es para elaborar?"
                             />
-                            <Button variant="contained" component="span">
-                                Subir Imágenes
-                            </Button>
-                        </label>
-                        {images.length > 0 && (
-                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                {images.map((image, index) => (
-                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                        <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                        <IconButton onClick={() => removeImage(index)} size="small">
-                                            <Delete />
-                                        </IconButton>
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
+                            <TextField
+                                select
+                                label="Categoría"
+                                name="categoria"
+                                fullWidth
+                                margin="normal"
+                                value={currentArticuloInsumo.categoria?.id || ''}
+                                onChange={(e) => handleSelectChange(e, 'categoria')}
+                            >
+                                {categorias
+                                    .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
+                                    .map((categoria) => (
+                                        <MenuItem key={categoria.id} value={categoria.id !== null ? Number(categoria.id) : 0}>
+                                            {categoria.denominacion}
+                                        </MenuItem>
+                                    ))}
+                            </TextField>
+                        </Box>
+                        <Box mt={3} mb={3}>
+                            <Typography variant="subtitle1">Seleccione imágenes:</Typography>
+                            <label htmlFor="upload-button">
+                                <input
+                                    style={{ display: 'none' }}
+                                    id="upload-button"
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={cloudinaryFileChange}
+                                />
+                                <Button variant="contained" component="span">
+                                    Subir Imágenes
+                                </Button>
+                            </label>
+                            {images.length > 0 && (
+                                <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                    {images.map((image, index) => (
+                                        <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                            <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                            <IconButton onClick={() => removeImage(index)} size="small">
+                                                <Delete />
+                                            </IconButton>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+                        <TextField
+                            label="Precio de Compra"
+                            name="precioCompra"
+                            type="number"
+                            fullWidth
+                            margin="normal"
+                            value={currentArticuloInsumo.precioCompra}
+                            onChange={handleInputChange}
+                        />
+                        <TextField
+                            label="Precio de Venta"
+                            name="precioVenta"
+                            type="number"
+                            fullWidth
+                            margin="normal"
+                            value={currentArticuloInsumo.precioVenta}
+                            onChange={handleInputChange}
+                        />
+                        <TextField
+                            label="Stock Actual"
+                            name="stockActual"
+                            type="number"
+                            fullWidth
+                            margin="normal"
+                            value={currentArticuloInsumo.stockActual}
+                            onChange={handleInputChange}
+                        />
+                        <TextField
+                            label="Stock Minimo"
+                            name="stockMinimo"
+                            type="number"
+                            fullWidth
+                            margin="normal"
+                            value={currentArticuloInsumo.stockMinimo}
+                            onChange={handleInputChange}
+                        />
+                        <TextField
+                            label="Stock Maximo"
+                            name="stockMaximo"
+                            type="number"
+                            fullWidth
+                            margin="normal"
+                            value={currentArticuloInsumo.stockMaximo}
+                            onChange={handleInputChange}
+                        />
+                        <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
+                            Cancelar
+                        </Button>
+                        <Button variant="contained" color="primary" onClick={handleSubmit}>
+                            {currentArticuloInsumo.id === 0 ? 'Crear' : 'Actualizar'}
+                        </Button>
                     </Box>
-                    <TextField
-                        label="Precio de Compra"
-                        name="precioCompra"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.precioCompra}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Precio de Venta"
-                        name="precioVenta"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.precioVenta}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Stock Actual"
-                        name="stockActual"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.stockActual}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Stock Minimo"
-                        name="stockMinimo"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.stockMinimo}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Stock Maximo"
-                        name="stockMaximo"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.stockMaximo}
-                        onChange={handleInputChange}
-                    />
-                    <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
-                        Cancelar
-                    </Button>
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
-                        {currentArticuloInsumo.id === 0 ? 'Crear' : 'Actualizar'}
-                    </Button>
-                </Box>
-            </Modal>
+                </Modal>
+            </Box>
         </>
     );
 }
