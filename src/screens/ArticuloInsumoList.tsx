@@ -5,20 +5,19 @@ import {
 } from "@mui/material";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { Edit, Visibility, Delete, Check } from "@mui/icons-material";
+import { Edit, Visibility, Delete } from "@mui/icons-material";
 import SideBar from "../components/common/SideBar";
 import ArticuloInsumo from "../types/ArticuloInsumo";
-import { ArticuloInsumoFindBySucursal, ArticuloInsumoCreate } from "../services/ArticuloInsumoService";
+import { ArticuloInsumoFindBySucursal, ArticuloInsumoCreate, ArticuloInsumoUpdate, ArticuloInsumoDelete } from "../services/ArticuloInsumoService";
 import { useParams } from "react-router-dom";
 import Categoria from "../types/Categoria";
 import { CategoriaByEmpresaGetAll } from "../services/CategoriaService";
 import UnidadMedida from "../types/UnidadMedida";
 import { UnidadMedidaGetAll } from "../services/UnidadMedidaService";
-import { ArticuloInsumoUpdate } from "../services/ArticuloInsumoService";
-import { ArticuloInsumoDelete } from "../services/ArticuloInsumoService";
-import { CloudinaryUpload } from "../services/CloudinaryService";
-import { CloudinaryDelete } from "../services/CloudinaryService";
+import { CloudinaryUpload, CloudinaryDelete } from "../services/CloudinaryService";
 import Imagen from "../types/Imagen";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -54,13 +53,23 @@ function ArticuloInsumoList() {
     };
 
     const createArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
-        await ArticuloInsumoCreate(articuloInsumo);
-        await getAllArticuloInsumoBySucursal();
+        try {
+            await ArticuloInsumoCreate(articuloInsumo);
+            await getAllArticuloInsumoBySucursal();
+            toast.error('Error al crear el artículo insumo');
+        } catch (error) {
+            toast.error('Error al crear el artículo insumo');
+        }
     };
 
     const updateArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
-        await ArticuloInsumoUpdate(articuloInsumo);
-        await getAllArticuloInsumoBySucursal();
+        try {
+            await ArticuloInsumoUpdate(articuloInsumo);
+            await getAllArticuloInsumoBySucursal();
+            toast.success('Artículo insumo actualizado con éxito');
+        } catch (error) {
+            toast.error('Error al actualizar el artículo insumo');
+        }
     };
 
     const deleteArticuloInsumo = async (id: number) => {
@@ -110,7 +119,8 @@ function ArticuloInsumoList() {
         } catch (error) {
             console.error('Error deleting the file', error);
         }
-        
+
+        setView(true);
     };
 
     const handleView = (articulo?: ArticuloInsumo) => {
@@ -154,17 +164,18 @@ function ArticuloInsumoList() {
     };
 
     const handleDelete = async (articulo: ArticuloInsumo) => {
-        const imagenes: Imagen[] = articulo.imagenes;
+        if (window.confirm('¿Estás seguro de que deseas eliminar este artículo?')) {
+            const imagenes: Imagen[] = articulo.imagenes;
 
-        try {
-            deleteArticuloInsumo(articulo.id);
-
-        } catch (error) {
-            console.log("Error al eliminar el articulo.")
+            try {
+                await deleteArticuloInsumo(articulo.id);
+                deleteImages(imagenes);
+                window.location.reload();
+                toast.success('Artículo insumo eliminado con éxito');
+            } catch (error) {
+                toast.error('Error al eliminar el artículo insumo');
+            }
         }
-
-        deleteImages(imagenes);
-        window.location.reload();
     };
 
     const deleteImages = async (imagenes: Imagen[]) => {
@@ -201,50 +212,38 @@ function ArticuloInsumoList() {
         const value = e.target.value as number; // Asumiendo que el valor es un número (id)
 
         if (name === 'unidadMedida') {
-            const unidadMedidaSeleccionada = unidadMedidas.find(u => u.id === value);
+            const selectedUnidadMedida = unidadMedidas.find(um => um.id === value);
             setCurrentArticuloInsumo(prevState => ({
                 ...prevState,
-                unidadMedida: unidadMedidaSeleccionada || emptyUnidadMedida
+                unidadMedida: selectedUnidadMedida || emptyUnidadMedida
             }));
         } else if (name === 'categoria') {
-            const categoriaSeleccionada = categorias.find(c => c.id === value);
+            const selectedCategoria = categorias.find(c => c.id === value);
             setCurrentArticuloInsumo(prevState => ({
                 ...prevState,
-                categoria: categoriaSeleccionada || emptyCategoria
+                categoria: selectedCategoria || emptyCategoria
             }));
         }
     };
 
-    const handleSubmit = async () => {
-        const imagenes = await cloudinaryUpload();
-        const imagenesExistentes = currentArticuloInsumo.imagenes;
-        if (imagenes && imagenes?.length > 0) {
-            currentArticuloInsumo.imagenes = imagenes;
-        }
 
-        if (currentArticuloInsumo.id > 0) {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const uploadedImages = await cloudinaryUpload();
 
-            try {
-                deleteImages(imagenesExistentes);
-                await updateArticuloInsumo(currentArticuloInsumo);
-                setCurrentArticuloInsumo(emptyArticuloInsumo);
-            } catch (error) {
-                console.log("Error al actualizar un articulo insumo");
-                deleteImages(imagenes);
-            }
+        const articuloInsumo = {
+            ...currentArticuloInsumo,
+            imagenes: uploadedImages,
+        };
 
+        if (articuloInsumo.id === 0) {
+            await createArticuloInsumo(articuloInsumo);
         } else {
-
-            try {
-                await createArticuloInsumo(currentArticuloInsumo);
-                setCurrentArticuloInsumo(emptyArticuloInsumo);
-            } catch (error) {
-                console.log("Error al crear un articulo insumo");
-                deleteImages(imagenes);
-            }
+            await updateArticuloInsumo(articuloInsumo);
         }
 
-        handleClose();
+        setOpen(false);
+        setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
     };
 
     useEffect(() => {
@@ -254,134 +253,134 @@ function ArticuloInsumoList() {
     }, []);
 
     return (
-        <>
-            <SideBar />
-            <Typography variant="h5" gutterBottom>
-                Articulos Insumos
-            </Typography>
-            <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Nombre</TableCell>
-                            <TableCell>Precio Compra</TableCell>
-                            <TableCell>Precio Venta</TableCell>
-                            <TableCell>Unidad de Medida</TableCell>
-                            <TableCell>Stock Actual</TableCell>
-                            <TableCell>Stock Mínimo</TableCell>
-                            <TableCell>Stock Máximo</TableCell>
-                            <TableCell>Para Elaborar</TableCell>
-                            <TableCell>Categoría</TableCell>
-                            <TableCell>Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {articulosInsumo
-                            .filter(articulo => !articulo.eliminado)
-                            .map((articulo) => (
+        <div>
+            <ToastContainer />
+            <SideBar/>
+            <div className="container">
+                <Button onClick={handleOpen} variant="contained" color="primary">
+                    Crear Artículo Insumo
+                </Button>
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Denominación</TableCell>
+                                <TableCell>Precio Venta</TableCell>
+                                <TableCell>Stock Actual</TableCell>
+                                <TableCell>Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {articulosInsumo.map(articulo => (
                                 <TableRow key={articulo.id}>
                                     <TableCell>{articulo.denominacion}</TableCell>
-                                    <TableCell>{articulo.precioCompra}</TableCell>
                                     <TableCell>{articulo.precioVenta}</TableCell>
-                                    <TableCell>{articulo.unidadMedida?.denominacion}</TableCell>
                                     <TableCell>{articulo.stockActual}</TableCell>
-                                    <TableCell>{articulo.stockMinimo}</TableCell>
-                                    <TableCell>{articulo.stockMaximo}</TableCell>
                                     <TableCell>
-                                        {articulo.esParaElaborar ? <Check color="success" /> : ""}
-                                    </TableCell>
-                                    <TableCell>{articulo.categoria?.denominacion}</TableCell>
-                                    <TableCell>
-                                        <IconButton aria-label="edit" onClick={() => handleEdit(articulo)}>
-                                            <Edit />
-                                        </IconButton>
-                                        <IconButton aria-label="view" onClick={() => handleView(articulo)}>
+                                        <IconButton onClick={() => handleView(articulo)}>
                                             <Visibility />
                                         </IconButton>
-                                        <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
+                                        <IconButton onClick={() => handleEdit(articulo)}>
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDelete(articulo)}>
                                             <Delete />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
                             ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
-            <Modal open={view} onClose={handleClose}>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '40%', // Ancho del modal
-                        maxWidth: 800, // Máximo ancho del modal
-                        maxHeight: '80vh',
-                        overflow: 'auto',
-                        bgcolor: 'background.paper',
-                        p: 4,
-                        borderRadius: 8, // Borde redondeado del modal
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}
-                >
-                    <Typography variant="h6" gutterBottom align="center">
-                        {currentArticuloInsumo.denominacion}
-                    </Typography>
-                    {images.length > 0 && (
-                        <Box display="flex" justifyContent="center" alignItems="center">
-                            <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
-                                <ArrowBackIosIcon />
-                            </IconButton>
-                            <img
-                                src={images[currentImageIndex]}
-                                alt={`Imagen ${currentImageIndex}`}
-                                style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
-                            />
-                            <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
-                                <ArrowForwardIosIcon />
-                            </IconButton>
-                        </Box>
-                    )}
-                    <Box display="flex" justifyContent="flex-end" mt={2}>
-                        <Button variant="contained" color="secondary" onClick={handleClose}>
-                            Cerrar
-                        </Button>
-                    </Box>
-                </Box>
-            </Modal>
-
-            <Modal open={open} onClose={handleClose}>
-                <Box sx={{ width: 800, maxHeight: '80vh', overflow: 'auto', p: 4, bgcolor: 'background.paper', m: 'auto', mt: '5%' }}>
-                    <Typography variant="h6" gutterBottom>
-                        {currentArticuloInsumo.id === 0 ? 'Crear Articulo Insumo' : 'Actualizar Articulo Insumo'}
-                    </Typography>
-                    <TextField
-                        label="Denominacion"
-                        name="denominacion"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.denominacion}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        select
-                        label="Unidad de Medida"
-                        name="unidadMedida"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.unidadMedida.id || ''}
-                        onChange={(e) => handleSelectChange(e, 'unidadMedida')}
-                    >
-                        {unidadMedidas.map((unidad) => (
-                            <MenuItem key={unidad.id} value={unidad.id}>
-                                {unidad.denominacion}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <Box display="flex" alignItems="center">
+                <Modal open={open} onClose={handleClose}>
+                    <Box component="form" onSubmit={handleSubmit} sx={{ ...modalStyle }}>
+                        <Typography variant="h6" component="h2">
+                            {currentArticuloInsumo.id === 0 ? 'Crear Artículo Insumo' : 'Editar Artículo Insumo'}
+                        </Typography>
+                        <TextField
+                            label="Denominación"
+                            name="denominacion"
+                            value={currentArticuloInsumo.denominacion}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Precio Venta"
+                            name="precioVenta"
+                            type="number"
+                            value={currentArticuloInsumo.precioVenta}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Precio Compra"
+                            name="precioCompra"
+                            type="number"
+                            value={currentArticuloInsumo.precioCompra}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Stock Actual"
+                            name="stockActual"
+                            type="number"
+                            value={currentArticuloInsumo.stockActual}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Stock Mínimo"
+                            name="stockMinimo"
+                            type="number"
+                            value={currentArticuloInsumo.stockMinimo}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Stock Máximo"
+                            name="stockMaximo"
+                            type="number"
+                            value={currentArticuloInsumo.stockMaximo}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            select
+                            label="Unidad de Medida"
+                            name="unidadMedida"
+                            value={currentArticuloInsumo.unidadMedida?.id || 0}
+                            onChange={(e) => handleSelectChange(e, 'unidadMedida')}
+                            fullWidth
+                            margin="normal"
+                        >
+                            {unidadMedidas.map((unidadMedida) => (
+                                <MenuItem key={unidadMedida.id} value={unidadMedida.id}>
+                                    {unidadMedida.denominacion}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                        <TextField
+                            select
+                            label="Categoría"
+                            name="categoria"
+                            value={currentArticuloInsumo.categoria?.id || 0}
+                            onChange={(e) => handleSelectChange(e, 'categoria')}
+                            fullWidth
+                            margin="normal"
+                        >
+                            {categorias.map((categoria) => (
+                                <MenuItem key={categoria.id} value={categoria.id}>
+                                    {categoria.denominacion}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -392,107 +391,78 @@ function ArticuloInsumoList() {
                             }
                             label="¿Es para elaborar?"
                         />
-                        <TextField
-                            select
-                            label="Categoría"
-                            name="categoria"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.categoria?.id || ''}
-                            onChange={(e) => handleSelectChange(e, 'categoria')}
-                        >
-                            {categorias
-                                .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
-                                .map((categoria) => (
-                                    <MenuItem key={categoria.id} value={categoria.id !== null ? Number(categoria.id) : 0}>
-                                        {categoria.denominacion}
-                                    </MenuItem>
-                                ))}
-                        </TextField>
-                    </Box>
-                    <Box mt={3} mb={3}>
-                        <Typography variant="subtitle1">Seleccione imágenes:</Typography>
-                        <label htmlFor="upload-button">
+                        <div>
                             <input
-                                style={{ display: 'none' }}
-                                id="upload-button"
-                                type="file"
                                 accept="image/*"
+                                style={{ display: 'none' }}
+                                id="raised-button-file"
                                 multiple
+                                type="file"
                                 onChange={cloudinaryFileChange}
                             />
-                            <Button variant="contained" component="span">
-                                Subir Imágenes
-                            </Button>
-                        </label>
-                        {images.length > 0 && (
-                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                {images.map((image, index) => (
-                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                        <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                        <IconButton onClick={() => removeImage(index)} size="small">
-                                            <Delete />
-                                        </IconButton>
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
+                            <label htmlFor="raised-button-file">
+                                <Button variant="contained" component="span">
+                                    Subir Imágenes
+                                </Button>
+                            </label>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+                            {images.map((url, index) => (
+                                <div key={index} style={{ position: 'relative', display: 'inline-block', margin: 10 }}>
+                                    <img src={url} alt={`Imagen ${index}`} style={{ width: 100, height: 100 }} />
+                                    <IconButton
+                                        onClick={() => removeImage(index)}
+                                        style={{ position: 'absolute', top: 0, right: 0 }}
+                                    >
+                                        <Delete />
+                                    </IconButton>
+                                </div>
+                            ))}
+                        </div>
+                        <Button type="submit" variant="contained" color="primary" fullWidth>
+                            {currentArticuloInsumo.id === 0 ? 'Crear' : 'Guardar'}
+                        </Button>
                     </Box>
-                    <TextField
-                        label="Precio de Compra"
-                        name="precioCompra"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.precioCompra}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Precio de Venta"
-                        name="precioVenta"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.precioVenta}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Stock Actual"
-                        name="stockActual"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.stockActual}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Stock Minimo"
-                        name="stockMinimo"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.stockMinimo}
-                        onChange={handleInputChange}
-                    />
-                    <TextField
-                        label="Stock Maximo"
-                        name="stockMaximo"
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                        value={currentArticuloInsumo.stockMaximo}
-                        onChange={handleInputChange}
-                    />
-                    <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
-                        Cancelar
-                    </Button>
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
-                        {currentArticuloInsumo.id === 0 ? 'Crear' : 'Actualizar'}
-                    </Button>
-                </Box>
-            </Modal>
-        </>
+                </Modal>
+
+                <Modal open={view} onClose={handleClose}>
+                    <Box sx={{ ...modalStyle }}>
+                        <Typography variant="h6" component="h2">
+                            {currentArticuloInsumo.denominacion}
+                        </Typography>
+                        <div>
+                            <img src={images[currentImageIndex]} alt="Producto" style={{ width: '100%' }} />
+                            <IconButton onClick={handlePreviousImage}>
+                                <ArrowBackIosIcon />
+                            </IconButton>
+                            <IconButton onClick={handleNextImage}>
+                                <ArrowForwardIosIcon />
+                            </IconButton>
+                        </div>
+                        <Typography>Precio Venta: {currentArticuloInsumo.precioVenta}</Typography>
+                        <Typography>Precio Compra: {currentArticuloInsumo.precioCompra}</Typography>
+                        <Typography>Stock Actual: {currentArticuloInsumo.stockActual}</Typography>
+                        <Typography>Stock Mínimo: {currentArticuloInsumo.stockMinimo}</Typography>
+                        <Typography>Stock Máximo: {currentArticuloInsumo.stockMaximo}</Typography>
+                        <Typography>Unidad de Medida: {currentArticuloInsumo.unidadMedida?.denominacion}</Typography>
+                        <Typography>Categoría: {currentArticuloInsumo.categoria?.denominacion}</Typography>
+                        <Typography>Es para elaborar: {currentArticuloInsumo.esParaElaborar ? 'Sí' : 'No'}</Typography>
+                    </Box>
+                </Modal>
+            </div>
+        </div>
     );
 }
 
 export default ArticuloInsumoList;
+
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+};

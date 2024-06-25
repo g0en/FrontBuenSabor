@@ -21,6 +21,8 @@ import { Delete } from "@mui/icons-material";
 import Imagen from "../types/Imagen";
 import { CloudinaryUpload } from "../services/CloudinaryService";
 import { CloudinaryDelete } from "../services/CloudinaryService";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -55,18 +57,34 @@ function ArticuloManufacturadoList() {
     };
 
     const createArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        await ArticuloManufacturadoCreate(articulo);
-        await getAllArticuloManufacturadoBySucursal();
+        try {
+            await ArticuloManufacturadoCreate(articulo);
+            toast.success('Artículo manufacturado creado con éxito');
+            await getAllArticuloManufacturadoBySucursal();
+        } catch (error) {
+            toast.error('Error al crear el artículo manufacturado');
+        }
     };
 
     const updateArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        await ArticuloManufacturadoCreate(articulo);
-        await getAllArticuloManufacturadoBySucursal();
+        try {
+            await ArticuloManufacturadoCreate(articulo);
+            toast.success('Artículo manufacturado actualizado con éxito');
+            await getAllArticuloManufacturadoBySucursal();
+        } catch (error) {
+            toast.error('Error al actualizar el artículo manufacturado');
+        }
     };
 
     const deleteArticuloManufacturado = async (id: number) => {
-        return ArticuloManufacturadoDelete(id);
-    }
+        try {
+            await ArticuloManufacturadoDelete(id);
+            toast.success('Artículo manufacturado eliminado con éxito');
+            await getAllArticuloManufacturadoBySucursal();
+        } catch (error) {
+            toast.error('Error al eliminar el artículo manufacturado');
+        }
+    };
 
     const deleteImages = async (imagenes: Imagen[]) => {
         try {
@@ -79,9 +97,9 @@ function ArticuloManufacturadoList() {
                 }
             }
         } catch (error) {
-            console.log("Error al eliminar las imagenes")
+            console.log("Error al eliminar las imágenes");
         }
-    }
+    };
 
     const cloudinaryFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = event.target.files;
@@ -117,7 +135,6 @@ function ArticuloManufacturadoList() {
     };
 
     const cloudinaryDelete = async (publicId: string, id: number) => {
-
         if (!publicId) return;
 
         try {
@@ -125,7 +142,6 @@ function ArticuloManufacturadoList() {
         } catch (error) {
             console.error('Error deleting the file', error);
         }
-
     };
 
     useEffect(() => {
@@ -161,15 +177,14 @@ function ArticuloManufacturadoList() {
         const imagenes: Imagen[] = articulo.imagenes;
 
         try {
-            deleteArticuloManufacturado(articulo.id);
-
+            await deleteArticuloManufacturado(articulo.id);
         } catch (error) {
-            console.log("Error al eliminar el articulo.")
+            console.log("Error al eliminar el artículo.");
         }
 
         deleteImages(imagenes);
         window.location.reload();
-    }
+    };
 
     const handleSubmit = async () => {
         const imagenes = await cloudinaryUpload();
@@ -179,36 +194,33 @@ function ArticuloManufacturadoList() {
         }
 
         if (currentArticuloManufacturado.id > 0) {
-
             try {
                 deleteImages(imagenesExistentes);
                 await updateArticuloManufacturado(currentArticuloManufacturado);
                 setCurrentArticuloManufacturado(emptyArticuloManufacturado);
             } catch (error) {
-                console.log("Error al actualizar un articulo insumo");
+                console.log("Error al actualizar un artículo manufacturado");
                 deleteImages(imagenes);
             }
-
         } else {
-
             try {
                 await createArticuloManufacturado(currentArticuloManufacturado);
                 setCurrentArticuloManufacturado(emptyArticuloManufacturado);
             } catch (error) {
-                console.log("Error al crear un articulo insumo");
+                console.log("Error al crear un artículo manufacturado");
                 deleteImages(imagenes);
             }
         }
 
         handleCloseModal();
-    }
+    };
 
     return (
         <>
             <SideBar />
             <Box p={0} ml={3}>
                 <Typography variant="h5" gutterBottom>
-                    Articulos Manufacturados
+                    Artículos Manufacturados
                 </Typography>
                 <Box mb={2}>
                     <Button variant="contained" startIcon={<AddIcon />} color="primary" onClick={handleOpenModal}>
@@ -223,7 +235,7 @@ function ArticuloManufacturadoList() {
                                 <TableCell align="center">Unidad de Medida</TableCell>
                                 <TableCell align="center">Precio</TableCell>
                                 <TableCell align="center">Tiempo (minutos)</TableCell>
-                                <TableCell align="center">Categoria</TableCell>
+                                <TableCell align="center">Categoría</TableCell>
                                 <TableCell align="center">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
@@ -253,15 +265,14 @@ function ArticuloManufacturadoList() {
                 </TableContainer>
             </Box>
 
-            {/* Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
-                <DialogTitle>Crear Articulo Manufacturado</DialogTitle>
+                <DialogTitle>Crear Artículo Manufacturado</DialogTitle>
                 <DialogContent dividers>
                     {modalStep === 1 && (
                         <Box>
                             <TextField
                                 name="denominacion"
-                                label="Denominacion"
+                                label="Denominación"
                                 fullWidth
                                 margin="normal"
                                 value={currentArticuloManufacturado.denominacion}
@@ -293,7 +304,7 @@ function ArticuloManufacturadoList() {
                                         <TextField
                                             select
                                             name="categoriaId"
-                                            label="Categoria"
+                                            label="Categoría"
                                             fullWidth
                                             margin="normal"
                                             value={currentArticuloManufacturado.categoria?.id || ''}
@@ -312,33 +323,33 @@ function ArticuloManufacturadoList() {
                                 </Grid>
                             </Box>
                             <Box mt={3} mb={3}>
-                        <Typography variant="subtitle1">Seleccione imágenes:</Typography>
-                        <label htmlFor="upload-button">
-                            <input
-                                style={{ display: 'none' }}
-                                id="upload-button"
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={cloudinaryFileChange}
-                            />
-                            <Button variant="contained" component="span">
-                                Subir Imágenes
-                            </Button>
-                        </label>
-                        {images.length > 0 && (
-                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                {images.map((image, index) => (
-                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                        <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                        <IconButton onClick={() => removeImage(index)} size="small">
-                                            <Delete />
-                                        </IconButton>
+                                <Typography variant="subtitle1">Seleccione imágenes:</Typography>
+                                <label htmlFor="upload-button">
+                                    <input
+                                        style={{ display: 'none' }}
+                                        id="upload-button"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={cloudinaryFileChange}
+                                    />
+                                    <Button variant="contained" component="span">
+                                        Subir Imágenes
+                                    </Button>
+                                </label>
+                                {images.length > 0 && (
+                                    <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                        {images.map((image, index) => (
+                                            <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                <IconButton onClick={() => removeImage(index)} size="small">
+                                                    <Delete />
+                                                </IconButton>
+                                            </Box>
+                                        ))}
                                     </Box>
-                                ))}
+                                )}
                             </Box>
-                        )}
-                    </Box>
                             <TextField
                                 name="precioVenta"
                                 label="Precio de Venta"
@@ -363,7 +374,7 @@ function ArticuloManufacturadoList() {
                         <Box>
                             <TextField
                                 name="descripcion"
-                                label="Descripcion"
+                                label="Descripción"
                                 fullWidth
                                 margin="normal"
                                 multiline
@@ -373,7 +384,7 @@ function ArticuloManufacturadoList() {
                             />
                             <TextField
                                 name="preparacion"
-                                label="Preparacion"
+                                label="Preparación"
                                 fullWidth
                                 margin="normal"
                                 multiline
@@ -398,7 +409,7 @@ function ArticuloManufacturadoList() {
                 </DialogContent>
                 <DialogActions>
                     {modalStep > 1 && (
-                        <Button variant="contained" color="secondary" onClick={handlePreviousStep}>Atras</Button>
+                        <Button variant="contained" color="secondary" onClick={handlePreviousStep}>Atrás</Button>
                     )}
                     {modalStep < 3 && (
                         <Button variant="contained" color="primary" onClick={handleNextStep}>Siguiente</Button>
@@ -408,6 +419,7 @@ function ArticuloManufacturadoList() {
                     )}
                 </DialogActions>
             </Dialog>
+            <ToastContainer />
         </>
     );
 }

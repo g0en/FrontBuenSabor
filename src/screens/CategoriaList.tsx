@@ -6,6 +6,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import SideBar from "../components/common/SideBar";
 import Categoria from "../types/Categoria";
 import { CategoriaByEmpresaGetAll, CategoriaCreate, CategoriaUpdate, CategoriaBaja } from "../services/CategoriaService";
@@ -26,38 +28,66 @@ function CategoriaList() {
     const { idSucursal } = useParams();
 
     const getAllCategoriaByEmpresa = async () => {
-        const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
-        setCategorias(categorias);
-        setCategoriaGet(categorias);
+        try {
+            const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
+            setCategorias(categorias);
+            setCategoriaGet(categorias);
+        } catch (error) {
+            toast.error('Error al obtener las categorías');
+        }
     };
 
     const getAllSucursal = async () => {
-        const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa));
-        setSucursales(sucursales);
+        try {
+            const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa));
+            setSucursales(sucursales);
+        } catch (error) {
+            toast.error('Error al obtener las sucursales');
+        }
     };
 
     const createCategoria = async (categoria: Categoria) => {
-        await CategoriaCreate(categoria);
-        getAllCategoriaByEmpresa(); // Refresh categories after adding new one
-        setOpen(false); // Close the modal after creation
+        try {
+            await CategoriaCreate(categoria);
+            getAllCategoriaByEmpresa();
+            setOpen(false);
+            toast.success('Categoría creada exitosamente');
+        } catch (error) {
+            toast.error('Error al crear la categoría');
+        }
     };
 
     const updateCategoria = async (categoria: Categoria) => {
-        await CategoriaUpdate(categoria);
-        getAllCategoriaByEmpresa();
-        setOpen(false); // Close the modal after update
+        try {
+            await CategoriaUpdate(categoria);
+            getAllCategoriaByEmpresa();
+            setOpen(false);
+            toast.success('Categoría actualizada exitosamente');
+        } catch (error) {
+            toast.error('Error al actualizar la categoría');
+        }
     };
 
     const bajaCategoria = async (idCategoria: number) => {
-        await CategoriaBaja(idCategoria, Number(idSucursal));
-        getAllCategoriaByEmpresa();
-        window.location.reload();
+        try {
+            await CategoriaBaja(idCategoria, Number(idSucursal));
+            getAllCategoriaByEmpresa();
+            window.location.reload();
+            toast.success('Categoría dada de baja exitosamente');
+        } catch (error) {
+            toast.error('Error al dar de baja la categoría');
+        }
     };
 
     const deleteCategoria = async (idCategoria: number) => {
-        await CategoriaDelete(idCategoria);
-        getAllCategoriaByEmpresa();
-        window.location.reload();
+        try {
+            await CategoriaDelete(idCategoria);
+            getAllCategoriaByEmpresa();
+            window.location.reload();
+            toast.success('Categoría eliminada exitosamente');
+        } catch (error) {
+            toast.error('Error al eliminar la categoría');
+        }
     };
 
     useEffect(() => {
@@ -172,6 +202,7 @@ function CategoriaList() {
     return (
         <>
             <SideBar />
+            <ToastContainer />
             <Box p={0} ml={3}>
                 <Typography variant="h5" gutterBottom>
                     Categorías
