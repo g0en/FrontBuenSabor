@@ -2,16 +2,23 @@ import { useEffect, useState } from "react";
 import SideBar from "../components/common/SideBar";
 import UnidadMedida from "../types/UnidadMedida";
 import { UnidadMedidaGetAll, UnidadMedidaCreate, UnidadMedidaUpdate, UnidadMedidaDelete } from "../services/UnidadMedidaService";
-import { Container, Typography, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box } from "@mui/material";
+import { Container, Typography, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
+const MySwal = withReactContent(Swal);
 
-function UnidadMedidaList(){
+function UnidadMedidaList() {
     const [unidadMedidas, setUnidadMedidas] = useState<UnidadMedida[]>([]);
-    const [currentUnidadMedida, setCurrentUnidadMedida] = useState<UnidadMedida>({...emptyUnidadMedida});
+    const [currentUnidadMedida, setCurrentUnidadMedida] = useState<UnidadMedida>({ ...emptyUnidadMedida });
     const [isEditing, setIsEditing] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [unidadToDelete, setUnidadToDelete] = useState<UnidadMedida | null>(null);
 
     const getAllUnidadMedida = async () => {
         const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll();
@@ -19,18 +26,51 @@ function UnidadMedidaList(){
     };
 
     const createUnidadMedida = async (unidadMedida: UnidadMedida) => {
-        await UnidadMedidaCreate(unidadMedida);
-        getAllUnidadMedida();
+        try {
+            await UnidadMedidaCreate(unidadMedida);
+            MySwal.fire({
+                title: 'Creado!',
+                text: 'Unidad de medida creada con éxito',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            getAllUnidadMedida();
+        } catch (error) {
+            toast.error('Error al crear la unidad de medida');
+        }
     };
 
     const updateUnidadMedida = async (unidadMedida: UnidadMedida) => {
-        await UnidadMedidaUpdate(unidadMedida);
-        getAllUnidadMedida();
+        try {
+            await UnidadMedidaUpdate(unidadMedida);
+            MySwal.fire({
+                title: 'Actualizado!',
+                text: 'Unidad de medida actualizada con éxito',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            getAllUnidadMedida();
+        } catch (error) {
+            toast.error('Error al actualizar la unidad de medida');
+        }
     };
 
     const deleteUnidadMedida = async (id: number) => {
-        await UnidadMedidaDelete(id);
-        getAllUnidadMedida();
+        try {
+            await UnidadMedidaDelete(id);
+            MySwal.fire({
+                title: 'Eliminado!',
+                text: 'Unidad de medida eliminada con éxito',
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            getAllUnidadMedida();
+        } catch (error) {
+           console.log('Error al eliminar la unidad de medida');
+        }
     };
 
     useEffect(() => {
@@ -42,11 +82,19 @@ function UnidadMedidaList(){
     };
 
     const handleSave = () => {
+        if (!currentUnidadMedida.denominacion.trim()) {
+            toast.error('Este campo no puede estar vacío');
+            return;
+        }
         createUnidadMedida(currentUnidadMedida);
         setCurrentUnidadMedida({ ...emptyUnidadMedida });
     };
 
     const handleUpdate = () => {
+        if (!currentUnidadMedida.denominacion.trim()) {
+            toast.error('Este campo no puede estar vacío');
+            return;
+        }
         updateUnidadMedida(currentUnidadMedida);
         setCurrentUnidadMedida({ ...emptyUnidadMedida });
         setIsEditing(false);
@@ -57,9 +105,28 @@ function UnidadMedidaList(){
         setIsEditing(true);
     };
 
+    const handleOpenDialog = (unidad: UnidadMedida) => {
+        setUnidadToDelete(unidad);
+        setOpenDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setUnidadToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (unidadToDelete) {
+                await deleteUnidadMedida(unidadToDelete.id);
+                await getAllUnidadMedida(); // Asegúrate de actualizar la lista después de la eliminación
+                toast.success('Unidad de medida eliminada correctamente');
+        }
+        handleCloseDialog();
+    };
+
     return (
         <>
-            <SideBar/>
+            <SideBar />
             <Container>
                 <Typography variant="h5" component="h1" gutterBottom>
                     Unidades de Medida
@@ -98,7 +165,7 @@ function UnidadMedidaList(){
                                         <IconButton onClick={() => handleEdit(unidad)}>
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton onClick={() => deleteUnidadMedida(unidad.id)}>
+                                        <IconButton onClick={() => handleOpenDialog(unidad)}>
                                             <DeleteIcon />
                                         </IconButton>
                                     </TableCell>
@@ -108,6 +175,25 @@ function UnidadMedidaList(){
                     </Table>
                 </TableContainer>
             </Container>
+            <ToastContainer />
+
+            {/* Dialog de confirmación */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Confirmar eliminación</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        ¿Está seguro que desea eliminar esta unidad de medida?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancelar
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }
