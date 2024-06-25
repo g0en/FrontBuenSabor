@@ -11,7 +11,13 @@ export async function ArticuloManufacturadoCreate(articuloManufacturado: Articul
 		},
         mode: 'cors'
 	});
-	return await response.json() as ArticuloManufacturado;
+	
+	const responseData = await response.json() as ArticuloManufacturado;
+	const status = response.status;
+	return {
+		status,
+		responseData
+	};
 }
 
 export async function ArticuloManufacturadoFindBySucursal(id: number){
@@ -64,7 +70,13 @@ export async function ArticuloManufacturadoUpdate(articuloManufacturado: Articul
 		},
         mode: 'cors'
 	});
-	return await response.json() as ArticuloManufacturado;
+
+	const responseData = await response.json() as ArticuloManufacturado;
+	const status = response.status;
+	return {
+		status,
+		responseData
+	};
 }
 
 export async function ArticuloManufacturadoDelete(id: number){

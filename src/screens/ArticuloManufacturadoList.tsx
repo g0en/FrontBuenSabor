@@ -62,13 +62,11 @@ function ArticuloManufacturadoList() {
     };
 
     const createArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        await ArticuloManufacturadoCreate(articulo);
-        await getAllArticuloManufacturadoBySucursal();
+        return ArticuloManufacturadoCreate(articulo);
     };
 
     const updateArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        await ArticuloManufacturadoUpdate(articulo);
-        await getAllArticuloManufacturadoBySucursal();
+        return ArticuloManufacturadoUpdate(articulo);
     };
 
     const deleteArticuloManufacturado = async (id: number) => {
@@ -166,13 +164,21 @@ function ArticuloManufacturadoList() {
         getAllArticuloInsumoBySucursal();
     };
 
-    const handleOpenEditModal = (articulo: ArticuloManufacturado) => {
+    const handleOpenEditModal = async (articulo: ArticuloManufacturado) => {
         setCurrentArticuloManufacturado(articulo);
-        if(articulo.articuloManufacturadoDetalles !== null){
+        if (articulo.articuloManufacturadoDetalles !== null) {
             setDetalles(articulo.articuloManufacturadoDetalles);
         }
         setImages(articulo.imagenes.map(imagen => imagen.url));
-        console.log(articulo);
+
+        const imageUrls = articulo.imagenes.map(imagen => imagen.url);
+        const imageFiles = await Promise.all(imageUrls.map(async (url) => {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const filename = url.split('/').pop();
+            return new File([blob], filename || 'image.jpg', { type: blob.type });
+        }));
+        setFiles(imageFiles);
         setOpenModal(true);
         setModalStep(1);
         getAllArticuloInsumoBySucursal();
@@ -231,9 +237,9 @@ function ArticuloManufacturadoList() {
             console.log("Error al crear un Articulo Manufacturado.");
         }
 
-        try{
+        try {
             await deleteImages(imagenes);
-        }catch(error){
+        } catch (error) {
             console.log("Error al subir las Imagenes.");
         }
 
@@ -249,23 +255,36 @@ function ArticuloManufacturadoList() {
 
         if (currentArticuloManufacturado.id > 0) {
             try {
+                const data = await updateArticuloManufacturado(currentArticuloManufacturado);
+                if (data.status !== 200) {
+                    deleteImages(imagenes);
+                    return;
+                }
                 deleteImages(imagenesExistentes);
-                await updateArticuloManufacturado(currentArticuloManufacturado);
                 setCurrentArticuloManufacturado(emptyArticuloManufacturado);
             } catch (error) {
-                console.log("Error al actualizar un articulo insumo");
-                deleteImages(imagenes);
+                console.log("Error al actualizar un articulo manufacturado.");
             }
 
         } else {
             try {
                 currentArticuloManufacturado.articuloManufacturadoDetalles = detalles;
-                await createArticuloManufacturado(currentArticuloManufacturado);
+                const data = await createArticuloManufacturado(currentArticuloManufacturado);
+                if (data.status !== 200) {
+                    deleteImages(imagenes);
+                    return;
+                }
+
                 setCurrentArticuloManufacturado(emptyArticuloManufacturado);
             } catch (error) {
-                console.log("Error al crear un articulo insumo");
-                deleteImages(imagenes);
+                console.log("Error al crear un articulo manufacturado.");
             }
+        }
+
+        try {
+            await getAllArticuloManufacturadoBySucursal();
+        } catch (error) {
+            console.log("Error al cargar los manufacturados.");
         }
 
         handleCloseModal();

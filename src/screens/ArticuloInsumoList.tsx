@@ -37,6 +37,7 @@ function ArticuloInsumoList() {
     const [files, setFiles] = useState<File[]>([]);
     const [images, setImages] = useState<string[]>([]);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+    const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
 
     const getAllArticuloInsumoBySucursal = async () => {
         const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
@@ -54,13 +55,11 @@ function ArticuloInsumoList() {
     };
 
     const createArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
-        await ArticuloInsumoCreate(articuloInsumo);
-        await getAllArticuloInsumoBySucursal();
+        return ArticuloInsumoCreate(articuloInsumo);
     };
 
     const updateArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
-        await ArticuloInsumoUpdate(articuloInsumo);
-        await getAllArticuloInsumoBySucursal();
+        return ArticuloInsumoUpdate(articuloInsumo);
     };
 
     const deleteArticuloInsumo = async (id: number) => {
@@ -76,7 +75,9 @@ function ArticuloInsumoList() {
             newFiles.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = () => {
+                    const newImage = reader.result as string;
                     setImages(prevImages => [...prevImages, reader.result as string]);
+                    setArticuloImages(prevImages => [...prevImages, { id: 0, eliminado: false, url: newImage }]);
                 };
                 reader.readAsDataURL(file);
             });
@@ -84,8 +85,12 @@ function ArticuloInsumoList() {
     };
 
     const removeImage = (index: number) => {
-        setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-        setImages(prevImages => prevImages.filter((_, i) => i !== index));
+        if(currentArticuloInsumo.id > 0){
+            setArticuloImages(articuloImages.filter(img => img.id !== index));
+        }else{
+            setImages(prevImages => prevImages.filter((_, i) => i !== index));
+        }
+
     };
 
     const cloudinaryUpload = async (): Promise<Imagen[]> => {
@@ -131,12 +136,16 @@ function ArticuloInsumoList() {
         setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
     };
 
-    const handleEdit = (articulo?: ArticuloInsumo) => {
+    const handleEdit = async (articulo?: ArticuloInsumo) => {
         if (articulo) {
             setCurrentArticuloInsumo(articulo);
             setImages(articulo.imagenes.map(imagen => imagen.url));
+            setArticuloImages(articulo.imagenes);
         } else {
             setCurrentArticuloInsumo({ ...emptyArticuloInsumo });
+            setImages([]);
+            setFiles([]);
+            setArticuloImages([]);
         }
 
         setOpen(true);
@@ -225,31 +234,49 @@ function ArticuloInsumoList() {
 
     const handleSubmit = async () => {
         const imagenes = await cloudinaryUpload();
-        const imagenesExistentes = currentArticuloInsumo.imagenes;
+
         if (imagenes && imagenes?.length > 0) {
-            currentArticuloInsumo.imagenes = imagenes;
+            imagenes.forEach(imagen => {
+                articuloImages.push(imagen);
+            });
         }
+
+        currentArticuloInsumo.imagenes = articuloImages;
 
         if (currentArticuloInsumo.id > 0) {
 
             try {
-                deleteImages(imagenesExistentes);
-                await updateArticuloInsumo(currentArticuloInsumo);
+                const data = await updateArticuloInsumo(currentArticuloInsumo);
+                if (data.status !== 200) {
+                    deleteImages(imagenes);
+                    return;
+                }
+
+                //deleteImages(imagenesExistentes);
                 setCurrentArticuloInsumo(emptyArticuloInsumo);
             } catch (error) {
                 console.log("Error al actualizar un articulo insumo");
-                deleteImages(imagenes);
             }
 
         } else {
 
             try {
-                await createArticuloInsumo(currentArticuloInsumo);
+                const data = await createArticuloInsumo(currentArticuloInsumo);
+                if (data.status !== 200) {
+                    deleteImages(imagenes);
+                    return;
+                }
+
                 setCurrentArticuloInsumo(emptyArticuloInsumo);
             } catch (error) {
                 console.log("Error al crear un articulo insumo");
-                deleteImages(imagenes);
             }
+        }
+
+        try {
+            await getAllArticuloInsumoBySucursal();
+        } catch (error) {
+            console.log("Error al cargar los insumos.");
         }
 
         handleClose();
@@ -434,7 +461,23 @@ function ArticuloInsumoList() {
                                     Subir Imágenes
                                 </Button>
                             </label>
-                            {images.length > 0 && (
+                            {currentArticuloInsumo.id > 0 ? 
+                            images.length > 0 && (
+                                <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                    {articuloImages.map((image, index) => (
+                                        !image.eliminado && (
+                                            <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                <img src={image.url} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                <IconButton onClick={() => removeImage(image.id)} size="small">
+                                                    <Delete />
+                                                </IconButton>
+                                            </Box>
+                                        )
+                                    ))}
+                                </Box>
+                            )
+                            : 
+                            images.length > 0 && (
                                 <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
                                     {images.map((image, index) => (
                                         <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
@@ -445,7 +488,8 @@ function ArticuloInsumoList() {
                                         </Box>
                                     ))}
                                 </Box>
-                            )}
+                            )
+                            }
                         </Box>
                         <TextField
                             label="Precio de Compra"

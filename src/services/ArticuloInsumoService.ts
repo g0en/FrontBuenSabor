@@ -11,7 +11,12 @@ export async function ArticuloInsumoCreate(articuloInsumo: ArticuloInsumo){
 		},
         mode: 'cors'
 	});
-	return await response.json() as ArticuloInsumo;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as ArticuloInsumo
+	};
 }
 
 export async function ArticuloInsumoFindBySucursal(id: number){
@@ -64,7 +69,12 @@ export async function ArticuloInsumoUpdate(articuloInsumo: ArticuloInsumo){
 		},
         mode: 'cors'
 	});
-	return await response.json() as ArticuloInsumo;
+	const responseData = await response.json() as ArticuloInsumo;
+	const status = response.status;
+	return {
+		status,
+		responseData
+	};
 }
 
 export async function ArticuloInsumoDelete(id: number){
