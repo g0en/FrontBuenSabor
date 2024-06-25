@@ -8,6 +8,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: 0 };
 
@@ -24,15 +28,31 @@ function EmpresaList() {
 
     const createEmpresa = async (empresa: Empresa) => {
         await EmpresaCreate(empresa);
-    }
+        return MySwal.fire({
+            title: 'Empresa creada',
+            text: 'La empresa se ha creado correctamente',
+            icon: 'success',
+            showConfirmButton: true,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
 
     const updateEmpresa = async (empresa: Empresa) => {
         await EmpresaUpdate(empresa);
-    }
+        return MySwal.fire({
+            title: 'Empresa actualizada',
+            text: 'La empresa se ha actualizado correctamente',
+            icon: 'success',
+            showConfirmButton: true,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
 
     const redirectSucursal = (id: number) => {
         navigate('/empresa/' + id);
-    } 
+    };
 
     const handleOpen = (empresa?: Empresa) => {
         if (empresa) {
@@ -53,18 +73,18 @@ function EmpresaList() {
         setCurrentEmpresa(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        let result;
+        handleClose();  // Cerrar el modal antes de mostrar la animación
         if (currentEmpresa.id > 0) {
-            //UPDATE
-            updateEmpresa(currentEmpresa);
-            console.log("Guardando empresa:", currentEmpresa);
+            result = await updateEmpresa(currentEmpresa);
         } else {
-            //CREATE
-            createEmpresa(currentEmpresa);
-            console.log("Creando nueva empresa");
+            result = await createEmpresa(currentEmpresa);
         }
-        handleClose();
-        window.location.reload();
+        // Espera a que se cierre el pop-up antes de recargar la página
+        if (result.isConfirmed || result.dismiss) {
+            window.location.reload();
+        }
     };
 
     useEffect(() => {
@@ -77,7 +97,7 @@ function EmpresaList() {
                 Seleccione una Empresa
             </Typography><br></br>
             <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()}>Crear Empresa</Button>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px', marginTop: '16px' }}>
                 {empresas.map((empresa) => (
                     <Card key={empresa.id} style={{ width: '250px' }}>
                         <CardHeader
@@ -91,7 +111,7 @@ function EmpresaList() {
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Sucursales">
-                                <Button variant="contained" color="success" sx={{height: "50px", width:"200px"}} onClick={() => redirectSucursal(empresa.id)}>
+                                <Button variant="contained" color="success" sx={{ height: "50px", width: "200px" }} onClick={() => redirectSucursal(empresa.id)}>
                                     <VisibilityIcon /> Ver Sucursales
                                 </Button>
                             </Tooltip>
