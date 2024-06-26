@@ -5,7 +5,7 @@ import {
 } from "@mui/material";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { Edit, Visibility, Delete, Check } from "@mui/icons-material";
+import { Edit, Visibility, Delete, Check, Padding } from "@mui/icons-material";
 import SideBar from "../components/common/SideBar";
 import ArticuloInsumo from "../types/ArticuloInsumo";
 import { ArticuloInsumoFindBySucursal, ArticuloInsumoCreate } from "../services/ArticuloInsumoService";
@@ -295,24 +295,25 @@ function ArticuloInsumoList() {
         <>
             <SideBar />
             <Box p={0} ml={3}>
-                <Typography variant="h5" gutterBottom fontWeight={"bold"}>
-                    Articulos Insumos
+                <Typography variant="h5" component="h1" gutterBottom fontWeight={'bold' } paddingBottom={'10px'}>
+                    Articulos - Insumos
                 </Typography>
-                <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
-                <TableContainer component={Paper} >
-                    <Table>
-                        <TableHead>
+                
+                <Button variant="contained"  color="primary" onClick={handleOpen}>Agregar Insumo</Button>
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px' , marginTop:'20px'}}>
+                    <Table >
+                        <TableHead >
                             <TableRow>
-                                <TableCell>Nombre</TableCell>
-                                <TableCell>Precio Compra</TableCell>
-                                <TableCell>Precio Venta</TableCell>
-                                <TableCell>Unidad de Medida</TableCell>
-                                <TableCell>Stock Actual</TableCell>
-                                <TableCell>Stock Mínimo</TableCell>
-                                <TableCell>Stock Máximo</TableCell>
-                                <TableCell>Para Elaborar</TableCell>
-                                <TableCell>Categoría</TableCell>
-                                <TableCell>Acciones</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Precio Compra</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Precio Venta</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Unidad de Medida</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Stock Actual</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Stock Mínimo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Stock Máximo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Para Elaborar</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Categoría</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -332,13 +333,13 @@ function ArticuloInsumoList() {
                                         </TableCell>
                                         <TableCell>{articulo.categoria?.denominacion}</TableCell>
                                         <TableCell>
-                                            <IconButton aria-label="edit" onClick={() => handleEdit(articulo)}>
+                                            <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
                                                 <Edit />
                                             </IconButton>
-                                            <IconButton aria-label="view" onClick={() => handleView(articulo)}>
+                                            <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                                 <Visibility />
                                             </IconButton>
-                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
+                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
                                                 <Delete />
                                             </IconButton>
                                         </TableCell>

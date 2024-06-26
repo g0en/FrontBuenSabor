@@ -333,7 +333,7 @@ function ArticuloManufacturadoList() {
         <>
             <SideBar />
             <Box p={0} ml={3}>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom fontWeight={'bold'} paddingBottom={'10px'}>
                     Articulos Manufacturados
                 </Typography>
                 <Box mb={2}>
@@ -341,16 +341,16 @@ function ArticuloManufacturadoList() {
                         Agregar Manufacturado
                     </Button>
                 </Box>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px' , marginTop:'20px'}}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="center">Nombre</TableCell>
-                                <TableCell align="center">Unidad de Medida</TableCell>
-                                <TableCell align="center">Precio</TableCell>
-                                <TableCell align="center">Tiempo (minutos)</TableCell>
-                                <TableCell align="center">Categoria</TableCell>
-                                <TableCell align="center">Acciones</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Unidad de Medida</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Precio</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Tiempo (minutos)</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Categoria</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -363,13 +363,13 @@ function ArticuloManufacturadoList() {
                                         <TableCell align="center">{articulo.tiempoEstimadoMinutos}</TableCell>
                                         <TableCell align="center">{articulo.categoria && articulo.categoria.denominacion}</TableCell>
                                         <TableCell align="center">
-                                            <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)}>
+                                            <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)} color="primary">
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton aria-label="view" onClick={() => handleView(articulo)}>
+                                            <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                                 <VisibilityIcon />
                                             </IconButton>
-                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)}>
+                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
                                                 <DeleteIcon />
                                             </IconButton>
                                         </TableCell>

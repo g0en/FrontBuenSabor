@@ -92,7 +92,7 @@ function EmpresaList() {
     }, []);
 
     return (
-    <div style={{ backgroundColor: '#f0f4f8', padding: '20px', borderRadius: '8px' }}>
+    <div style={{ backgroundColor: '#E0E0E0', padding: '20px', borderRadius: '8px' }}>
         <Typography 
             variant="h4" 
             component="h4" 
@@ -112,15 +112,15 @@ function EmpresaList() {
             </Button>
         </div>
         <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
-            gap: '16px', 
+                display: 'flex', 
+                gap: '16px', 
+            flexWrap: 'wrap', 
             marginTop: '16px',
             justifyContent: 'center',
             padding: '10px',
         }}>
             {empresas.map((empresa) => (
-                <Card key={empresa.id} style={{ width: '250px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', borderRadius: '8px' }}>
+                <Card key={empresa.id} style={{ width: '250px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', borderRadius: '8px'  }}>
                     <CardHeader
                         title={empresa.nombre}
                         subheader={empresa.razonSocial}

@@ -148,15 +148,15 @@ function CategoriaList() {
                             )}
                         </Typography>
                     </ListItemText>
-                    <IconButton edge="end" aria-label="edit" onClick={() => handleOpen(categoria)}>
+                    <IconButton edge="end" aria-label="edit" onClick={() => handleOpen(categoria)} color="primary">
                         <EditIcon />
                     </IconButton>
                     {level === 0 && (
-                        <IconButton edge="end" aria-label="baja" onClick={() => categoria.id !== null && bajaCategoria(categoria.id)}>
+                        <IconButton edge="end" aria-label="baja" onClick={() => categoria.id !== null && bajaCategoria(categoria.id)}color="secondary">
                             <ArrowCircleDownIcon />
                         </IconButton>
                     )}
-                    <IconButton edge="end" aria-label="delete" onClick={() => categoria.id !== null && deleteCategoria(categoria.id)}>
+                    <IconButton edge="end" aria-label="delete" onClick={() => categoria.id !== null && deleteCategoria(categoria.id)}color="error">
                         <DeleteIcon />
                     </IconButton>
                 </ListItem>
@@ -173,7 +173,7 @@ function CategoriaList() {
         <>
             <SideBar />
             <Box p={0} ml={3}>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom fontWeight={'bold'} paddingBottom={'10px'}>
                     Categorías
                 </Typography>
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()} sx={{ mb: 2 }}>
@@ -181,10 +181,10 @@ function CategoriaList() {
                 </Button>
                 <List>
                     <ListItem>
-                        <ListItemText>
-                            <Typography variant="body2">Nombre</Typography>
+                        <ListItemText >
+                            <Typography variant="body2" style={{fontWeight:'bold'}}>Nombre</Typography>
                         </ListItemText>
-                        <Typography variant="body2">Acciones</Typography>
+                        <Typography variant="body2" style={{fontWeight:'bold'}}>Acciones</Typography>
                     </ListItem>
                     <Divider />
                     {renderCategorias(categorias)}
@@ -250,7 +250,7 @@ function CategoriaList() {
                         </Box>
                     ))}
                     <Box mt={2} display="flex" justifyContent="flex-end">
-                        <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
+                        <Button variant="contained" color="error" onClick={handleClose} sx={{ mr: 2 }}>
                             Cancelar
                         </Button>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>

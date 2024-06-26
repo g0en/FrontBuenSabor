@@ -3,7 +3,6 @@ import SideBar from "../components/common/SideBar";
 import UnidadMedida from "../types/UnidadMedida";
 import { UnidadMedidaGetAll, UnidadMedidaCreate, UnidadMedidaUpdate, UnidadMedidaDelete } from "../services/UnidadMedidaService";
 import {
-    Container,
     Typography,
     IconButton,
     Table,
@@ -131,7 +130,7 @@ function UnidadMedidaList() {
     return (
         <>
             <SideBar />
-            <Container>
+            <Box p={0} ml={3}>
                 <Typography variant="h5" component="h1" gutterBottom fontWeight={'bold'}>
                     Unidades de Medida
                 </Typography>
@@ -178,7 +177,7 @@ function UnidadMedidaList() {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Container>
+            </Box>
             <ToastContainer />
 
             {/* Dialog de confirmación */}

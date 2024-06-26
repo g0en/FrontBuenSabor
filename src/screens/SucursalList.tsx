@@ -187,7 +187,7 @@ function SucursalList() {
     };
     
     return (
-        <div style={{ backgroundColor: '#e8f5e9', padding: '20px', borderRadius: '8px' }}>
+        <div style={{ backgroundColor: '#E0E0E0', padding: '20px', borderRadius: '8px' }}>
             <Typography 
                 variant="h4" 
                 component="h4" 
@@ -356,7 +356,7 @@ function SucursalList() {
                     </Select>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="secondary">Cancelar</Button>
+                    <Button onClick={handleClose} color="error">Cancelar</Button>
                     <Button onClick={handleSave} color="primary">Guardar</Button>
                 </DialogActions>
             </Dialog>
