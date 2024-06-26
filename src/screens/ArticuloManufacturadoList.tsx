@@ -28,6 +28,7 @@ import ArticuloInsumo from "../types/ArticuloInsumo";
 import { ArticuloInsumoFindBySucursal } from "../services/ArticuloInsumoService";
 import ArticuloManufacturadoDetalle from "../types/ArticuloManufacturadoDetalle";
 import { ArticuloManufacturadoUpdate } from "../services/ArticuloManufacturadoService";
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -89,10 +90,10 @@ function ArticuloManufacturadoList() {
         setSearch(e.target.value);
     }
 
-    let results = [];
+    let results: ArticuloInsumo[] = [];
 
     if (!search) {
-        results = insumos;
+        results = [];
     } else {
         results = insumos.filter((insumo) =>
             insumo.denominacion.toLowerCase().includes(search.toLocaleLowerCase()));
@@ -341,16 +342,16 @@ function ArticuloManufacturadoList() {
                         Agregar Manufacturado
                     </Button>
                 </Box>
-                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px' , marginTop:'20px'}}>
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Nombre</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Unidad de Medida</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Precio</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Tiempo (minutos)</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Categoria</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}} align="center">Acciones</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Unidad de Medida</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Tiempo (minutos)</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Categoria</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -381,60 +382,60 @@ function ArticuloManufacturadoList() {
             </Box>
 
             <Modal open={view} onClose={handleCloseModal}>
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '40%', // Ancho del modal
-                            maxWidth: 800, // Máximo ancho del modal
-                            maxHeight: '80vh',
-                            overflow: 'auto',
-                            bgcolor: 'background.paper',
-                            p: 4,
-                            borderRadius: 8, // Borde redondeado del modal
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        <Typography variant="h5" gutterBottom align="center">
-                            {currentArticuloManufacturado.denominacion}
-                        </Typography>
-                        {images.length > 0 && (
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
-                                    <ArrowBackIosIcon />
-                                </IconButton>
-                                <img
-                                    src={images[currentImageIndex]}
-                                    alt={`Imagen ${currentImageIndex}`}
-                                    style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
-                                />
-                                <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
-                                    <ArrowForwardIosIcon />
-                                </IconButton>
-                            </Box>
-                        )}
-                        <Typography variant="h6" gutterBottom>
-                            Descripcion:
-                        </Typography>
-                        <Typography variant="body2" gutterBottom mb={3}>
-                            {currentArticuloManufacturado.descripcion}
-                        </Typography>
-                        <Typography variant="h6" gutterBottom>
-                            Preparación:
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                            {currentArticuloManufacturado.preparacion}
-                        </Typography>
-                        <Box display="flex" justifyContent="flex-end" mt={2}>
-                            <Button variant="contained" color="secondary" onClick={handleCloseModal}>
-                                Cerrar
-                            </Button>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '40%', // Ancho del modal
+                        maxWidth: 800, // Máximo ancho del modal
+                        maxHeight: '80vh',
+                        overflow: 'auto',
+                        bgcolor: 'background.paper',
+                        p: 4,
+                        borderRadius: 8, // Borde redondeado del modal
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }}
+                >
+                    <Typography variant="h5" gutterBottom align="center">
+                        {currentArticuloManufacturado.denominacion}
+                    </Typography>
+                    {images.length > 0 && (
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <IconButton onClick={handlePreviousImage} disabled={images.length <= 1}>
+                                <ArrowBackIosIcon />
+                            </IconButton>
+                            <img
+                                src={images[currentImageIndex]}
+                                alt={`Imagen ${currentImageIndex}`}
+                                style={{ maxWidth: '40%', marginTop: '10px', borderRadius: 8 }} // Ajustes de estilo para la imagen
+                            />
+                            <IconButton onClick={handleNextImage} disabled={images.length <= 1}>
+                                <ArrowForwardIosIcon />
+                            </IconButton>
                         </Box>
+                    )}
+                    <Typography variant="h6" gutterBottom>
+                        Descripcion:
+                    </Typography>
+                    <Typography variant="body2" gutterBottom mb={3}>
+                        {currentArticuloManufacturado.descripcion}
+                    </Typography>
+                    <Typography variant="h6" gutterBottom>
+                        Preparación:
+                    </Typography>
+                    <Typography variant="body2" gutterBottom>
+                        {currentArticuloManufacturado.preparacion}
+                    </Typography>
+                    <Box display="flex" justifyContent="flex-end" mt={2}>
+                        <Button variant="contained" color="secondary" onClick={handleCloseModal}>
+                            Cerrar
+                        </Button>
                     </Box>
-                </Modal>
+                </Box>
+            </Modal>
 
             {/* Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
@@ -459,7 +460,7 @@ function ArticuloManufacturadoList() {
                                             label="Unidad de Medida"
                                             fullWidth
                                             margin="normal"
-                                            value={currentArticuloManufacturado.unidadMedida.id}
+                                            value={currentArticuloManufacturado.unidadMedida?.id || ''}
                                             onChange={(e) => setCurrentArticuloManufacturado({
                                                 ...currentArticuloManufacturado,
                                                 unidadMedida: unidadMedidas.find((u) => u.id === Number(e.target.value)) || emptyUnidadMedida
@@ -485,7 +486,7 @@ function ArticuloManufacturadoList() {
                                                 categoria: categorias.find((c) => c.id === Number(e.target.value)) || emptyCategoria
                                             })}
                                         >
-                                            {categorias.map((categoria) => (
+                                            {categorias.filter(categoria => !categoria.esInsumo).map((categoria) => (
                                                 <MenuItem key={categoria.id} value={categoria.id ?? ''}>
                                                     {categoria.denominacion}
                                                 </MenuItem>
@@ -495,20 +496,22 @@ function ArticuloManufacturadoList() {
                                 </Grid>
                             </Box>
                             <Box mt={3} mb={3}>
-                                <Typography variant="subtitle1">Seleccione imágenes:</Typography>
-                                <label htmlFor="upload-button">
-                                    <input
-                                        style={{ display: 'none' }}
-                                        id="upload-button"
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={cloudinaryFileChange}
-                                    />
-                                    <Button variant="contained" component="span">
-                                        Subir Imágenes
-                                    </Button>
-                                </label>
+                                <Box display="flex" alignItems="center">
+                                    <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+                                        Seleccione imágenes:
+                                    </Typography>
+                                    <label htmlFor="upload-button">
+                                        <input
+                                            style={{ display: 'none' }}
+                                            id="upload-button"
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={cloudinaryFileChange}
+                                        />
+                                        <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
+                                    </label>
+                                </Box>
                                 {currentArticuloManufacturado.id > 0 ?
                                     images.length > 0 && (
                                         <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
@@ -539,24 +542,30 @@ function ArticuloManufacturadoList() {
                                     )
                                 }
                             </Box>
-                            <TextField
-                                name="precioVenta"
-                                label="Precio de Venta"
-                                fullWidth
-                                margin="normal"
-                                type="decimal"
-                                value={currentArticuloManufacturado.precioVenta}
-                                onChange={handleChange}
-                            />
-                            <TextField
-                                name="tiempoEstimadoMinutos"
-                                label="Tiempo Estimado (minutos)"
-                                fullWidth
-                                margin="normal"
-                                type="decimal"
-                                value={currentArticuloManufacturado.tiempoEstimadoMinutos}
-                                onChange={handleChange}
-                            />
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        name="precioVenta"
+                                        label="Precio de Venta"
+                                        fullWidth
+                                        margin="normal"
+                                        type="decimal"
+                                        value={currentArticuloManufacturado.precioVenta}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        name="tiempoEstimadoMinutos"
+                                        label="Tiempo Estimado (minutos)"
+                                        fullWidth
+                                        margin="normal"
+                                        type="decimal"
+                                        value={currentArticuloManufacturado.tiempoEstimadoMinutos}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+                            </Grid>
                         </Box>
                     )}
                     {modalStep === 2 && (

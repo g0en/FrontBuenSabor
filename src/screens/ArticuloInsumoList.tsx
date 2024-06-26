@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button, Modal, Box, TextField, MenuItem, FormControlLabel, Switch,
-    Typography
+    Typography,
+    Grid
 } from "@mui/material";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import { Edit, Visibility, Delete, Check, Padding } from "@mui/icons-material";
+import { Edit, Visibility, Delete, Check } from "@mui/icons-material";
 import SideBar from "../components/common/SideBar";
 import ArticuloInsumo from "../types/ArticuloInsumo";
 import { ArticuloInsumoFindBySucursal, ArticuloInsumoCreate } from "../services/ArticuloInsumoService";
@@ -19,6 +20,7 @@ import { ArticuloInsumoDelete } from "../services/ArticuloInsumoService";
 import { CloudinaryUpload } from "../services/CloudinaryService";
 import { CloudinaryDelete } from "../services/CloudinaryService";
 import Imagen from "../types/Imagen";
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -77,7 +79,7 @@ function ArticuloInsumoList() {
                 reader.onload = () => {
                     const newImage = reader.result as string;
                     setImages(prevImages => [...prevImages, reader.result as string]);
-                    if(currentArticuloInsumo.id > 0){
+                    if (currentArticuloInsumo.id > 0) {
                         setArticuloImages(prevImages => [...prevImages, { id: 0, eliminado: false, url: newImage }]);
                     }
                 };
@@ -295,25 +297,25 @@ function ArticuloInsumoList() {
         <>
             <SideBar />
             <Box p={0} ml={3}>
-                <Typography variant="h5" component="h1" gutterBottom fontWeight={'bold' } paddingBottom={'10px'}>
+                <Typography variant="h5" component="h1" gutterBottom fontWeight={'bold'} paddingBottom={'10px'}>
                     Articulos - Insumos
                 </Typography>
-                
-                <Button variant="contained"  color="primary" onClick={handleOpen}>Agregar Insumo</Button>
-                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px' , marginTop:'20px'}}>
+
+                <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
                     <Table >
                         <TableHead >
                             <TableRow>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Nombre</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Precio Compra</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Precio Venta</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Unidad de Medida</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Stock Actual</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Stock Mínimo</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Stock Máximo</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Para Elaborar</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Categoría</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold'}}>Acciones</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Precio Compra</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Precio Venta</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Unidad de Medida</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Stock Actual</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Stock Mínimo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Stock Máximo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Para Elaborar</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Categoría</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -406,22 +408,22 @@ function ArticuloInsumoList() {
                             value={currentArticuloInsumo.denominacion}
                             onChange={handleInputChange}
                         />
-                        <TextField
-                            select
-                            label="Unidad de Medida"
-                            name="unidadMedida"
-                            fullWidth
-                            margin="normal"
-                            value={currentArticuloInsumo.unidadMedida.id || ''}
-                            onChange={(e) => handleSelectChange(e, 'unidadMedida')}
-                        >
-                            {unidadMedidas.map((unidad) => (
-                                <MenuItem key={unidad.id} value={unidad.id}>
-                                    {unidad.denominacion}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-                        <Box display="flex" alignItems="center">
+                        <Box display="flex" alignItems="center" margin="normal">
+                            <TextField
+                                select
+                                label="Unidad de Medida"
+                                name="unidadMedida"
+                                fullWidth
+                                value={currentArticuloInsumo.unidadMedida.id || ''}
+                                onChange={(e) => handleSelectChange(e, 'unidadMedida')}
+                                style={{ flex: 1, marginRight: 8 }}
+                            >
+                                {unidadMedidas.map((unidad) => (
+                                    <MenuItem key={unidad.id} value={unidad.id}>
+                                        {unidad.denominacion}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -431,15 +433,16 @@ function ArticuloInsumoList() {
                                     />
                                 }
                                 label="¿Es para elaborar?"
+                                style={{ marginRight: 8 }}
                             />
                             <TextField
                                 select
                                 label="Categoría"
                                 name="categoria"
                                 fullWidth
-                                margin="normal"
                                 value={currentArticuloInsumo.categoria?.id || ''}
                                 onChange={(e) => handleSelectChange(e, 'categoria')}
+                                style={{ flex: 1 }}
                             >
                                 {categorias
                                     .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
@@ -451,20 +454,22 @@ function ArticuloInsumoList() {
                             </TextField>
                         </Box>
                         <Box mt={3} mb={3}>
-                            <Typography variant="subtitle1">Seleccione imágenes:</Typography>
-                            <label htmlFor="upload-button">
-                                <input
-                                    style={{ display: 'none' }}
-                                    id="upload-button"
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    onChange={cloudinaryFileChange}
-                                />
-                                <Button variant="contained" component="span">
-                                    Subir Imágenes
-                                </Button>
-                            </label>
+                            <Box display="flex" alignItems="center">
+                                <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+                                    Seleccione imágenes:
+                                </Typography>
+                                <label htmlFor="upload-button">
+                                    <input
+                                        style={{ display: 'none' }}
+                                        id="upload-button"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={cloudinaryFileChange}
+                                    />
+                                    <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
+                                </label>
+                            </Box>
                             {currentArticuloInsumo.id > 0 ?
                                 images.length > 0 && (
                                     <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
@@ -495,56 +500,66 @@ function ArticuloInsumoList() {
                                 )
                             }
                         </Box>
-                        <Box display="flex">
-                            <TextField
-                                label="Precio de Compra"
-                                name="precioCompra"
-                                type="decimal"
-                                fullWidth
-                                margin="normal"
-                                value={currentArticuloInsumo.precioCompra}
-                                onChange={handleInputChange}
-                            />
-                            <TextField
-                                label="Precio de Venta"
-                                name="precioVenta"
-                                type="decimal"
-                                disabled={currentArticuloInsumo.esParaElaborar}
-                                fullWidth
-                                margin="normal"
-                                value={currentArticuloInsumo.precioVenta}
-                                onChange={handleInputChange}
-                            />
-                        </Box>
-                        <Box display="flex" mb="20px">
-                            <TextField
-                                label="Stock Actual"
-                                name="stockActual"
-                                type="decimal"
-                                fullWidth
-                                margin="normal"
-                                value={currentArticuloInsumo.stockActual}
-                                onChange={handleInputChange}
-                            />
-                            <TextField
-                                label="Stock Minimo"
-                                name="stockMinimo"
-                                type="decimal"
-                                fullWidth
-                                margin="normal"
-                                value={currentArticuloInsumo.stockMinimo}
-                                onChange={handleInputChange}
-                            />
-                            <TextField
-                                label="Stock Maximo"
-                                name="stockMaximo"
-                                type="decimal"
-                                fullWidth
-                                margin="normal"
-                                value={currentArticuloInsumo.stockMaximo}
-                                onChange={handleInputChange}
-                            />
-                        </Box>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Precio de Compra"
+                                    name="precioCompra"
+                                    type="decimal"
+                                    fullWidth
+                                    margin="normal"
+                                    value={currentArticuloInsumo.precioCompra}
+                                    onChange={handleInputChange}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="Precio de Venta"
+                                    name="precioVenta"
+                                    type="decimal"
+                                    disabled={currentArticuloInsumo.esParaElaborar}
+                                    fullWidth
+                                    margin="normal"
+                                    value={currentArticuloInsumo.precioVenta}
+                                    onChange={handleInputChange}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid container spacing={2} mb={2}>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Stock Actual"
+                                    name="stockActual"
+                                    type="decimal"
+                                    fullWidth
+                                    margin="normal"
+                                    value={currentArticuloInsumo.stockActual}
+                                    onChange={handleInputChange}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Stock Minimo"
+                                    name="stockMinimo"
+                                    type="decimal"
+                                    fullWidth
+                                    margin="normal"
+                                    value={currentArticuloInsumo.stockMinimo}
+                                    onChange={handleInputChange}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Stock Maximo"
+                                    name="stockMaximo"
+                                    type="decimal"
+                                    fullWidth
+                                    margin="normal"
+                                    value={currentArticuloInsumo.stockMaximo}
+                                    onChange={handleInputChange}
+                                />
+                            </Grid>
+                        </Grid>
                         <Button variant="contained" color="secondary" onClick={handleClose} sx={{ mr: 2 }}>
                             Cancelar
                         </Button>
