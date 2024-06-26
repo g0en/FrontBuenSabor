@@ -15,6 +15,7 @@ import Provincia from "../types/Provincia";
 import Localidad from "../types/Localidad";
 import Empresa from "../types/Empresa";
 import Swal from 'sweetalert2';
+
 import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
@@ -187,35 +188,63 @@ function SucursalList() {
     
 
     return (
-        <>
-            <Typography variant="h4" component="h4">
+        <div style={{ backgroundColor: '#f0f4f8', padding: '20px', borderRadius: '8px' }}>
+           <Typography 
+                variant="h4" 
+                component="h4" 
+                align="center" 
+                style={{ fontWeight: 'bold', marginBottom: '20px', color: 'black', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)' }}
+            >
                 Seleccione una Sucursal
-            </Typography><br />
-            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()}>Agregar nueva Sucursal</Button>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px' }}>
+            </Typography>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpen()}
+                style={{ backgroundColor: '#334e77', color: 'white', marginBottom: '20px' }}
+            >
+                Agregar nueva Sucursal
+            </Button>
+            </div>
+            <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: '16px', 
+                justifyContent: 'center', 
+                marginTop: '16px',
+                padding: '10px',
+            }}>
                 {sucursales.map((sucursal) => (
-                    <Card key={sucursal.id} style={{ width: '300px' }}>
+                    <Card key={sucursal.id} style={{ width: '300px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', borderRadius: '8px' }}>
                         <CardHeader
                             title={sucursal.nombre}
                             subheader={`${sucursal.domicilio.calle} ${sucursal.domicilio.numero}, ${sucursal.domicilio.cp}, ${sucursal.domicilio.localidad?.nombre}, ${sucursal.domicilio.localidad?.provincia.nombre}`}
+                            titleTypographyProps={{ variant: 'h6', color: 'black' }}
+                            subheaderTypographyProps={{ variant: 'body2', color: 'textSecondary' }}
                         />
-                        <CardActions>
-                            Casa Matriz: {sucursal.esCasaMatriz ? <CheckIcon /> : <CloseIcon />}
-                            <Tooltip title="Editar">
-                                <IconButton onClick={() => handleOpen(sucursal)}>
-                                    <EditIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Ver">
-                            <Button variant="contained" color="success" sx={{height: "40px", width:"50px"}} onClick={() => redirectDashboard(sucursal.id)}>
-                                    <VisibilityIcon /> Ver
-                                </Button>
-                            </Tooltip>
+                        <CardActions style={{ justifyContent: 'space-between' }}>
+                            <span style={{ display: 'flex', alignItems: 'center' }}>
+                                Casa Matriz: {sucursal.esCasaMatriz ? <CheckIcon color="primary" /> : <CloseIcon color="error" />}
+                            </span>
+                            <div>
+                                <Tooltip title="Editar">
+                                    <IconButton onClick={() => handleOpen(sucursal)} color="primary">
+                                        <EditIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Ver">
+                                    <Button variant="contained" color="info" sx={{ height: "30px", width: "40px" }} onClick={() => redirectDashboard(sucursal.id)}>
+                                        <VisibilityIcon /> Ver
+                                    </Button>
+                                </Tooltip>
+                            </div>
                         </CardActions>
                     </Card>
                 ))}
             </div>
-
+    
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{currentSucursal.id ? "Editar Sucursal" : "Crear Sucursal"}</DialogTitle>
                 <DialogContent>
@@ -333,8 +362,9 @@ function SucursalList() {
                     <Button onClick={handleSave} color="primary">Guardar</Button>
                 </DialogActions>
             </Dialog>
-        </>
+        </div>
     );
+    
 }
 
 export default SucursalList;

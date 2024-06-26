@@ -92,70 +92,99 @@ function EmpresaList() {
     }, []);
 
     return (
-        <>
-            <Typography variant="h4" component="h4">
-                Seleccione una Empresa
-            </Typography><br></br>
-            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()}>Crear Empresa</Button>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px', marginTop: '16px' }}>
-                {empresas.map((empresa) => (
-                    <Card key={empresa.id} style={{ width: '250px' }}>
-                        <CardHeader
-                            title={empresa.nombre}
-                            subheader={empresa.razonSocial}
-                        />
-                        <CardActions>
-                            <Tooltip title="Editar">
-                                <IconButton onClick={() => handleOpen(empresa)}>
-                                    <EditIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Sucursales">
-                                <Button variant="contained" color="success" sx={{ height: "50px", width: "200px" }} onClick={() => redirectSucursal(empresa.id)}>
-                                    <VisibilityIcon /> Ver Sucursales
-                                </Button>
-                            </Tooltip>
-                        </CardActions>
-                    </Card>
-                ))}
-            </div>
+    <div style={{ backgroundColor: '#f0f4f8', padding: '20px', borderRadius: '8px' }}>
+        <Typography 
+            variant="h4" 
+            component="h4" 
+            align="center" 
+            style={{ fontWeight: 'bold', marginBottom: '20px', color: 'black', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)' }}
+        >
+            Seleccione una Empresa
+        </Typography>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpen()}
+                style={{ backgroundColor: '#334e77', color: 'white', marginBottom: '20px' }}
+            >
+                Crear Empresa
+            </Button>
+        </div>
+        <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
+            gap: '16px', 
+            marginTop: '16px',
+            justifyContent: 'center',
+            padding: '10px',
+        }}>
+            {empresas.map((empresa) => (
+                <Card key={empresa.id} style={{ width: '250px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', borderRadius: '8px' }}>
+                    <CardHeader
+                        title={empresa.nombre}
+                        subheader={empresa.razonSocial}
+                        titleTypographyProps={{ variant: 'h5', color: 'black'}}
+                        subheaderTypographyProps={{ variant: 'body2', color: 'textSecondary' }}
+                    />
+                    <CardActions style={{ justifyContent: 'space-between' }}>
+                        <Tooltip title="Editar">
+                            <IconButton onClick={() => handleOpen(empresa)} color="primary">
+                                <EditIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Sucursales">
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                sx={{ height: "30px", width: "170px" }} 
+                                onClick={() => redirectSucursal(empresa.id)}
+                            >
+                                <VisibilityIcon /> Ver Sucursales
+                            </Button>
+                        </Tooltip>
+                    </CardActions>
+                </Card>
+            ))}
+        </div>
 
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>{currentEmpresa.id ? "Editar Empresa" : "Crear Empresa"}</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        margin="dense"
-                        label="Nombre"
-                        name="nombre"
-                        fullWidth
-                        value={currentEmpresa.nombre}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Razón Social"
-                        name="razonSocial"
-                        fullWidth
-                        value={currentEmpresa.razonSocial}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Cuil"
-                        name="cuil"
-                        fullWidth
-                        value={currentEmpresa.cuil}
-                        onChange={handleChange}
-                        disabled={!!currentEmpresa.id}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="secondary">Cancelar</Button>
-                    <Button onClick={handleSave} color="primary">Guardar</Button>
-                </DialogActions>
-            </Dialog>
-        </>
-    )
+        <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>{currentEmpresa.id ? "Editar Empresa" : "Crear Empresa"}</DialogTitle>
+            <DialogContent>
+                <TextField
+                    margin="dense"
+                    label="Nombre"
+                    name="nombre"
+                    fullWidth
+                    value={currentEmpresa.nombre}
+                    onChange={handleChange}
+                />
+                <TextField
+                    margin="dense"
+                    label="Razón Social"
+                    name="razonSocial"
+                    fullWidth
+                    value={currentEmpresa.razonSocial}
+                    onChange={handleChange}
+                />
+                <TextField
+                    margin="dense"
+                    label="Cuil"
+                    name="cuil"
+                    fullWidth
+                    value={currentEmpresa.cuil}
+                    onChange={handleChange}
+                    disabled={!!currentEmpresa.id}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose} color="secondary">Cancelar</Button>
+                <Button onClick={handleSave} color="primary">Guardar</Button>
+            </DialogActions>
+        </Dialog>
+    </div>
+)
+
 }
 
 export default EmpresaList;
