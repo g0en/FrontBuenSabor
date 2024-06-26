@@ -295,11 +295,11 @@ function ArticuloInsumoList() {
         <>
             <SideBar />
             <Box p={0} ml={3}>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom fontWeight={"bold"}>
                     Articulos Insumos
                 </Typography>
                 <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} >
                     <Table>
                         <TableHead>
                             <TableRow>

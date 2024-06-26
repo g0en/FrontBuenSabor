@@ -186,27 +186,25 @@ function SucursalList() {
         }
     };
     
-
     return (
-        <div style={{ backgroundColor: '#f0f4f8', padding: '20px', borderRadius: '8px' }}>
-           <Typography 
+        <div style={{ backgroundColor: '#e8f5e9', padding: '20px', borderRadius: '8px' }}>
+            <Typography 
                 variant="h4" 
                 component="h4" 
                 align="center" 
-                style={{ fontWeight: 'bold', marginBottom: '20px', color: 'black', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                style={{ fontWeight: 'bold', marginBottom: '20px', color: '#2e7d32', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)' }}
             >
                 Seleccione una Sucursal
             </Typography>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => handleOpen()}
-                style={{ backgroundColor: '#334e77', color: 'white', marginBottom: '20px' }}
-            >
-                Agregar nueva Sucursal
-            </Button>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpen()}
+                    style={{ backgroundColor: '#2e7d32', color: 'white', marginBottom: '20px' }}
+                >
+                    Agregar nueva Sucursal
+                </Button>
             </div>
             <div style={{ 
                 display: 'flex', 
@@ -221,12 +219,12 @@ function SucursalList() {
                         <CardHeader
                             title={sucursal.nombre}
                             subheader={`${sucursal.domicilio.calle} ${sucursal.domicilio.numero}, ${sucursal.domicilio.cp}, ${sucursal.domicilio.localidad?.nombre}, ${sucursal.domicilio.localidad?.provincia.nombre}`}
-                            titleTypographyProps={{ variant: 'h6', color: 'black' }}
-                            subheaderTypographyProps={{ variant: 'body2', color: 'textSecondary' }}
+                            titleTypographyProps={{ variant: 'h6', color: 'Black',fontWeight:'bold' }}
+                            subheaderTypographyProps={{ variant: 'body2', color: 'textSecondary'}}
                         />
                         <CardActions style={{ justifyContent: 'space-between' }}>
                             <span style={{ display: 'flex', alignItems: 'center' }}>
-                                Casa Matriz: {sucursal.esCasaMatriz ? <CheckIcon color="primary" /> : <CloseIcon color="error" />}
+                                Casa Matriz: {sucursal.esCasaMatriz ? <CheckIcon color="error" /> : <CloseIcon color="error" />}
                             </span>
                             <div>
                                 <Tooltip title="Editar">
@@ -235,7 +233,7 @@ function SucursalList() {
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Ver">
-                                    <Button variant="contained" color="info" sx={{ height: "30px", width: "40px" }} onClick={() => redirectDashboard(sucursal.id)}>
+                                    <Button variant="contained" color="success" sx={{ height: "30px", width: "90px" }} onClick={() => redirectDashboard(sucursal.id)}>
                                         <VisibilityIcon /> Ver
                                     </Button>
                                 </Tooltip>
@@ -364,6 +362,7 @@ function SucursalList() {
             </Dialog>
         </div>
     );
+    
     
 }
 
