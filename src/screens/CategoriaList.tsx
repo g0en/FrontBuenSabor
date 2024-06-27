@@ -1,35 +1,37 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, List, ListItem, ListItemText, IconButton, Chip, Button, Modal, TextField, Checkbox, FormControlLabel, Divider } from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, IconButton, Typography, Box, Chip, Button, Modal, TextField, FormControlLabel, Checkbox, TableCell, TableBody, Table, TableContainer, TableRow, TableHead, Paper, Grid } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
+import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SideBar from "../components/common/SideBar";
-import Categoria from "../types/Categoria";
-import { CategoriaByEmpresaGetAll, CategoriaCreate, CategoriaUpdate, CategoriaBaja } from "../services/CategoriaService";
-import { SucursalGetByEmpresaId } from "../services/SucursalService";
-import Sucursal from "../types/Sucursal";
-import { CategoriaDelete } from "../services/CategoriaService";
 import CategoriaGetDto from "../types/CategoriaGetDto";
+import { CategoriaByEmpresaGetAll, CategoriaCreate, CategoriaUpdate, CategoriaBaja, CategoriaDelete } from "../services/CategoriaService";
+import AddIcon from "@mui/icons-material/Add";
+import Sucursal from "../types/Sucursal";
+import Categoria from "../types/Categoria";
+import { SucursalGetByEmpresaId } from "../services/SucursalService";
 
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 
 function CategoriaList() {
-    const [categorias, setCategorias] = useState<Categoria[]>([]);
+    const [categorias, setCategorias] = useState<CategoriaGetDto[]>([]);
+    const { idEmpresa, idSucursal } = useParams();
     const [currentCategoria, setCurrentCategoria] = useState<Categoria>({ ...emptyCategoria });
-    const [categoriaGet, setCategoriaGet] = useState<CategoriaGetDto[]>([]);
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
     const [open, setOpen] = useState(false);
-    const { idEmpresa } = useParams();
-    const { idSucursal } = useParams();
 
-    const getAllCategoriaByEmpresa = async () => {
-        const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
+    const getAllCategoriaBySucursal = async () => {
+        const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idSucursal));
         setCategorias(categorias);
-        setCategoriaGet(categorias);
     };
+
+    useEffect(() => {
+        getAllCategoriaBySucursal();
+        getAllSucursal();
+    }, [idEmpresa, idSucursal]);
 
     const getAllSucursal = async () => {
         const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa));
@@ -38,44 +40,26 @@ function CategoriaList() {
 
     const createCategoria = async (categoria: Categoria) => {
         await CategoriaCreate(categoria);
-        getAllCategoriaByEmpresa(); // Refresh categories after adding new one
+        getAllCategoriaBySucursal();
         setOpen(false); // Close the modal after creation
     };
 
     const updateCategoria = async (categoria: Categoria) => {
         await CategoriaUpdate(categoria);
-        getAllCategoriaByEmpresa();
+        getAllCategoriaBySucursal();
         setOpen(false); // Close the modal after update
     };
 
     const bajaCategoria = async (idCategoria: number) => {
         await CategoriaBaja(idCategoria, Number(idSucursal));
-        getAllCategoriaByEmpresa();
+        getAllCategoriaBySucursal();
         window.location.reload();
     };
 
     const deleteCategoria = async (idCategoria: number) => {
         await CategoriaDelete(idCategoria);
-        getAllCategoriaByEmpresa();
+        getAllCategoriaBySucursal();
         window.location.reload();
-    };
-
-    useEffect(() => {
-        getAllCategoriaByEmpresa();
-        getAllSucursal();
-    }, []);
-
-    const handleOpen = (categoria?: Categoria) => {
-        if (categoria) {
-            setCurrentCategoria(categoria);
-        } else {
-            setCurrentCategoria({ ...emptyCategoria });
-        }
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
     };
 
     const handleCategoriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +89,6 @@ function CategoriaList() {
             }
         }
     };
-
     const handleAddSubCategoria = () => {
         setCurrentCategoria({
             ...currentCategoria,
@@ -125,47 +108,72 @@ function CategoriaList() {
         setCurrentCategoria({ ...currentCategoria, subCategorias });
     };
 
+    const handleEdit = (categoria: Categoria | CategoriaGetDto) => {
+        setCurrentCategoria(categoria);
+        setOpen(true);
+    }
+
+    const handleDelete = (categoria: Categoria | CategoriaGetDto) => {
+        if (categoria.id !== null) {
+            deleteCategoria(categoria.id);
+        }
+    }
+
+    const handleBaja = (categoria: Categoria | CategoriaGetDto) => {
+        if (categoria.id !== null) {
+            bajaCategoria(categoria.id);
+        }
+    }
+
     const handleSubmit = () => {
         if (currentCategoria.id === null) {
             createCategoria(currentCategoria);
         } else {
+            if (currentCategoria.subCategorias !== null) {
+                let subcategorias: Categoria[] = currentCategoria.subCategorias;
+                for (let i = 0; i < subcategorias.length; i++) {
+                    subcategorias[i].sucursales = currentCategoria.sucursales;
+                }
+            }
             updateCategoria(currentCategoria);
         }
+
+
     };
 
-    const renderCategorias = (categorias: Categoria[], level: number = 0) => {
-        return categorias.filter(c => c.id !== null).map(categoria => (
-            <React.Fragment key={categoria.id}>
-                <Divider />
-                <ListItem sx={{ pl: level * 2 }}>
-                    <ListItemText>
-                        <Typography variant="body1">
-                            {categoria.denominacion}
-                            {level === 0 && (
-                                categoria.esInsumo ?
-                                    <Chip label="Insumo" size="small" color="secondary" sx={{ ml: 1 }} /> :
-                                    <Chip label="Manufacturado" size="small" color="error" sx={{ ml: 1 }} />
-                            )}
-                        </Typography>
-                    </ListItemText>
-                    <IconButton edge="end" aria-label="edit" onClick={() => handleOpen(categoria)} color="primary">
-                        <EditIcon />
-                    </IconButton>
-                    {level === 0 && (
-                        <IconButton edge="end" aria-label="baja" onClick={() => categoria.id !== null && bajaCategoria(categoria.id)}color="secondary">
-                            <ArrowCircleDownIcon />
-                        </IconButton>
-                    )}
-                    <IconButton edge="end" aria-label="delete" onClick={() => categoria.id !== null && deleteCategoria(categoria.id)}color="error">
-                        <DeleteIcon />
-                    </IconButton>
-                </ListItem>
-                {categoria.subCategorias && categoria.subCategorias.length > 0 && (
-                    <List sx={{ pl: 4 }}>
-                        {renderCategorias(categoria.subCategorias, level + 1)}
-                    </List>
-                )}
-            </React.Fragment>
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setCurrentCategoria(emptyCategoria);
+    };
+
+    const filterSubCategoriasBySucursal = (subCategorias: CategoriaGetDto[] | null, idSucursal: number) => {
+        return subCategorias ? subCategorias.filter(subCategoria =>
+            subCategoria.sucursales?.some(sucursal => sucursal.id === idSucursal)
+        ) : [];
+    };
+
+    const renderSubCategorias = (subCategorias: CategoriaGetDto[] | null) => {
+        const filteredSubCategorias = filterSubCategoriasBySucursal(subCategorias, Number(idSucursal));
+        return filteredSubCategorias.filter(subCategoria => !subCategoria.eliminado).map((subCategoria) => (
+            <Box key={subCategoria.id} sx={{ paddingLeft: 1 }}>
+                <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography>{subCategoria.denominacion}</Typography>
+                        <Box sx={{ marginLeft: 'auto' }}>
+                            <IconButton onClick={() => handleEdit(subCategoria)}><EditIcon /></IconButton>
+                            <IconButton onClick={() => handleBaja(subCategoria)}><ArrowCircleDownIcon /></IconButton>
+                            <IconButton onClick={() => handleDelete(subCategoria)}><DeleteIcon /></IconButton>
+                        </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        {renderSubCategorias(subCategoria.subCategorias)}
+                    </AccordionDetails>
+                </Accordion>
+            </Box>
         ));
     };
 
@@ -179,63 +187,139 @@ function CategoriaList() {
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()} sx={{ mb: 2 }}>
                     Agregar Categoría
                 </Button>
-                <List>
-                    <ListItem>
-                        <ListItemText >
-                            <Typography variant="body2" style={{fontWeight:'bold'}}>Nombre</Typography>
-                        </ListItemText>
-                        <Typography variant="body2" style={{fontWeight:'bold'}}>Acciones</Typography>
-                    </ListItem>
-                    <Divider />
-                    {renderCategorias(categorias)}
-                </List>
+
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
+                    <Table >
+                        <TableHead >
+                            <TableRow>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {categorias.filter(categoria => categoria.categoriaPadre === null && !categoria.eliminado).map((categoria) => (
+                                <Accordion key={categoria.id}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                        <Typography>{categoria.denominacion}{
+                                            categoria.esInsumo ?
+                                                <Chip label="Insumo" size="small" color="secondary" sx={{ ml: 1 }} /> :
+                                                <Chip label="Manufacturado" size="small" color="error" sx={{ ml: 1 }} />
+                                        }</Typography>
+                                        <Box sx={{ marginLeft: 'auto' }}>
+                                            <IconButton onClick={() => handleEdit(categoria)} color="primary">{categoria.sucursales !== null && <EditIcon />}</IconButton>
+                                            <IconButton onClick={() => handleBaja(categoria)} color="secondary"><ArrowCircleDownIcon /></IconButton>
+                                            <IconButton onClick={() => handleDelete(categoria)} color="error"><DeleteIcon /></IconButton>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        {renderSubCategorias(categoria.subCategorias)}
+                                    </AccordionDetails>
+                                </Accordion>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
             </Box>
             <Modal open={open} onClose={handleClose}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: 700, maxHeight: '80vh', bgcolor: 'background.paper', boxShadow: 24, p: 4, overflowY: 'auto' }}>
                     <Typography variant="h6" gutterBottom>
                         {currentCategoria.id === null ? 'Crear Categoría' : 'Editar Categoría'}
                     </Typography>
-                    <TextField
-                        fullWidth
-                        label="Denominación"
-                        name="denominacion"
-                        value={currentCategoria.denominacion}
-                        onChange={handleCategoriaChange}
-                        margin="normal"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={currentCategoria.esInsumo}
-                                onChange={handleEsInsumoChange}
-                                name="esInsumo"
-                                color="primary"
+                    <Grid container spacing={2} mb={2}>
+                        <Grid item xs={8}>
+                            <TextField
+                                fullWidth
+                                label="Denominación"
+                                name="denominacion"
+                                value={currentCategoria.denominacion}
+                                onChange={handleCategoriaChange}
+                                margin="normal"
                             />
-                        }
-                        label="Es Insumo"
-                    />
-                    <Typography variant="subtitle1" gutterBottom>
-                        Selecciona la/s sucursales:
-                    </Typography>
-                    {sucursales.map(sucursal => (
-                        <FormControlLabel
-                            key={sucursal.id}
-                            control={
-                                <Checkbox
-                                    checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
-                                    onChange={() => handleSucursalChange(sucursal.id)}
-                                    color="primary"
+                        </Grid>
+                        <Grid item xs={4} container justifyContent="center" alignItems="center">
+                            {currentCategoria.id !== null ?
+                                <div style={{ pointerEvents: 'none', opacity: 0.9 }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={currentCategoria.esInsumo}
+                                                onChange={handleEsInsumoChange}
+                                                name="esInsumo"
+                                                color="primary"
+                                                disabled={currentCategoria.id !== null}
+                                            />
+                                        }
+                                        label="Es Insumo"
+                                    />
+                                </div>
+                                :
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={currentCategoria.esInsumo}
+                                            onChange={handleEsInsumoChange}
+                                            name="esInsumo"
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Es Insumo"
                                 />
                             }
-                            label={sucursal.nombre}
-                        />
-                    ))}
-                    <Typography variant="subtitle1" gutterBottom>
-                        Agregar Subcategorías
-                    </Typography>
-                    <Button variant="outlined" color="primary" onClick={handleAddSubCategoria}>
-                        Agregar
-                    </Button>
+                        </Grid>
+                    </Grid>
+
+                    <Box mb={2}>
+                        <Typography variant="subtitle1" gutterBottom>
+                            Selecciona la/s sucursales:
+                        </Typography>
+                        {
+                            currentCategoria.id !== null ?
+                                <div>
+                                    <div style={{ pointerEvents: 'none', opacity: 0.9 }}>
+                                        {sucursales.map(sucursal => (
+                                            <FormControlLabel
+                                                key={sucursal.id}
+                                                control={
+                                                    <Checkbox
+                                                        checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
+                                                        onChange={() => handleSucursalChange(sucursal.id)}
+                                                        color="primary"
+                                                        disabled
+                                                    />
+                                                }
+                                                label={sucursal.nombre}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                                :
+                                <div>
+                                    {sucursales.map(sucursal => (
+                                        <FormControlLabel
+                                            key={sucursal.id}
+                                            control={
+                                                <Checkbox
+                                                    checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
+                                                    onChange={() => handleSucursalChange(sucursal.id)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label={sucursal.nombre}
+                                        />
+                                    ))}
+                                </div>
+                        }
+                    </Box>
+
+                    <Box display="flex" alignItems="center">
+                        <Typography variant="subtitle1" gutterBottom>
+                            Agregar Subcategorías
+                        </Typography>
+                        <Button variant="outlined" color="primary" onClick={handleAddSubCategoria} style={{ marginLeft: 10 }}>
+                            Agregar
+                        </Button>
+                    </Box>
                     {currentCategoria.subCategorias && currentCategoria.subCategorias.map((subCategoria, index) => (
                         <Box key={index} display="flex" alignItems="center" mt={2}>
                             <TextField
@@ -244,9 +328,12 @@ function CategoriaList() {
                                 onChange={(e) => handleSubCategoriaChange(index, e.target.value)}
                                 margin="normal"
                             />
-                            <IconButton color="secondary" onClick={() => handleRemoveSubCategoria(index)}>
-                                <CloseIcon />
-                            </IconButton>
+                            {
+                                subCategoria.id === null &&
+                                <IconButton color="secondary" onClick={() => handleRemoveSubCategoria(index)}>
+                                    <CloseIcon />
+                                </IconButton>
+                            }
                         </Box>
                     ))}
                     <Box mt={2} display="flex" justifyContent="flex-end">

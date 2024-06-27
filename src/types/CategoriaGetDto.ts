@@ -1,4 +1,3 @@
-import Categoria from "./Categoria";
 import CategoriaShortDto from "./CategoriaShortDto";
 import Sucursal from "./Sucursal";
 
@@ -8,6 +7,6 @@ export default interface CategoriaGetDto{
     denominacion: string,
     esInsumo: boolean,
     sucursales: Sucursal[] | null,
-    subCategorias: Categoria[] | null,
+    subCategorias: CategoriaGetDto[] | null,
     categoriaPadre: CategoriaShortDto | null
 }

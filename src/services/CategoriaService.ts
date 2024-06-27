@@ -12,7 +12,12 @@ export async function CategoriaCreate(categoria: Categoria){
 		},
         mode: 'cors'
 	});
-	return await response.json() as Categoria;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as Categoria
+	};
 }
 
 export async function CategoriaByEmpresaGetAll(id: number){
@@ -65,7 +70,12 @@ export async function CategoriaUpdate(categoria: Categoria){
 		},
         mode: 'cors'
 	});
-	return await response.json() as Categoria;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as Categoria
+	};
 }
 
 export async function CategoriaBaja(idCategoria: number, idSucursal: number){
