@@ -630,7 +630,8 @@ function ArticuloManufacturadoList() {
                             <TableContainer component={Paper}>
                                 <Table>
                                     <TableBody>
-                                        {results.map((insumo) => (
+                                        {results.filter(insumo => insumo.eliminado === false)
+                                        .map((insumo) => (
                                             <TableRow key={insumo.id}>
                                                 <TableCell>
                                                     <img src={insumo.imagenes.length > 0 ? insumo.imagenes[0].url : ''} alt={`Imagen de ${insumo.denominacion}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
