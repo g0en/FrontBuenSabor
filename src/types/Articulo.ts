@@ -1,6 +1,7 @@
 import Base from "./Base";
 import Categoria from "./Categoria";
 import Imagen from "./Imagen";
+import SucursalShortDto from "./SucursalShortDto";
 import UnidadMedida from "./UnidadMedida";
 
 export default interface Articulo extends Base{
@@ -8,5 +9,6 @@ export default interface Articulo extends Base{
     precioVenta: number,
     imagenes: Imagen[],
     unidadMedida: UnidadMedida,
-    categoria: Categoria | null
+    categoria: Categoria | null,
+    sucursal: SucursalShortDto | null
 }

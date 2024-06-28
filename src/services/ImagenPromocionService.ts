@@ -1,7 +1,7 @@
 import Imagen from "../types/Imagen";
 
-export async function CloudinaryUpload(file: File) {
-    const urlServer = 'http://localhost:8080/imagen/articulo/upload';
+export async function CloudinaryPromocionUpload(file: File) {
+    const urlServer = 'http://localhost:8080/imagen/promocion/upload';
     const formData = new FormData();
 
     formData.append('uploads', file);
@@ -23,8 +23,8 @@ export async function CloudinaryUpload(file: File) {
     return await response.json() as Imagen[];
 }
 
-export async function CloudinaryDelete(publicId: string, id: string) {
-    const urlServer = `http://localhost:8080/imagen/articulo/deleteImg?publicId=${publicId}&id=${id}`;
+export async function CloudinaryPromocionDelete(publicId: string, id: string) {
+    const urlServer = `http://localhost:8080/imagen/promocion/deleteImg?publicId=${publicId}&id=${id}`;
 
     const response = await fetch(urlServer, {
         method: 'POST',

@@ -29,11 +29,12 @@ import { ArticuloInsumoFindBySucursal } from "../services/ArticuloInsumoService"
 import ArticuloManufacturadoDetalle from "../types/ArticuloManufacturadoDetalle";
 import { ArticuloManufacturadoUpdate } from "../services/ArticuloManufacturadoService";
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 const emptyArticuloManufacturado = {
-    id: 0, eliminado: false, denominacion: '', precioVenta: 0, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, descripcion: '', tiempoEstimadoMinutos: 0, preparacion: '', articuloManufacturadoDetalles: null
+    id: 0, eliminado: false, denominacion: '', precioVenta: 0, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, sucursal: null, descripcion: '', tiempoEstimadoMinutos: 0, preparacion: '', articuloManufacturadoDetalles: null
 };
 
 function ArticuloManufacturadoList() {
@@ -53,6 +54,7 @@ function ArticuloManufacturadoList() {
     const [view, setView] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [text, setText] = useState("Crear");
+    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
 
     const getAllArticuloManufacturadoBySucursal = async () => {
         const articulosManufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
@@ -240,6 +242,12 @@ function ArticuloManufacturadoList() {
         setCurrentArticuloManufacturado({ ...currentArticuloManufacturado, [e.target.name]: e.target.value });
     };
 
+    const handleAlta = async (articulo: ArticuloManufacturado) => {
+        articulo.eliminado = false;
+        await updateArticuloManufacturado(articulo);
+        window.location.reload();
+    }
+
     const handleAgregar = (insumo: ArticuloInsumo) => {
         const nuevoDetalle = {
             id: 0,
@@ -262,7 +270,7 @@ function ArticuloManufacturadoList() {
     };
 
     const handleDelete = async (articulo: ArticuloManufacturado) => {
-        const imagenes: Imagen[] = articulo.imagenes;
+        //const imagenes: Imagen[] = articulo.imagenes;
 
         try {
             const data = await deleteArticuloManufacturado(articulo.id);
@@ -273,11 +281,11 @@ function ArticuloManufacturadoList() {
             console.log("Error al crear un Articulo Manufacturado.");
         }
 
-        try {
+        /*try {
             await deleteImages(imagenes);
         } catch (error) {
             console.log("Error al subir las Imagenes.");
-        }
+        }*/
 
         window.location.reload();
     }
@@ -309,6 +317,10 @@ function ArticuloManufacturadoList() {
 
         } else {
             try {
+                if (currentArticuloManufacturado.sucursal === null) {
+                    currentArticuloManufacturado.sucursal = emptySucursal;
+                }
+
                 const data = await createArticuloManufacturado(currentArticuloManufacturado);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
@@ -355,25 +367,38 @@ function ArticuloManufacturadoList() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {articulosManufacturados.filter(articulo => !articulo.eliminado)
+                            {articulosManufacturados
                                 .map((articulo) => (
-                                    <TableRow key={articulo.id}>
+                                    <TableRow sx={{ backgroundColor: articulo.eliminado ? "#B0B0B0" : "none" }} key={articulo.id}>
                                         <TableCell align="center">{articulo.denominacion}</TableCell>
                                         <TableCell align="center">{articulo.unidadMedida.denominacion}</TableCell>
                                         <TableCell align="center">{articulo.precioVenta}</TableCell>
                                         <TableCell align="center">{articulo.tiempoEstimadoMinutos}</TableCell>
                                         <TableCell align="center">{articulo.categoria && articulo.categoria.denominacion}</TableCell>
-                                        <TableCell align="center">
-                                            <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)} color="primary">
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </TableCell>
+                                        {
+                                            articulo.eliminado === false ?
+                                                <TableCell align="center">
+                                                    <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)} color="primary">
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
+                                                        <VisibilityIcon />
+                                                    </IconButton>
+                                                    <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </TableCell>
+                                                :
+                                                <TableCell>
+                                                    <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
+                                                        <VisibilityIcon />
+                                                    </IconButton>
+                                                    <IconButton aria-label="alta" onClick={() => handleAlta(articulo)} color="success">
+                                                        <KeyboardDoubleArrowUpIcon />
+                                                    </IconButton>
+                                                </TableCell>
+
+                                        }
                                     </TableRow>
                                 ))}
                         </TableBody>

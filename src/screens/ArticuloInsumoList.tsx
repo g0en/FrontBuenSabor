@@ -21,11 +21,13 @@ import { CloudinaryUpload } from "../services/CloudinaryService";
 import { CloudinaryDelete } from "../services/CloudinaryService";
 import Imagen from "../types/Imagen";
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import AddIcon from "@mui/icons-material/Add";
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 const emptyArticuloInsumo = {
-    id: 0, eliminado: false, denominacion: '', precioVenta: 0, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, precioCompra: 0, stockActual: 0, stockMinimo: 0, stockMaximo: 0, esParaElaborar: false
+    id: 0, eliminado: false, denominacion: '', precioVenta: 0, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, sucursal: null, precioCompra: 0, stockActual: 0, stockMinimo: 0, stockMaximo: 0, esParaElaborar: false
 };
 
 function ArticuloInsumoList() {
@@ -40,6 +42,7 @@ function ArticuloInsumoList() {
     const [images, setImages] = useState<string[]>([]);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
+    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' };
 
     const getAllArticuloInsumoBySucursal = async () => {
         const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
@@ -168,8 +171,14 @@ function ArticuloInsumoList() {
         setView(false);
     };
 
+    const handleAlta = async (articulo: ArticuloInsumo) => {
+        articulo.eliminado = false;
+        await updateArticuloInsumo(articulo);
+        window.location.reload();
+    }
+
     const handleDelete = async (articulo: ArticuloInsumo) => {
-        const imagenes: Imagen[] = articulo.imagenes;
+        //const imagenes: Imagen[] = articulo.imagenes;
 
         try {
             const data = await deleteArticuloInsumo(articulo.id);
@@ -180,11 +189,11 @@ function ArticuloInsumoList() {
             console.log("Error al crear un Articulo Insumo.");
         }
 
-        try {
+        /*try {
             await deleteImages(imagenes);
         } catch (error) {
             console.log("Error al subir las Imagenes.");
-        }
+        }*/
 
         window.location.reload();
     };
@@ -246,7 +255,9 @@ function ArticuloInsumoList() {
             });
         }
 
-        currentArticuloInsumo.imagenes = articuloImages;
+        if(articuloImages !== null){
+            currentArticuloInsumo.imagenes = articuloImages; 
+        }
 
         if (currentArticuloInsumo.id > 0) {
 
@@ -257,7 +268,6 @@ function ArticuloInsumoList() {
                     return;
                 }
 
-                //deleteImages(imagenesExistentes);
                 setCurrentArticuloInsumo(emptyArticuloInsumo);
             } catch (error) {
                 console.log("Error al actualizar un articulo insumo");
@@ -266,6 +276,10 @@ function ArticuloInsumoList() {
         } else {
 
             try {
+                if (currentArticuloInsumo.sucursal === null) {
+                    currentArticuloInsumo.sucursal = emptySucursal;
+                }
+
                 const data = await createArticuloInsumo(currentArticuloInsumo);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
@@ -301,7 +315,7 @@ function ArticuloInsumoList() {
                     Articulos - Insumos
                 </Typography>
 
-                <Button variant="contained" color="primary" onClick={handleOpen}>Agregar Insumo</Button>
+                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>Agregar Insumo</Button>
                 <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
                     <Table >
                         <TableHead >
@@ -320,9 +334,8 @@ function ArticuloInsumoList() {
                         </TableHead>
                         <TableBody>
                             {articulosInsumo
-                                .filter(articulo => !articulo.eliminado)
                                 .map((articulo) => (
-                                    <TableRow key={articulo.id}>
+                                    <TableRow sx={{ backgroundColor: articulo.eliminado ? "#B0B0B0" : "none" }} key={articulo.id}>
                                         <TableCell>{articulo.denominacion}</TableCell>
                                         <TableCell>{articulo.precioCompra}</TableCell>
                                         <TableCell>{articulo.precioVenta}</TableCell>
@@ -335,15 +348,32 @@ function ArticuloInsumoList() {
                                         </TableCell>
                                         <TableCell>{articulo.categoria?.denominacion}</TableCell>
                                         <TableCell>
-                                            <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
-                                                <Edit />
-                                            </IconButton>
-                                            <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
-                                                <Visibility />
-                                            </IconButton>
-                                            <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
-                                                <Delete />
-                                            </IconButton>
+
+                                            {
+                                                articulo.eliminado === false ?
+                                                    <Box>
+                                                        <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
+                                                            <Visibility />
+                                                        </IconButton>
+                                                        <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
+                                                            <Edit />
+                                                        </IconButton>
+                                                        <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
+                                                            <Delete />
+                                                        </IconButton>
+                                                    </Box>
+                                                    :
+                                                    <Box>
+                                                        <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
+                                                            <Visibility />
+                                                        </IconButton>
+                                                        <IconButton aria-label="alta" onClick={() => handleAlta(articulo)} color="success">
+                                                            <KeyboardDoubleArrowUpIcon />
+                                                        </IconButton>
+                                                    </Box>
+                                            }
+
+
                                         </TableCell>
                                     </TableRow>
                                 ))}

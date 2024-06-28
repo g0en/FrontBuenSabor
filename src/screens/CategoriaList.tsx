@@ -142,6 +142,7 @@ function CategoriaList() {
     };
 
     const handleOpen = () => {
+        setCurrentCategoria(emptyCategoria);
         setOpen(true);
     };
 
