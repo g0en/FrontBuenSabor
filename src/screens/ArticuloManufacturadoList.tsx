@@ -299,7 +299,10 @@ function ArticuloManufacturadoList() {
             });
         }
 
-        currentArticuloManufacturado.imagenes = articuloImages;
+        if(articuloImages !== null){
+            currentArticuloManufacturado.imagenes = articuloImages; 
+        }
+        
         currentArticuloManufacturado.articuloManufacturadoDetalles = detalles;
 
         if (currentArticuloManufacturado.id > 0) {
@@ -630,7 +633,7 @@ function ArticuloManufacturadoList() {
                             <TableContainer component={Paper}>
                                 <Table>
                                     <TableBody>
-                                        {results.filter(insumo => insumo.eliminado === false)
+                                        {results.filter(insumo => insumo.eliminado === false && insumo.esParaElaborar === true)
                                         .map((insumo) => (
                                             <TableRow key={insumo.id}>
                                                 <TableCell>

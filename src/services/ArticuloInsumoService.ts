@@ -45,6 +45,19 @@ export async function ArticuloInsumoGetAll(){
 	return await response.json() as ArticuloInsumo[];
 }
 
+export async function ArticuloInsumoGetAllParaVender(id: number){
+	const urlServer = 'http://localhost:8080/articuloInsumo/paraVenta/' + id;
+	const response = await fetch(urlServer, {
+		method: 'GET',
+        headers: {
+			'Content-type': 'application/json',
+			'Access-Control-Allow-Origin':'*'
+		},
+        mode: 'cors'
+	});
+	return await response.json() as ArticuloInsumo[];
+}
+
 export async function ArticuloInsumoGetById(id: number){
 	const urlServer = 'http://localhost:8080/articuloInsumo/' + id;
 	const response = await fetch(urlServer, {

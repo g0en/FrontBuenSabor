@@ -14,6 +14,6 @@ export default interface Promocion extends Base{
     precioPromocional: number,
     tipoPromocion: TipoPromocion | null,
     imagenes: Imagen[],
-    sucursales: Sucursal[],
+    sucursal: Sucursal[] | null,
     promocionDetalle: PromocionDetalle[]
 }

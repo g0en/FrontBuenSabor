@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card, CardHeader, CardMedia, CardContent, Typography, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import Promocion from '../../types/Promocion';
+import { Delete } from '@mui/icons-material';
 
 interface PromocionCardProps {
     promocion: Promocion;
@@ -45,7 +45,7 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ promocion }) => {
                     <EditIcon />
                 </IconButton>
                 <IconButton aria-label="download" color='error'>
-                    <ArrowCircleDownIcon />
+                    <Delete />
                 </IconButton>
             </CardContent>
         </Card>
