@@ -385,7 +385,7 @@ function ArticuloManufacturadoList() {
                                         <TableCell align="center">{articulo.tiempoEstimadoMinutos}</TableCell>
                                         <TableCell align="center">{articulo.categoria && articulo.categoria.denominacion}</TableCell>
                                         {
-                                            articulo.eliminado === false ?
+                                            articulo.habilitado === true ?
                                                 <TableCell align="center">
                                                     <IconButton aria-label="edit" onClick={() => handleOpenEditModal(articulo)} color="primary">
                                                         <EditIcon />

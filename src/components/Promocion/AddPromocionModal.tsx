@@ -417,7 +417,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                         <TableContainer component={Paper}>
                             <Table>
                                 <TableBody>
-                                    {results.filter(articulo => articulo.eliminado === false)
+                                    {results.filter(articulo => articulo.habilitado === true)
                                         .map((articulo) => (
                                             <TableRow key={articulo.id}>
                                                 <TableCell>

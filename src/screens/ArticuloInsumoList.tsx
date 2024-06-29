@@ -173,8 +173,16 @@ function ArticuloInsumoList() {
 
     const handleBaja = async (articulo: ArticuloInsumo) => {
         articulo.habilitado = false;
-        await updateArticuloInsumo(articulo);
-        window.location.reload();
+        try {
+            const data = await updateArticuloInsumo(articulo);
+            if (data.status !== 200) {
+                return;
+            }
+
+            window.location.reload();
+        } catch (error) {
+            console.log("Error al dar de baja un articulo insumo");
+        }
     }
 
     const handleAlta = async (articulo: ArticuloInsumo) => {
@@ -261,8 +269,8 @@ function ArticuloInsumoList() {
             });
         }
 
-        if(articuloImages !== null){
-            currentArticuloInsumo.imagenes = articuloImages; 
+        if (articuloImages !== null) {
+            currentArticuloInsumo.imagenes = articuloImages;
         }
 
         if (currentArticuloInsumo.id > 0) {
@@ -318,7 +326,7 @@ function ArticuloInsumoList() {
             <SideBar />
             <Box p={0} ml={3}>
                 <Typography variant="h5" component="h1" gutterBottom fontWeight={'bold'} paddingBottom={'10px'}>
-                    Articulos - Insumos
+                    Articulos Insumos
                 </Typography>
 
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>Agregar Insumo</Button>
@@ -326,33 +334,33 @@ function ArticuloInsumoList() {
                     <Table >
                         <TableHead >
                             <TableRow>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Nombre</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Precio Compra</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Precio Venta</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Unidad de Medida</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Stock Actual</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Stock Mínimo</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Stock Máximo</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Para Elaborar</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Categoría</TableCell>
-                                <TableCell style={{ color: 'black', fontWeight: 'bold' }}>Acciones</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio Compra</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio Venta</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Unidad de Medida</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Actual</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Mínimo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Máximo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Para Elaborar</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Categoría</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {articulosInsumo.filter(articulo => articulo.eliminado === false)
                                 .map((articulo) => (
                                     <TableRow sx={{ backgroundColor: articulo.habilitado ? "none" : "#B0B0B0" }} key={articulo.id}>
-                                        <TableCell>{articulo.denominacion}</TableCell>
-                                        <TableCell>{articulo.precioCompra}</TableCell>
-                                        <TableCell>{articulo.precioVenta}</TableCell>
-                                        <TableCell>{articulo.unidadMedida?.denominacion}</TableCell>
-                                        <TableCell>{articulo.stockActual}</TableCell>
-                                        <TableCell>{articulo.stockMinimo}</TableCell>
-                                        <TableCell>{articulo.stockMaximo}</TableCell>
-                                        <TableCell>
+                                        <TableCell align="center">{articulo.denominacion}</TableCell>
+                                        <TableCell align="center">{articulo.precioCompra}</TableCell>
+                                        <TableCell align="center">{articulo.precioVenta}</TableCell>
+                                        <TableCell align="center">{articulo.unidadMedida?.denominacion}</TableCell>
+                                        <TableCell align="center">{articulo.stockActual}</TableCell>
+                                        <TableCell align="center">{articulo.stockMinimo}</TableCell>
+                                        <TableCell align="center">{articulo.stockMaximo}</TableCell>
+                                        <TableCell align="center">
                                             {articulo.esParaElaborar ? <Check color="success" /> : ""}
                                         </TableCell>
-                                        <TableCell>{articulo.categoria?.denominacion}</TableCell>
+                                        <TableCell align="center">{articulo.categoria?.denominacion}</TableCell>
                                         <TableCell>
 
                                             {

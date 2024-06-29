@@ -11,24 +11,18 @@ import FoodBankIcon from '@mui/icons-material/FoodBank';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SpeedIcon from '@mui/icons-material/Speed';
 import avatarImage from '../../assets/images/logo.png'
+import MonitorIcon from '@mui/icons-material/Monitor';
 
 function SideBar() {
     const [openProducts, setOpenProducts] = useState(false);
-    const [openEmpleados, setOpenEmpleados] = useState(false);
     const { idSucursal } = useParams();
     const { idEmpresa } = useParams();
 
     const handleProductsClick = () => {
         setOpenProducts(!openProducts);
-    };
-
-    const handleEmpleadosClick = () => {
-        setOpenEmpleados(!openEmpleados);
     };
 
     return (
@@ -53,7 +47,7 @@ function SideBar() {
                             direction="row"
                             justifyContent="center"
                         >
-                            <Avatar src={avatarImage} sx={{width: 100, height: 100}}/>
+                            <Avatar src={avatarImage} sx={{ width: 100, height: 100 }} />
                         </Stack>
                     </Toolbar>
                     <ListItemButton component={Link} to={"/dashboard/" + idEmpresa + "/" + idSucursal}>
@@ -70,7 +64,7 @@ function SideBar() {
                         }}>
                             <FoodBankIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Productos" />
+                        <ListItemText primary="Articulos" />
                         {openProducts ? <ExpandLess /> : <ExpandMore />}
                     </ListItemButton>
                     <Collapse in={openProducts} timeout="auto" unmountOnExit>
@@ -81,18 +75,26 @@ function SideBar() {
                                 }}>
                                     <FastfoodIcon />
                                 </ListItemIcon>
-                                <ListItemText primary="Lista de Productos" />
+                                <ListItemText primary="Manufacturados" />
                             </ListItemButton>
-                            <ListItemButton component={Link} to={"/categorias/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/insumos/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>
-                                    <CategoryIcon />
+                                    <ShoppingCartIcon />
                                 </ListItemIcon>
-                                <ListItemText primary="Categorías" />
+                                <ListItemText primary="Insumos" />
                             </ListItemButton>
                         </List>
                     </Collapse>
+                    <ListItemButton component={Link} to={"/categorias/" + idEmpresa + "/" + idSucursal}>
+                        <ListItemIcon sx={{
+                            color: colorConfigs.sidebar.color
+                        }}>
+                            <CategoryIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Categorías" />
+                    </ListItemButton>
                     <ListItemButton component={Link} to={"/promociones/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
@@ -101,42 +103,13 @@ function SideBar() {
                         </ListItemIcon>
                         <ListItemText primary="Promociones" />
                     </ListItemButton>
-                    <ListItemButton onClick={handleEmpleadosClick}>
+                    <ListItemButton component={Link} to={"/empleados/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
                         }}>
                             <PeopleAltIcon />
                         </ListItemIcon>
                         <ListItemText primary="Empleados" />
-                        {openEmpleados ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                    <Collapse in={openEmpleados} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
-                            <ListItemButton component={Link} to={"/empleados/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
-                                <ListItemIcon sx={{
-                                    color: colorConfigs.sidebar.color
-                                }}>
-                                    <FormatListBulletedIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Lista de Empleados" />
-                            </ListItemButton>
-                            <ListItemButton component={Link} to={"/roles/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
-                                <ListItemIcon sx={{
-                                    color: colorConfigs.sidebar.color
-                                }}>
-                                    <AccountBoxIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Roles" />
-                            </ListItemButton>
-                        </List>
-                    </Collapse>
-                    <ListItemButton component={Link} to={"/insumos/" + idEmpresa + "/" + idSucursal}>
-                        <ListItemIcon sx={{
-                            color: colorConfigs.sidebar.color
-                        }}>
-                            <ShoppingCartIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Insumos" />
                     </ListItemButton>
                     <ListItemButton component={Link} to={"/unidad-medida/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
@@ -145,6 +118,14 @@ function SideBar() {
                             <SpeedIcon />
                         </ListItemIcon>
                         <ListItemText primary="Unidad de Medida" />
+                    </ListItemButton>
+                    <ListItemButton component={Link} to={"/pedidos/" + idEmpresa + "/" + idSucursal}>
+                        <ListItemIcon sx={{
+                            color: colorConfigs.sidebar.color
+                        }}>
+                            <MonitorIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Pedidos" />
                     </ListItemButton>
                 </List>
             </Drawer>

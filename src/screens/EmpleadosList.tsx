@@ -1,12 +1,12 @@
 import SideBar from "../components/common/SideBar";
 
-function Empleado(){
+function EmpleadosList(){
     return (
         <>
             <SideBar/>
-            <h1>Empleado</h1>
+            <h1>Empleados</h1>
         </>
     )
 }
 
-export default Empleado;
+export default EmpleadosList;

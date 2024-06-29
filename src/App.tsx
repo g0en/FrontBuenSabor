@@ -5,12 +5,12 @@ import Categoria from "./screens/CategoriaList";
 import ArticuloManufacturado from "./screens/ArticuloManufacturadoList";
 import Promocion from "./screens/PromocionList";
 import Empleado from "./screens/EmpleadosList";
-import Roles from "./screens/RolesList";
 import ArticuloInsumo from "./screens/ArticuloInsumoList";
 import UnidadMedida from "./screens/UnidadMedidaList";
 import Empresa from "./screens/EmpresaList";
 import Sucursal from "./screens/SucursalList";
 import PreLayout from "./components/layout/PreLayout";
+import PedidosList from "./screens/PedidosList";
 
 function App() {
   return (
@@ -26,9 +26,9 @@ function App() {
           <Route path="categorias/:idEmpresa/:idSucursal" element={<Categoria />} />
           <Route path="promociones/:idEmpresa/:idSucursal" element={<Promocion />} />
           <Route path="empleados/:idEmpresa/:idSucursal" element={<Empleado />} />
-          <Route path="roles/:idEmpresa/:idSucursal" element={<Roles />} />
           <Route path="insumos/:idEmpresa/:idSucursal" element={<ArticuloInsumo />} />
           <Route path="unidad-medida/:idEmpresa/:idSucursal" element={<UnidadMedida />} />
+          <Route path="pedidos/:idEmpresa/:idSucursal" element={<PedidosList />}/>
         </Route>
       </Routes>
     </BrowserRouter>
