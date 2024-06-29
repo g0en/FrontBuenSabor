@@ -23,6 +23,7 @@ import Imagen from "../types/Imagen";
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import AddIcon from "@mui/icons-material/Add";
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -358,7 +359,7 @@ function ArticuloInsumoList() {
                                         <TableCell align="center">{articulo.stockMinimo}</TableCell>
                                         <TableCell align="center">{articulo.stockMaximo}</TableCell>
                                         <TableCell align="center">
-                                            {articulo.esParaElaborar ? <Check color="success" /> : ""}
+                                            {articulo.esParaElaborar ? <Check color="success" /> : <RemoveIcon color="error" />}
                                         </TableCell>
                                         <TableCell align="center">{articulo.categoria?.denominacion}</TableCell>
                                         <TableCell>

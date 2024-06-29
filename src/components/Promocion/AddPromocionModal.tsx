@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper, Card, CardContent, CardActions } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TipoPromocion } from '../../types/enums/TipoPromocion';
 import Promocion from '../../types/Promocion';
@@ -14,6 +14,7 @@ import { ArticuloManufacturadoFindBySucursal } from '../../services/ArticuloManu
 import { ArticuloInsumoGetAllParaVender } from '../../services/ArticuloInsumoService';
 import ArticuloManufacturado from '../../types/ArticuloManufacturado';
 import ArticuloInsumo from '../../types/ArticuloInsumo';
+import PromocionDetalle from '../../types/PromocionDetalle';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -27,7 +28,7 @@ const modalStyle = {
 };
 
 const emptyPromocion: Promocion = {
-    id: 0,
+    id: null,
     eliminado: false,
     denominacion: '',
     fechaDesde: '',
@@ -38,8 +39,8 @@ const emptyPromocion: Promocion = {
     precioPromocional: 0,
     tipoPromocion: null,
     imagenes: [],
-    sucursal: null,
-    promocionDetalle: [],
+    sucursales: [],
+    promocionDetalles: [],
 };
 
 interface AddPromocionModalProps {
@@ -49,16 +50,16 @@ interface AddPromocionModalProps {
 
 const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) => {
     const [step, setStep] = useState(1);
-    const [promocion, setPromocion] = useState<Promocion>(emptyPromocion);
+    const [promocion, setPromocion] = useState<Promocion>({ ...emptyPromocion });
     const [files, setFiles] = useState<File[]>([]);
     const [images, setImages] = useState<string[]>([]);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
-    const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const { idSucursal } = useParams();
     const [search, setSearch] = useState("");
     const [manufacturados, setManufacturados] = useState<ArticuloManufacturado[]>([]);
     const [insumos, setInsumos] = useState<ArticuloInsumo[]>([]);
     const [articulos, setArticulos] = useState<Articulo[]>([]);
+    const [detalles, setDetalles] = useState<PromocionDetalle[]>([]);
     const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
 
     const createPromocion = async (promocion: Promocion) => {
@@ -79,7 +80,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         setSearch(e.target.value);
     }
 
-    let results:  Articulo[] = [];
+    let results: Articulo[] = [];
 
     if (!search) {
         results = [];
@@ -99,7 +100,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                 reader.onload = () => {
                     const newImage = reader.result as string;
                     setImages(prevImages => [...prevImages, reader.result as string]);
-                    if (promocion.id > 0) {
+                    if (promocion.id !== null && promocion.id > 0) {
                         setArticuloImages(prevImages => [...prevImages, { id: 0, eliminado: false, url: newImage }]);
                     }
                 };
@@ -109,7 +110,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
     };
 
     const removeImage = (index: number) => {
-        if (promocion.id > 0) {
+        if (promocion.id !== null && promocion.id > 0) {
             setArticuloImages(articuloImages.filter(img => img.id !== index));
         } else {
             setImages(prevImages => prevImages.filter((_, i) => i !== index));
@@ -164,6 +165,27 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         setArticulos([...insumos, ...manufacturados]);
     }, [insumos, manufacturados]);
 
+    const handleAgregar = (articulo: Articulo) => {
+        const nuevoDetalle = {
+            id: null,
+            eliminado: false,
+            cantidad: 1,
+            articulo: articulo
+        };
+        setDetalles([...detalles, nuevoDetalle]);
+    };
+
+    const handleCantidadChange = (index: number, cantidad: number) => {
+        const nuevosDetalles = [...detalles];
+        nuevosDetalles[index].cantidad = cantidad;
+        setDetalles(nuevosDetalles);
+    };
+
+    const handleEliminar = (index: number) => {
+        const nuevosDetalles = detalles.filter((_, i) => i !== index);
+        setDetalles(nuevosDetalles);
+    };
+
     const handleNext = () => setStep((prev) => prev + 1);
     const handleBack = () => setStep((prev) => prev - 1);
 
@@ -171,6 +193,8 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         setStep(1);
         setPromocion(emptyPromocion);
         onClose();
+        setDetalles([]);
+        setFiles([]);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -191,15 +215,15 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
             promocion.imagenes = articuloImages;
         }
 
-        //promocion.detalles = detalles
+        promocion.promocionDetalles = detalles;
 
-        if (promocion.id > 0) {
+        if (promocion.id !== null && promocion.id > 0) {
 
         } else {
             try {
-                /*if (promocion.sucursal === null) {
-                promocion.sucursal = emptySucursal;
-            }*/
+                if (!promocion.sucursales.find(sucursal => sucursal.id === emptySucursal.id)) {
+                    promocion.sucursales.push(emptySucursal);
+                }
                 const data = await createPromocion(promocion);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
@@ -364,7 +388,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                                     <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
                                 </label>
                             </Box>
-                            {promocion.id > 0 ?
+                            {promocion.id !== null && promocion.id > 0 ?
                                 images.length > 0 && (
                                     <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
                                         {articuloImages.map((image, index) => (
@@ -427,7 +451,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                                                     <Typography variant="body1">{articulo.denominacion}</Typography>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Button variant="contained" color="success">Agregar</Button>
+                                                    <Button variant="contained" color="success" onClick={() => handleAgregar(articulo)}>Agregar</Button>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -437,6 +461,31 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                         <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
                             Detalles de la Promoción
                         </Typography>
+                        <Grid container spacing={2}>
+                            {detalles.map((detalle, index) => (
+                                <Grid item xs={12} sm={6} md={4} key={index}>
+                                    <Card>
+                                        <CardContent>
+                                            <Typography variant="body1" gutterBottom mb={2}>
+                                                {detalle.articulo.denominacion}
+                                            </Typography>
+                                            <TextField
+                                                type="decimal"
+                                                value={detalle.cantidad}
+                                                onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
+                                                label="Cantidad"
+                                                fullWidth
+                                            />
+                                        </CardContent>
+                                        <CardActions>
+                                            <Button variant="contained" color="error" onClick={() => handleEliminar(index)} fullWidth>
+                                                Eliminar
+                                            </Button>
+                                        </CardActions>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
                         <Box mt={2} display="flex" justifyContent="space-between">
                             <Button variant="contained" color='secondary' onClick={handleBack}>
                                 Atrás

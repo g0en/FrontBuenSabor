@@ -1,10 +1,11 @@
-import Base from "./Base";
 import Imagen from "./Imagen";
 import PromocionDetalle from "./PromocionDetalle";
-import Sucursal from "./Sucursal";
+import SucursalShortDto from "./SucursalShortDto";
 import { TipoPromocion } from "./enums/TipoPromocion";
 
-export default interface Promocion extends Base{
+export default interface Promocion{
+    id: null,
+    eliminado: boolean,
     denominacion: string,
     fechaDesde: string,
     fechaHasta: string,
@@ -14,6 +15,6 @@ export default interface Promocion extends Base{
     precioPromocional: number,
     tipoPromocion: TipoPromocion | null,
     imagenes: Imagen[],
-    sucursal: Sucursal[] | null,
-    promocionDetalle: PromocionDetalle[]
+    sucursales: SucursalShortDto[],
+    promocionDetalles: PromocionDetalle[]
 }

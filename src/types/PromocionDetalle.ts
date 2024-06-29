@@ -1,7 +1,8 @@
 import Articulo from "./Articulo";
-import Base from "./Base";
 
-export default interface PromocionDetalle extends Base{
+export default interface PromocionDetalle{
+    id: null,
+    eliminado: boolean,
     cantidad: number,
     articulo: Articulo
 }
