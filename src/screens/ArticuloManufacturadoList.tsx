@@ -34,7 +34,7 @@ import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 const emptyArticuloManufacturado = {
-    id: 0, eliminado: false, denominacion: '', precioVenta: 0, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, sucursal: null, descripcion: '', tiempoEstimadoMinutos: 0, preparacion: '', articuloManufacturadoDetalles: null
+    id: 0, eliminado: false, denominacion: '', precioVenta: 0, habilitado: true, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, sucursal: null, descripcion: '', tiempoEstimadoMinutos: 0, preparacion: '', articuloManufacturadoDetalles: null
 };
 
 function ArticuloManufacturadoList() {
@@ -242,8 +242,14 @@ function ArticuloManufacturadoList() {
         setCurrentArticuloManufacturado({ ...currentArticuloManufacturado, [e.target.name]: e.target.value });
     };
 
+    const handleBaja = async (articulo: ArticuloManufacturado) => {
+        articulo.habilitado = false;
+        await updateArticuloManufacturado(articulo);
+        window.location.reload();
+    }
+
     const handleAlta = async (articulo: ArticuloManufacturado) => {
-        articulo.eliminado = false;
+        articulo.habilitado = true;
         await updateArticuloManufacturado(articulo);
         window.location.reload();
     }
@@ -370,9 +376,9 @@ function ArticuloManufacturadoList() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {articulosManufacturados
+                            {articulosManufacturados.filter(articulo => articulo.eliminado === false)
                                 .map((articulo) => (
-                                    <TableRow sx={{ backgroundColor: articulo.eliminado ? "#B0B0B0" : "none" }} key={articulo.id}>
+                                    <TableRow sx={{ backgroundColor: articulo.habilitado === true ? "none" : "#B0B0B0" }} key={articulo.id}>
                                         <TableCell align="center">{articulo.denominacion}</TableCell>
                                         <TableCell align="center">{articulo.unidadMedida.denominacion}</TableCell>
                                         <TableCell align="center">{articulo.precioVenta}</TableCell>
@@ -387,7 +393,7 @@ function ArticuloManufacturadoList() {
                                                     <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                                         <VisibilityIcon />
                                                     </IconButton>
-                                                    <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
+                                                    <IconButton aria-label="delete" onClick={() => handleBaja(articulo)} color="error">
                                                         <DeleteIcon />
                                                     </IconButton>
                                                 </TableCell>

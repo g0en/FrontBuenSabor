@@ -27,7 +27,7 @@ import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 const emptyArticuloInsumo = {
-    id: 0, eliminado: false, denominacion: '', precioVenta: 0, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, sucursal: null, precioCompra: 0, stockActual: 0, stockMinimo: 0, stockMaximo: 0, esParaElaborar: false
+    id: 0, eliminado: false, denominacion: '', precioVenta: 0, habilitado: true, imagenes: [], unidadMedida: emptyUnidadMedida, categoria: emptyCategoria, sucursal: null, precioCompra: 0, stockActual: 0, stockMinimo: 0, stockMaximo: 0, esParaElaborar: false
 };
 
 function ArticuloInsumoList() {
@@ -171,8 +171,14 @@ function ArticuloInsumoList() {
         setView(false);
     };
 
+    const handleBaja = async (articulo: ArticuloInsumo) => {
+        articulo.habilitado = false;
+        await updateArticuloInsumo(articulo);
+        window.location.reload();
+    }
+
     const handleAlta = async (articulo: ArticuloInsumo) => {
-        articulo.eliminado = false;
+        articulo.habilitado = true;
         await updateArticuloInsumo(articulo);
         window.location.reload();
     }
@@ -186,7 +192,7 @@ function ArticuloInsumoList() {
                 return;
             }
         } catch (error) {
-            console.log("Error al crear un Articulo Insumo.");
+            console.log("Error al dar de baja un Articulo Insumo.");
         }
 
         /*try {
@@ -333,9 +339,9 @@ function ArticuloInsumoList() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {articulosInsumo
+                            {articulosInsumo.filter(articulo => articulo.eliminado === false)
                                 .map((articulo) => (
-                                    <TableRow sx={{ backgroundColor: articulo.eliminado ? "#B0B0B0" : "none" }} key={articulo.id}>
+                                    <TableRow sx={{ backgroundColor: articulo.habilitado ? "none" : "#B0B0B0" }} key={articulo.id}>
                                         <TableCell>{articulo.denominacion}</TableCell>
                                         <TableCell>{articulo.precioCompra}</TableCell>
                                         <TableCell>{articulo.precioVenta}</TableCell>
@@ -350,7 +356,7 @@ function ArticuloInsumoList() {
                                         <TableCell>
 
                                             {
-                                                articulo.eliminado === false ?
+                                                articulo.habilitado === true ?
                                                     <Box>
                                                         <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                                             <Visibility />
@@ -358,7 +364,7 @@ function ArticuloInsumoList() {
                                                         <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
                                                             <Edit />
                                                         </IconButton>
-                                                        <IconButton aria-label="delete" onClick={() => handleDelete(articulo)} color="error">
+                                                        <IconButton aria-label="delete" onClick={() => handleBaja(articulo)} color="error">
                                                             <Delete />
                                                         </IconButton>
                                                     </Box>

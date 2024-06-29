@@ -286,7 +286,7 @@ function CategoriaList() {
                                                         checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
                                                         onChange={() => handleSucursalChange(sucursal.id)}
                                                         color="primary"
-                                                        disabled
+                                                        disabled={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
                                                     />
                                                 }
                                                 label={sucursal.nombre}
