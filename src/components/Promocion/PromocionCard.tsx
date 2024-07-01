@@ -7,6 +7,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Promocion from '../../types/Promocion';
 import AddPromocionModal from './AddPromocionModal';
 import Visibility from '@mui/icons-material/Visibility';
+import ViewPromocionModal from './PromocionViewModal';
 
 interface PromocionCardProps {
     onClose: () => void;
@@ -16,6 +17,7 @@ interface PromocionCardProps {
 const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [openEdit, setOpenEdit] = useState(false);
+    const [openView, setOpenView] = useState(false);
 
     const isActiva = new Date(promocion.fechaHasta) > new Date();
 
@@ -34,6 +36,14 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
     const handleCloseModal = async () => {
         setOpenEdit(false);
         onClose();
+    }
+
+    const handleView = () => {
+        setOpenView(true);
+    }
+
+    const handleCloseViewModal = () => {
+        setOpenView(false);
     }
 
     return (
@@ -81,7 +91,7 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
                     <IconButton aria-label="edit" color='primary' size="small" onClick={handleEdit}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton  aria-label="view" color='secondary' size="small">
+                    <IconButton  aria-label="view" color='secondary' size="small" onClick={handleView}>
                         <Visibility />
                     </IconButton>
                     <IconButton aria-label="delete" color='error' size="small">
@@ -90,6 +100,7 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
                 </CardContent>
             </Card>
             <AddPromocionModal open={openEdit} onClose={handleCloseModal} currentPromocion={promocion}/>
+            <ViewPromocionModal open={openView} onClose={handleCloseViewModal} promocion={promocion} />
         </Box>
     );
 };

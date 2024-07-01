@@ -43,7 +43,6 @@ function ArticuloInsumoList() {
     const [images, setImages] = useState<string[]>([]);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
-    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' };
     const { getAccessTokenSilently } = useAuth0();
 
     const getAllArticuloInsumoBySucursal = async () => {

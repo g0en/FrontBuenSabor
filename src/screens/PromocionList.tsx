@@ -30,15 +30,15 @@ function PromocionList() {
     const [promociones, setPromociones] = useState<Promocion[]>([]);
     const { idSucursal } = useParams();
     const [open, setOpen] = useState(false);
-    const [currentPromocion, setCurrentPromocion] = useState<Promocion>({...emptyPromocion});
+    const [currentPromocion, setCurrentPromocion] = useState<Promocion>({ ...emptyPromocion });
     const { getAccessTokenSilently } = useAuth0();
 
     const getAllPromocionesBySucursal = async () => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         const promociones: Promocion[] = await PromocionFindBySucursal(Number(idSucursal), token);
         setPromociones(promociones);
     }
@@ -48,14 +48,14 @@ function PromocionList() {
     }, [idSucursal]);
 
     const handleOpenModal = () => {
-        setCurrentPromocion({...emptyPromocion});
+        setCurrentPromocion({ ...emptyPromocion });
         setOpen(true);
     }
 
     const handleCloseModal = async () => {
         setOpen(false);
         await getAllPromocionesBySucursal();
-        setCurrentPromocion({...emptyPromocion});
+        setCurrentPromocion({ ...emptyPromocion });
     }
 
     return (
@@ -78,7 +78,7 @@ function PromocionList() {
                     ))}
                 </Grid>
             </Box>
-            <AddPromocionModal open={open} onClose={handleCloseModal} currentPromocion={currentPromocion}/>
+            <AddPromocionModal open={open} onClose={handleCloseModal} currentPromocion={currentPromocion} />
         </>
     )
 }

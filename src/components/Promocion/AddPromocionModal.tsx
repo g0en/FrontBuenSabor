@@ -15,12 +15,9 @@ import { ArticuloInsumoGetAllParaVender } from '../../services/ArticuloInsumoSer
 import ArticuloManufacturado from '../../types/ArticuloManufacturado';
 import ArticuloInsumo from '../../types/ArticuloInsumo';
 import PromocionDetalle from '../../types/PromocionDetalle';
-<<<<<<< HEAD
 import { SucursalGetByEmpresaId } from '../../services/SucursalService';
 import SucursalShortDto from '../../types/SucursalShortDto';
-=======
 import { useAuth0 } from '@auth0/auth0-react';
->>>>>>> 17165f60923ebac94b471c747d0e6c6c15ad962f
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -54,7 +51,6 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     const [total, setTotal] = useState(0);
     const [sucursales, setSucursales] = useState<SucursalShortDto[]>([]);
     const [currentSucursales, setCurrentSucursales] = useState<SucursalShortDto[]>(currentPromocion.sucursales);
-    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
     const { getAccessTokenSilently } = useAuth0();
 
     const createPromocion = async (promocion: Promocion) => {
@@ -68,7 +64,12 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     };
 
     const updatePromocion = async (promocion: Promocion) => {
-        return PromocionUpdate(promocion);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        return PromocionUpdate(promocion, token);
     };
 
     const getAllArticuloInsumoParaVender = async () => {
@@ -94,7 +95,12 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     };
 
     const getAllSucursales = async () => {
-        const sucursales: SucursalShortDto[] = await SucursalGetByEmpresaId(Number(idEmpresa));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const sucursales: SucursalShortDto[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
         setSucursales(sucursales);
     }
 
@@ -276,6 +282,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         setSearch("");
         setTotal(0);
         setFiles([]);
+        setArticuloImages([]);
         setPromocion(currentPromocion);
         if (promocion.id !== null && promocion.id > 0) {
             setDetalles(JSON.parse(JSON.stringify(currentPromocion.promocionDetalles)));
