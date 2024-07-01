@@ -43,11 +43,8 @@ function ArticuloInsumoList() {
     const [images, setImages] = useState<string[]>([]);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
-<<<<<<< HEAD
-=======
     const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' };
     const { getAccessTokenSilently } = useAuth0();
->>>>>>> 17165f60923ebac94b471c747d0e6c6c15ad962f
 
     const getAllArticuloInsumoBySucursal = async () => {
         const token = await getAccessTokenSilently({
@@ -249,30 +246,6 @@ function ArticuloInsumoList() {
         }
     }
 
-<<<<<<< HEAD
-    const handleDelete = async (articulo: ArticuloInsumo) => {
-        //const imagenes: Imagen[] = articulo.imagenes;
-
-        try {
-            const data = await deleteArticuloInsumo(articulo.id);
-            if (data.status !== 200) {
-                return;
-            }
-        } catch (error) {
-            console.log("Error al dar de baja un Articulo Insumo.");
-        }
-
-        /*try {
-            await deleteImages(imagenes);
-        } catch (error) {
-            console.log("Error al subir las Imagenes.");
-        }*/
-
-        //window.location.reload();
-    };
-
-=======
->>>>>>> 17165f60923ebac94b471c747d0e6c6c15ad962f
     const deleteImages = async (imagenes: Imagen[]) => {
         try {
             for (let i = 0; i < imagenes.length; i++) {
