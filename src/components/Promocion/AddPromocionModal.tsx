@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper, Card, CardContent, CardActions } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper, Card, CardContent, CardActions, FormControlLabel, Checkbox, MenuItem } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TipoPromocion } from '../../types/enums/TipoPromocion';
 import Promocion from '../../types/Promocion';
-import { PromocionCreate } from '../../services/PromocionService';
+import { PromocionCreate, PromocionUpdate } from '../../services/PromocionService';
 import { Delete } from "@mui/icons-material";
 import Imagen from '../../types/Imagen';
 import { CloudinaryPromocionUpload, CloudinaryPromocionDelete } from '../../services/ImagenPromocionService';
@@ -15,6 +15,8 @@ import { ArticuloInsumoGetAllParaVender } from '../../services/ArticuloInsumoSer
 import ArticuloManufacturado from '../../types/ArticuloManufacturado';
 import ArticuloInsumo from '../../types/ArticuloInsumo';
 import PromocionDetalle from '../../types/PromocionDetalle';
+import { SucursalGetByEmpresaId } from '../../services/SucursalService';
+import SucursalShortDto from '../../types/SucursalShortDto';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -27,43 +29,34 @@ const modalStyle = {
     p: 4,
 };
 
-const emptyPromocion: Promocion = {
-    id: null,
-    eliminado: false,
-    denominacion: '',
-    fechaDesde: '',
-    fechaHasta: '',
-    horaDesde: '',
-    horaHasta: '',
-    descripcionDescuento: '',
-    precioPromocional: 0,
-    tipoPromocion: null,
-    imagenes: [],
-    sucursales: [],
-    promocionDetalles: [],
-};
-
 interface AddPromocionModalProps {
     open: boolean;
     onClose: () => void;
+    currentPromocion: Promocion;
 }
 
-const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) => {
+const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, currentPromocion }) => {
     const [step, setStep] = useState(1);
-    const [promocion, setPromocion] = useState<Promocion>({ ...emptyPromocion });
+    const [promocion, setPromocion] = useState<Promocion>(currentPromocion);
     const [files, setFiles] = useState<File[]>([]);
     const [images, setImages] = useState<string[]>([]);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
-    const { idSucursal } = useParams();
+    const { idSucursal, idEmpresa } = useParams();
     const [search, setSearch] = useState("");
     const [manufacturados, setManufacturados] = useState<ArticuloManufacturado[]>([]);
     const [insumos, setInsumos] = useState<ArticuloInsumo[]>([]);
     const [articulos, setArticulos] = useState<Articulo[]>([]);
     const [detalles, setDetalles] = useState<PromocionDetalle[]>([]);
-    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
+    const [total, setTotal] = useState(0);
+    const [sucursales, setSucursales] = useState<SucursalShortDto[]>([]);
+    const [currentSucursales, setCurrentSucursales] = useState<SucursalShortDto[]>(currentPromocion.sucursales);
 
     const createPromocion = async (promocion: Promocion) => {
         return PromocionCreate(promocion);
+    };
+
+    const updatePromocion = async (promocion: Promocion) => {
+        return PromocionUpdate(promocion);
     };
 
     const getAllArticuloInsumoParaVender = async () => {
@@ -75,6 +68,11 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         const manufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
         setManufacturados(manufacturados);
     };
+
+    const getAllSucursales = async () => {
+        const sucursales: SucursalShortDto[] = await SucursalGetByEmpresaId(Number(idEmpresa));
+        setSucursales(sucursales);
+    }
 
     const searcher = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
@@ -159,11 +157,51 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
     useEffect(() => {
         getAllArticuloManufacturadoBySucursal();
         getAllArticuloInsumoParaVender();
-    }, [idSucursal]);
+        getAllSucursales();
+        if(currentPromocion.id !== null){
+            detalles.forEach(detalle => {
+                setTotal(total + detalle.articulo.precioVenta * detalle.cantidad);
+            });
+        }
+    }, [idSucursal, idEmpresa]);
 
     useEffect(() => {
         setArticulos([...insumos, ...manufacturados]);
     }, [insumos, manufacturados]);
+
+    useEffect(() => {
+        if (promocion.id !== null && promocion.id > 0) {
+            setDetalles(JSON.parse(JSON.stringify(currentPromocion.promocionDetalles)));
+        }
+        setImages(promocion.imagenes.map(imagen => imagen.url));
+        setArticuloImages(promocion.imagenes);
+    }, [currentPromocion]);
+
+    const handleSucursalChange = (id: number) => {
+        const sucursalesSeleccionadas = promocion.sucursales || [];
+        const sucursalExistenteIndex = sucursalesSeleccionadas.findIndex(s => s.id === id);
+
+        if (sucursalExistenteIndex !== -1) {
+            // Si la sucursal ya está seleccionada, la quitamos del array
+            const updatedSucursales = [...sucursalesSeleccionadas];
+            updatedSucursales.splice(sucursalExistenteIndex, 1);
+            setCurrentSucursales(updatedSucursales);
+            setPromocion({
+                ...promocion,
+                sucursales: updatedSucursales
+            });
+        } else {
+            // Si la sucursal no está seleccionada, la añadimos al array
+            const sucursal = sucursales.find(s => s.id === id);
+            if (sucursal) {
+                currentSucursales.push(sucursal);
+                setPromocion({
+                    ...promocion,
+                    sucursales: [...sucursalesSeleccionadas, sucursal]
+                });
+            }
+        }
+    };
 
     const handleAgregar = (articulo: Articulo) => {
         const nuevoDetalle = {
@@ -173,11 +211,14 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
             articulo: articulo
         };
         setDetalles([...detalles, nuevoDetalle]);
+        handleTotal(articulo.precioVenta, nuevoDetalle.cantidad);
+        setSearch("");
     };
 
     const handleCantidadChange = (index: number, cantidad: number) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index].cantidad = cantidad;
+        handleTotal(nuevosDetalles[index].articulo.precioVenta, cantidad);
         setDetalles(nuevosDetalles);
     };
 
@@ -186,15 +227,28 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         setDetalles(nuevosDetalles);
     };
 
-    const handleNext = () => setStep((prev) => prev + 1);
+    const handleTotal = (precioVenta: number, cantidad: number) => {
+        setTotal(total + precioVenta * cantidad);
+    }
+
+    const handleNext = () => {
+        setStep((prev) => prev + 1);
+    }
     const handleBack = () => setStep((prev) => prev - 1);
 
     const handleClose = () => {
         setStep(1);
-        setPromocion(emptyPromocion);
-        onClose();
-        setDetalles([]);
+        setSearch("");
+        setTotal(0);
         setFiles([]);
+        setPromocion(currentPromocion);
+        if (promocion.id !== null && promocion.id > 0) {
+            setDetalles(JSON.parse(JSON.stringify(currentPromocion.promocionDetalles)));
+        } else {
+            setDetalles([]);
+        }
+
+        onClose();
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -216,21 +270,28 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         }
 
         promocion.promocionDetalles = detalles;
+        promocion.sucursales = currentSucursales;
+
 
         if (promocion.id !== null && promocion.id > 0) {
+            try {
+                const data = await updatePromocion(promocion);
+                if (data.status !== 200) {
+                    deleteImages(imagenes);
+                    return;
+                }
 
+            } catch (error) {
+                console.log("Error al actualizar un articulo manufacturado.");
+            }
         } else {
             try {
-                if (!promocion.sucursales.find(sucursal => sucursal.id === emptySucursal.id)) {
-                    promocion.sucursales.push(emptySucursal);
-                }
                 const data = await createPromocion(promocion);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
                     return;
                 }
 
-                setPromocion(emptyPromocion);
             } catch (error) {
                 console.log("Error al actualizar un articulo manufacturado.");
             }
@@ -255,9 +316,16 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                 >
                     <CloseIcon />
                 </IconButton>
-                <Typography variant="h6" gutterBottom>
-                    Agregar Promoción
-                </Typography>
+                {promocion.id !== null && promocion.id > 0 ?
+                    <Typography variant="h6" gutterBottom>
+                        Actualizar Promoción
+                    </Typography>
+                    :
+                    <Typography variant="h6" gutterBottom>
+                        Agregar Promoción
+                    </Typography>
+                }
+
                 {step === 1 && (
                     <>
                         <Grid container spacing={2}>
@@ -280,12 +348,9 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                                     value={promocion.tipoPromocion}
                                     onChange={handleChange}
                                     margin="normal"
-                                    SelectProps={{
-                                        native: true,
-                                    }}
                                 >
-                                    <option value={TipoPromocion.HAPPY_HOUR}>Happy Hour</option>
-                                    <option value={TipoPromocion.PROMOCION}>Promoción</option>
+                                    <MenuItem key={1} value={TipoPromocion.HAPPY_HOUR}>Happy Hour</MenuItem>
+                                    <MenuItem key={2} value={TipoPromocion.PROMOCION}>Promoción</MenuItem>
                                 </TextField>
                             </Grid>
                         </Grid>
@@ -458,41 +523,91 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-                            Detalles de la Promoción
+                        <Typography variant="body1" gutterBottom sx={{ mt: 3 }}>
+                            Precio neto: ${total}
                         </Typography>
-                        <Grid container spacing={2}>
-                            {detalles.map((detalle, index) => (
-                                <Grid item xs={12} sm={6} md={4} key={index}>
-                                    <Card>
-                                        <CardContent>
-                                            <Typography variant="body1" gutterBottom mb={2}>
-                                                {detalle.articulo.denominacion}
-                                            </Typography>
-                                            <TextField
-                                                type="decimal"
-                                                value={detalle.cantidad}
-                                                onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
-                                                label="Cantidad"
-                                                fullWidth
-                                            />
-                                        </CardContent>
-                                        <CardActions>
-                                            <Button variant="contained" color="error" onClick={() => handleEliminar(index)} fullWidth>
-                                                Eliminar
-                                            </Button>
-                                        </CardActions>
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
+                        <Box>
+                            <TextField
+                                label="Precio Promocional"
+                                name="precioPromocional"
+                                value={promocion.precioPromocional}
+                                onChange={handleChange}
+                                margin="normal"
+                            />
+                        </Box>
+                        <Box mb={4}>
+                            <Typography variant="body1" gutterBottom sx={{ mt: 3 }}>
+                                Detalles de la Promoción
+                            </Typography>
+                            <Grid container spacing={2}>
+                                {detalles.map((detalle, index) => (
+                                    <Grid item xs={12} sm={6} md={4} key={index}>
+                                        <Card>
+                                            <CardContent>
+                                                <Typography variant="body1" gutterBottom mb={2}>
+                                                    {detalle.articulo.denominacion}
+                                                </Typography>
+                                                <TextField
+                                                    type="decimal"
+                                                    value={detalle.cantidad}
+                                                    onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
+                                                    label="Cantidad"
+                                                    fullWidth
+                                                />
+                                            </CardContent>
+                                            <CardActions>
+                                                <Button variant="contained" color="error" onClick={() => handleEliminar(index)} fullWidth>
+                                                    Eliminar
+                                                </Button>
+                                            </CardActions>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
                         <Box mt={2} display="flex" justifyContent="space-between">
                             <Button variant="contained" color='secondary' onClick={handleBack}>
                                 Atrás
                             </Button>
-                            <Button variant="contained" onClick={() => { handleSubmit(); }}>
-                                Crear Promoción
+                            <Button variant="contained" onClick={handleNext}>
+                                Siguiente
                             </Button>
+                        </Box>
+                    </>
+                )}
+                {step === 4 && (
+                    <>
+                        <Typography variant="body1" gutterBottom sx={{ mt: 3 }}>
+                            Seleccione la/s sucursales:
+                        </Typography>
+                        <Box mb={3}>
+                            {sucursales.map(sucursal => (
+                                <FormControlLabel
+                                    key={sucursal.id}
+                                    control={
+                                        <Checkbox
+                                            checked={promocion.sucursales?.some(s => s.id === sucursal.id) || false}
+                                            onChange={() => handleSucursalChange(sucursal.id)}
+                                            color="primary"
+                                        />
+                                    }
+                                    label={sucursal.nombre}
+                                />
+                            ))}
+                        </Box>
+                        <Box mt={2} display="flex" justifyContent="space-between">
+                            <Button variant="contained" color='secondary' onClick={handleBack}>
+                                Atrás
+                            </Button>
+                            {promocion.id !== null && promocion.id > 0 ?
+                                <Button variant="contained" onClick={() => { handleSubmit(); }}>
+                                    Actualizar Promoción
+                                </Button>
+                                :
+                                <Button variant="contained" onClick={() => { handleSubmit(); }}>
+                                    Crear Promoción
+                                </Button>
+                            }
                         </Box>
                     </>
                 )}

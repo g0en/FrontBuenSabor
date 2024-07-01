@@ -88,7 +88,12 @@ export async function CategoriaBaja(idCategoria: number, idSucursal: number){
 		},
         mode: 'cors'
 	});
-	return await response.json() as string;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as string
+	};
 }
 
 export async function CategoriaDelete(idCategoria: number){
@@ -101,5 +106,10 @@ export async function CategoriaDelete(idCategoria: number){
 		},
         mode: 'cors'
 	});
-	return await response.json() as string;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as string
+	};
 }

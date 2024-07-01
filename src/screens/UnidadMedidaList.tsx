@@ -49,10 +49,15 @@ function UnidadMedidaList() {
         try {
             await UnidadMedidaCreate(unidadMedida);
             toast.success('Unidad de medida creada correctamente');
-            getAllUnidadMedida();
         } catch (error) {
             console.log('Error al crear la unidad de medida', error);
             toast.error('Error al crear la unidad de medida');
+        }
+
+        try{
+            await getAllUnidadMedida();
+        }catch(error){
+            console.log("Error al traer las unidades de medida.");
         }
     };
 
@@ -60,21 +65,31 @@ function UnidadMedidaList() {
         try {
             await UnidadMedidaUpdate(unidadMedida);
             toast.success('Unidad de medida actualizada correctamente');
-            getAllUnidadMedida();
         } catch (error) {
             console.log('Error al actualizar la unidad de medida', error);
             toast.error('Error al actualizar la unidad de medida');
+        }
+
+        try{
+            await getAllUnidadMedida();
+        }catch(error){
+            console.log("Error al traer las unidades de medida.");
         }
     };
 
     const deleteUnidadMedida = async (id: number) => {
         try {
             await UnidadMedidaDelete(id);
-            toast.success('Unidad de medida eliminada correctamente');
-            getAllUnidadMedida();
+            //toast.success('Unidad de medida eliminada correctamente');
         } catch (error) {
             console.log('Error al eliminar la unidad de medida', error);
-            toast.error('Error al eliminar la unidad de medida');
+            //toast.error('Error al eliminar la unidad de medida');
+        }
+
+        try{
+            await getAllUnidadMedida();
+        }catch(error){
+            console.log("Error al traer las unidades de medida.");
         }
     };
 

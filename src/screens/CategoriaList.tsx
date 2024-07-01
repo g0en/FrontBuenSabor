@@ -40,26 +40,20 @@ function CategoriaList() {
 
     const createCategoria = async (categoria: Categoria) => {
         await CategoriaCreate(categoria);
-        getAllCategoriaBySucursal();
         setOpen(false); // Close the modal after creation
     };
 
     const updateCategoria = async (categoria: Categoria) => {
         await CategoriaUpdate(categoria);
-        getAllCategoriaBySucursal();
         setOpen(false); // Close the modal after update
     };
 
     const bajaCategoria = async (idCategoria: number) => {
         await CategoriaBaja(idCategoria, Number(idSucursal));
-        getAllCategoriaBySucursal();
-        window.location.reload();
     };
 
     const deleteCategoria = async (idCategoria: number) => {
         await CategoriaDelete(idCategoria);
-        getAllCategoriaBySucursal();
-        window.location.reload();
     };
 
     const handleCategoriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +83,7 @@ function CategoriaList() {
             }
         }
     };
+    
     const handleAddSubCategoria = () => {
         setCurrentCategoria({
             ...currentCategoria,
@@ -113,21 +108,45 @@ function CategoriaList() {
         setOpen(true);
     }
 
-    const handleDelete = (categoria: Categoria | CategoriaGetDto) => {
+    const handleDelete = async (categoria: Categoria | CategoriaGetDto) => {
         if (categoria.id !== null) {
-            deleteCategoria(categoria.id);
+            try{
+                await deleteCategoria(categoria.id);
+            }catch(error){
+                console.log("Error al eliminar la categoria.");
+            }
+        }
+
+        try {
+            await getAllCategoriaBySucursal();
+        } catch (error) {
+            console.log("Error al cargar las categorias.");
         }
     }
 
-    const handleBaja = (categoria: Categoria | CategoriaGetDto) => {
+    const handleBaja = async (categoria: Categoria | CategoriaGetDto) => {
         if (categoria.id !== null) {
-            bajaCategoria(categoria.id);
+            try{
+                await bajaCategoria(categoria.id);
+            }catch(error){
+                console.log("Error al dar de baja la categoria.");
+            }
+        }
+
+        try {
+            await getAllCategoriaBySucursal();
+        } catch (error) {
+            console.log("Error al cargar las categorias.");
         }
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (currentCategoria.id === null) {
-            createCategoria(currentCategoria);
+            try{
+                await createCategoria(currentCategoria);
+            }catch(error){
+                console.log("No se pudo crear la categoria.");
+            }
         } else {
             if (currentCategoria.subCategorias !== null) {
                 let subcategorias: Categoria[] = currentCategoria.subCategorias;
@@ -135,7 +154,19 @@ function CategoriaList() {
                     subcategorias[i].sucursales = currentCategoria.sucursales;
                 }
             }
+
+            try {
+                await updateCategoria(currentCategoria);
+            } catch (error) {
+                console.log("Error al cargar las categorias.");
+            }
             updateCategoria(currentCategoria);
+        }
+
+        try {
+            await getAllCategoriaBySucursal();
+        } catch (error) {
+            console.log("Error al cargar las categorias.");
         }
 
 
@@ -272,12 +303,12 @@ function CategoriaList() {
 
                     <Box mb={2}>
                         <Typography variant="subtitle1" gutterBottom>
-                            Selecciona la/s sucursales:
+                            Seleccione la/s sucursales:
                         </Typography>
                         {
                             currentCategoria.id !== null ?
                                 <div>
-                                    <div style={{ pointerEvents: 'none', opacity: 0.9 }}>
+                                    <div>
                                         {sucursales.map(sucursal => (
                                             <FormControlLabel
                                                 key={sucursal.id}
@@ -285,8 +316,7 @@ function CategoriaList() {
                                                     <Checkbox
                                                         checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
                                                         onChange={() => handleSucursalChange(sucursal.id)}
-                                                        color="primary"
-                                                        disabled={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
+                                                        color="primary"  
                                                     />
                                                 }
                                                 label={sucursal.nombre}

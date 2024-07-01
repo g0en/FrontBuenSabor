@@ -8,10 +8,28 @@ import PromocionCard from '../components/Promocion/PromocionCard';
 import AddIcon from "@mui/icons-material/Add";
 import AddPromocionModal from '../components/Promocion/AddPromocionModal';
 
+const emptyPromocion: Promocion = {
+    id: null,
+    eliminado: false,
+    denominacion: '',
+    fechaDesde: '',
+    fechaHasta: '',
+    horaDesde: '',
+    horaHasta: '',
+    descripcionDescuento: '',
+    precioPromocional: 0,
+    habilitado: true,
+    tipoPromocion: null,
+    imagenes: [],
+    sucursales: [],
+    promocionDetalles: [],
+};
+
 function PromocionList() {
     const [promociones, setPromociones] = useState<Promocion[]>([]);
     const { idSucursal } = useParams();
     const [open, setOpen] = useState(false);
+    const [currentPromocion, setCurrentPromocion] = useState<Promocion>({...emptyPromocion});
 
     const getAllPromocionesBySucursal = async () => {
         const promociones: Promocion[] = await PromocionFindBySucursal(Number(idSucursal));
@@ -23,11 +41,14 @@ function PromocionList() {
     }, [idSucursal]);
 
     const handleOpenModal = () => {
+        setCurrentPromocion({...emptyPromocion});
         setOpen(true);
     }
 
-    const handleCloseModal = () => {
+    const handleCloseModal = async () => {
         setOpen(false);
+        await getAllPromocionesBySucursal();
+        setCurrentPromocion({...emptyPromocion});
     }
 
     return (
@@ -45,12 +66,12 @@ function PromocionList() {
                 <Grid container spacing={3}>
                     {promociones.map((promocion) => (
                         <Grid item xs={12} sm={6} md={4} key={promocion.id}>
-                            <PromocionCard promocion={promocion} />
+                            <PromocionCard onClose={handleCloseModal} promocion={promocion} />
                         </Grid>
                     ))}
                 </Grid>
             </Box>
-            <AddPromocionModal open={open} onClose={handleCloseModal} />
+            <AddPromocionModal open={open} onClose={handleCloseModal} currentPromocion={currentPromocion}/>
         </>
     )
 }

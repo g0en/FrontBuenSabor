@@ -43,7 +43,6 @@ function ArticuloInsumoList() {
     const [images, setImages] = useState<string[]>([]);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
-    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' };
 
     const getAllArticuloInsumoBySucursal = async () => {
         const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
@@ -177,19 +176,37 @@ function ArticuloInsumoList() {
         try {
             const data = await updateArticuloInsumo(articulo);
             if (data.status !== 200) {
+                articulo.habilitado = true;
                 return;
             }
 
-            window.location.reload();
         } catch (error) {
             console.log("Error al dar de baja un articulo insumo");
+        }
+        
+        try {
+            await getAllArticuloInsumoBySucursal();
+        } catch (error) {
+            console.log("Error al cargar los insumos.");
         }
     }
 
     const handleAlta = async (articulo: ArticuloInsumo) => {
         articulo.habilitado = true;
-        await updateArticuloInsumo(articulo);
-        window.location.reload();
+        try {
+            const data = await updateArticuloInsumo(articulo);
+            if (data.status !== 200) {
+                return;
+            }
+
+        } catch (error) {
+            console.log("Error al dar de baja un articulo insumo");
+        }
+        try {
+            await getAllArticuloInsumoBySucursal();
+        } catch (error) {
+            console.log("Error al cargar los insumos.");
+        }
     }
 
     const handleDelete = async (articulo: ArticuloInsumo) => {
@@ -210,7 +227,7 @@ function ArticuloInsumoList() {
             console.log("Error al subir las Imagenes.");
         }*/
 
-        window.location.reload();
+        //window.location.reload();
     };
 
     const deleteImages = async (imagenes: Imagen[]) => {
@@ -291,9 +308,6 @@ function ArticuloInsumoList() {
         } else {
 
             try {
-                if (currentArticuloInsumo.sucursal === null) {
-                    currentArticuloInsumo.sucursal = emptySucursal;
-                }
 
                 const data = await createArticuloInsumo(currentArticuloInsumo);
                 if (data.status !== 200) {
@@ -463,7 +477,7 @@ function ArticuloInsumoList() {
                                 onChange={(e) => handleSelectChange(e, 'unidadMedida')}
                                 style={{ flex: 1, marginRight: 8 }}
                             >
-                                {unidadMedidas.map((unidad) => (
+                                {unidadMedidas.filter(unidad => !unidad.eliminado).map((unidad) => (
                                     <MenuItem key={unidad.id} value={unidad.id}>
                                         {unidad.denominacion}
                                     </MenuItem>
@@ -491,6 +505,7 @@ function ArticuloInsumoList() {
                             >
                                 {categorias
                                     .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
+                                    .filter(categoria => !categoria.eliminado)
                                     .map((categoria) => (
                                         <MenuItem key={categoria.id} value={categoria.id !== null ? Number(categoria.id) : 0}>
                                             {categoria.denominacion}

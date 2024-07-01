@@ -89,8 +89,10 @@ export async function PromocionDelete(id: number){
 		},
         mode: 'cors'
 	});
+	const responseData = await response.json() as string;
 	const status = response.status;
-    const data = await response.json();
-
-    return { status, data };
+	return {
+		status,
+		responseData
+	};
 }

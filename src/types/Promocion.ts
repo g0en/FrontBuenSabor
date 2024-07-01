@@ -13,6 +13,7 @@ export default interface Promocion{
     horaHasta: string,
     descripcionDescuento: string,
     precioPromocional: number,
+    habilitado: boolean,
     tipoPromocion: TipoPromocion | null,
     imagenes: Imagen[],
     sucursales: SucursalShortDto[],

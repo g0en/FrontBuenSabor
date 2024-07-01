@@ -54,7 +54,6 @@ function ArticuloManufacturadoList() {
     const [view, setView] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [text, setText] = useState("Crear");
-    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
 
     const getAllArticuloManufacturadoBySucursal = async () => {
         const articulosManufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
@@ -224,8 +223,14 @@ function ArticuloManufacturadoList() {
         setOpenModal(false);
         setCurrentArticuloManufacturado({ ...emptyArticuloManufacturado });
         setInsumos([]);
-        setDetalles([]);
+        if (currentArticuloManufacturado.id > 0) {
+            setDetalles(JSON.parse(JSON.stringify(currentArticuloManufacturado.articuloManufacturadoDetalles)));
+        } else {
+            setDetalles([]);
+        }
+
         setFiles([]);
+        setSearch("");
         setText("Crear");
         setView(false);
     };
@@ -244,14 +249,43 @@ function ArticuloManufacturadoList() {
 
     const handleBaja = async (articulo: ArticuloManufacturado) => {
         articulo.habilitado = false;
-        await updateArticuloManufacturado(articulo);
-        window.location.reload();
+        try {
+            const data = await updateArticuloManufacturado(articulo);
+            if (data.status !== 200) {
+                articulo.habilitado = true;
+                return;
+            }
+
+        } catch (error) {
+            console.log("Error al dar de baja un articulo manufacturado");
+        }
+
+        try {
+            await getAllArticuloManufacturadoBySucursal();
+        } catch (error) {
+            console.log("Error al cargar los insumos.");
+        }
+
     }
 
     const handleAlta = async (articulo: ArticuloManufacturado) => {
         articulo.habilitado = true;
-        await updateArticuloManufacturado(articulo);
-        window.location.reload();
+        try {
+            const data = await updateArticuloManufacturado(articulo);
+            if (data.status !== 200) {
+                articulo.habilitado = false;
+                return;
+            }
+
+        } catch (error) {
+            console.log("Error al dar de baja un articulo manufacturado");
+        }
+
+        try {
+            await getAllArticuloManufacturadoBySucursal();
+        } catch (error) {
+            console.log("Error al cargar los insumos.");
+        }
     }
 
     const handleAgregar = (insumo: ArticuloInsumo) => {
@@ -305,10 +339,10 @@ function ArticuloManufacturadoList() {
             });
         }
 
-        if(articuloImages !== null){
-            currentArticuloManufacturado.imagenes = articuloImages; 
+        if (articuloImages !== null) {
+            currentArticuloManufacturado.imagenes = articuloImages;
         }
-        
+
         currentArticuloManufacturado.articuloManufacturadoDetalles = detalles;
 
         if (currentArticuloManufacturado.id > 0) {
@@ -326,9 +360,6 @@ function ArticuloManufacturadoList() {
 
         } else {
             try {
-                if (currentArticuloManufacturado.sucursal === null) {
-                    currentArticuloManufacturado.sucursal = emptySucursal;
-                }
 
                 const data = await createArticuloManufacturado(currentArticuloManufacturado);
                 if (data.status !== 200) {
@@ -500,7 +531,8 @@ function ArticuloManufacturadoList() {
                                                 unidadMedida: unidadMedidas.find((u) => u.id === Number(e.target.value)) || emptyUnidadMedida
                                             })}
                                         >
-                                            {unidadMedidas.map((unidad) => (
+                                            {unidadMedidas.filter(unidad => !unidad.eliminado)
+                                            .map((unidad) => (
                                                 <MenuItem key={unidad.id} value={unidad.id}>
                                                     {unidad.denominacion}
                                                 </MenuItem>
@@ -520,7 +552,9 @@ function ArticuloManufacturadoList() {
                                                 categoria: categorias.find((c) => c.id === Number(e.target.value)) || emptyCategoria
                                             })}
                                         >
-                                            {categorias.filter(categoria => !categoria.esInsumo).map((categoria) => (
+                                            {categorias.filter(categoria => !categoria.esInsumo)
+                                            .filter(categoria => !categoria.eliminado)
+                                            .map((categoria) => (
                                                 <MenuItem key={categoria.id} value={categoria.id ?? ''}>
                                                     {categoria.denominacion}
                                                 </MenuItem>
@@ -640,19 +674,19 @@ function ArticuloManufacturadoList() {
                                 <Table>
                                     <TableBody>
                                         {results.filter(insumo => insumo.eliminado === false && insumo.esParaElaborar === true)
-                                        .map((insumo) => (
-                                            <TableRow key={insumo.id}>
-                                                <TableCell>
-                                                    <img src={insumo.imagenes.length > 0 ? insumo.imagenes[0].url : ''} alt={`Imagen de ${insumo.denominacion}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="body1">{insumo.denominacion}</Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button variant="contained" color="success" onClick={() => handleAgregar(insumo)}>Agregar</Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                            .map((insumo) => (
+                                                <TableRow key={insumo.id}>
+                                                    <TableCell>
+                                                        <img src={insumo.imagenes.length > 0 ? insumo.imagenes[0].url : ''} alt={`Imagen de ${insumo.denominacion}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Typography variant="body1">{insumo.denominacion}</Typography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Button variant="contained" color="success" onClick={() => handleAgregar(insumo)}>Agregar</Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
