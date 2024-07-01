@@ -1,13 +1,13 @@
 import Promocion from "../types/Promocion";
 
-export async function PromocionCreate(promocion: Promocion){
+export async function PromocionCreate(promocion: Promocion, token: string){
 	const urlServer = 'http://localhost:8080/promocion';
 	const response = await fetch(urlServer, {
 		method: 'POST',
 		body: JSON.stringify(promocion),
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});
@@ -20,53 +20,53 @@ export async function PromocionCreate(promocion: Promocion){
 	};
 }
 
-export async function PromocionFindBySucursal(id: number){
+export async function PromocionFindBySucursal(id: number, token: string){
 	const urlServer = 'http://localhost:8080/promocion/findBySucursal/' + id;
 	const response = await fetch(urlServer, {
 		method: 'GET',
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});
 	return await response.json() as Promocion[];
 }
 
-export async function PromocionGetAll(){
+export async function PromocionGetAll(token: string){
 	const urlServer = 'http://localhost:8080/promocion';
 	const response = await fetch(urlServer, {
 		method: 'GET',
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});
 	return await response.json() as Promocion[];
 }
 
-export async function PromocionGetById(id: number){
+export async function PromocionGetById(id: number, token: string){
 	const urlServer = 'http://localhost:8080/promocion/' + id;
 	const response = await fetch(urlServer, {
 		method: 'GET',
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});
 	return await response.json() as Promocion;
 }
 
-export async function PromocionUpdate(promocion: Promocion){
+export async function PromocionUpdate(promocion: Promocion, token: string){
 	const urlServer = 'http://localhost:8080/promocion/' + promocion.id;
 	const response = await fetch(urlServer, {
 		method: 'PUT',
 		body: JSON.stringify(promocion),
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});
@@ -79,13 +79,13 @@ export async function PromocionUpdate(promocion: Promocion){
 	};
 }
 
-export async function PromocionDelete(id: number){
+export async function PromocionDelete(id: number, token: string){
 	const urlServer = 'http://localhost:8080/promocion/' + id;
 	const response = await fetch(urlServer, {
 		method: 'DELETE',
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});

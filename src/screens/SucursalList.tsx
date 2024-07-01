@@ -17,6 +17,7 @@ import Empresa from "../types/Empresa";
 import Swal from 'sweetalert2';
 
 import withReactContent from 'sweetalert2-react-content';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const MySwal = withReactContent(Swal);
 
@@ -45,15 +46,30 @@ function SucursalList() {
     const [selectedLocalidad, setSelectedLocalidad] = useState<number | null>(null);
     const navigate = useNavigate();
     const { idEmpresa } = useParams();
+    const { getAccessTokenSilently } = useAuth0();
 
     const getAllSucursal = async () => {
-        const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+        
+        console.log('Token:', token); // Agrega esta línea para verificar el token
+
+        const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
         setSucursales(sucursales);
         setHasCasaMatriz(sucursales.some(sucursal => sucursal.esCasaMatriz));
     };
 
     const createSucursal = async (sucursal: Sucursal) => {
-        await SucursalCreate(sucursal);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        await SucursalCreate(sucursal, token);
         return MySwal.fire({
             title: 'Sucursal creada',
             text: 'La sucursal se ha creado correctamente',
@@ -63,9 +79,14 @@ function SucursalList() {
             timerProgressBar: true,
         });
     };
-    
+
     const updateSucursal = async (sucursal: Sucursal) => {
-        await SucursalUpdate(sucursal);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+        await SucursalUpdate(sucursal, token);
         return MySwal.fire({
             title: 'Sucursal actualizada',
             text: 'La sucursal se ha actualizado correctamente',
@@ -75,20 +96,36 @@ function SucursalList() {
             timerProgressBar: true,
         });
     };
-    
 
-    const getAllProvincias = async() =>{
-        const provincias: Provincia[] = await ProvinciaGetAll();
+
+    const getAllProvincias = async () => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+        const provincias: Provincia[] = await ProvinciaGetAll(token);
         setProvincias(provincias);
     }
 
-    const getLocalidadesByProvincias = async (id:number) =>{
-        const localidades: Localidad[] = await LocalidadGetAllByProvincia(id);
+    const getLocalidadesByProvincias = async (id: number) => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        const localidades: Localidad[] = await LocalidadGetAllByProvincia(id, token);
         return localidades;
     }
 
-    const getEmpresaById = async (id:number) => {
-        const empresa: Empresa = await EmpresaGetById(id);
+    const getEmpresaById = async (id: number) => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+        const empresa: Empresa = await EmpresaGetById(id, token);
         setCurrentEmpresa(empresa);
     }
 
@@ -99,7 +136,7 @@ function SucursalList() {
 
     const redirectDashboard = (id: number) => {
         navigate('/dashboard/' + idEmpresa + "/" + id);
-    } 
+    }
 
     const handleOpen = (sucursal?: Sucursal) => {
         if (sucursal) {
@@ -165,7 +202,7 @@ function SucursalList() {
     };
 
     const handleSave = async () => {
-        
+
         if (currentSucursal.id > 0) {
             updateSucursal(currentSucursal);
         } else {
@@ -185,13 +222,13 @@ function SucursalList() {
             window.location.reload();
         }
     };
-    
+
     return (
         <div style={{ backgroundColor: '#E0E0E0', padding: '20px', borderRadius: '8px' }}>
-            <Typography 
-                variant="h4" 
-                component="h4" 
-                align="center" 
+            <Typography
+                variant="h4"
+                component="h4"
+                align="center"
                 style={{ fontWeight: 'bold', marginBottom: '20px', color: '#2e7d32', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)' }}
             >
                 Seleccione una Sucursal
@@ -206,11 +243,11 @@ function SucursalList() {
                     Agregar nueva Sucursal
                 </Button>
             </div>
-            <div style={{ 
-                display: 'flex', 
-                flexWrap: 'wrap', 
-                gap: '16px', 
-                justifyContent: 'center', 
+            <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
+                justifyContent: 'center',
                 marginTop: '16px',
                 padding: '10px',
             }}>
@@ -219,8 +256,8 @@ function SucursalList() {
                         <CardHeader
                             title={sucursal.nombre}
                             subheader={`${sucursal.domicilio.calle} ${sucursal.domicilio.numero}, ${sucursal.domicilio.cp}, ${sucursal.domicilio.localidad?.nombre}, ${sucursal.domicilio.localidad?.provincia.nombre}`}
-                            titleTypographyProps={{ variant: 'h6', color: 'Black',fontWeight:'bold' }}
-                            subheaderTypographyProps={{ variant: 'body2', color: 'textSecondary'}}
+                            titleTypographyProps={{ variant: 'h6', color: 'Black', fontWeight: 'bold' }}
+                            subheaderTypographyProps={{ variant: 'body2', color: 'textSecondary' }}
                         />
                         <CardActions style={{ justifyContent: 'space-between' }}>
                             <span style={{ display: 'flex', alignItems: 'center' }}>
@@ -242,7 +279,7 @@ function SucursalList() {
                     </Card>
                 ))}
             </div>
-    
+
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{currentSucursal.id ? "Editar Sucursal" : "Crear Sucursal"}</DialogTitle>
                 <DialogContent>
@@ -362,8 +399,8 @@ function SucursalList() {
             </Dialog>
         </div>
     );
-    
-    
+
+
 }
 
 export default SucursalList;

@@ -15,11 +15,15 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SpeedIcon from '@mui/icons-material/Speed';
 import avatarImage from '../../assets/images/logo.png'
 import MonitorIcon from '@mui/icons-material/Monitor';
+import LoginButton from "./LoginButton";
+import { useAuth0 } from "@auth0/auth0-react";
+import LogoutButton from "./LogoutButton";
 
 function SideBar() {
     const [openProducts, setOpenProducts] = useState(false);
     const { idSucursal } = useParams();
     const { idEmpresa } = useParams();
+    const { isAuthenticated } = useAuth0();
 
     const handleProductsClick = () => {
         setOpenProducts(!openProducts);
@@ -50,6 +54,17 @@ function SideBar() {
                             <Avatar src={avatarImage} sx={{ width: 100, height: 100 }} />
                         </Stack>
                     </Toolbar>
+                    <div className="-ml-8 flex-col gap-2.5 sm:flex-row sm:justify-center lg:flex lg:justify-start">
+                        {isAuthenticated ? (
+                            <>
+                                <LogoutButton />
+                            </>
+                        ) : (
+                            <>
+                                <LoginButton />
+                            </>
+                        )}
+                    </div>
                     <ListItemButton component={Link} to={"/dashboard/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color

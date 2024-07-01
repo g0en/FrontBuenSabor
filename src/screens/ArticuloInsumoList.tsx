@@ -16,7 +16,6 @@ import { CategoriaByEmpresaGetAll } from "../services/CategoriaService";
 import UnidadMedida from "../types/UnidadMedida";
 import { UnidadMedidaGetAll } from "../services/UnidadMedidaService";
 import { ArticuloInsumoUpdate } from "../services/ArticuloInsumoService";
-import { ArticuloInsumoDelete } from "../services/ArticuloInsumoService";
 import { CloudinaryUpload } from "../services/CloudinaryService";
 import { CloudinaryDelete } from "../services/CloudinaryService";
 import Imagen from "../types/Imagen";
@@ -24,6 +23,7 @@ import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import AddIcon from "@mui/icons-material/Add";
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -43,32 +43,60 @@ function ArticuloInsumoList() {
     const [images, setImages] = useState<string[]>([]);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>([]);
+<<<<<<< HEAD
+=======
+    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' };
+    const { getAccessTokenSilently } = useAuth0();
+>>>>>>> 17165f60923ebac94b471c747d0e6c6c15ad962f
 
     const getAllArticuloInsumoBySucursal = async () => {
-        const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal), token);
         setArticulosInsumo(articulosInsumo);
     };
 
     const getAllCategoriaByEmpresa = async () => {
-        const categorias: Categoria[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const categorias: Categoria[] = await CategoriaByEmpresaGetAll(Number(idEmpresa), token);
         setCategorias(categorias);
     };
 
     const getAllUnidadMedida = async () => {
-        const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll();
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll(token);
         setUnidadMedidas(unidadMedidas);
     };
 
     const createArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
-        return ArticuloInsumoCreate(articuloInsumo);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        return ArticuloInsumoCreate(articuloInsumo, token);
     };
 
     const updateArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
-        return ArticuloInsumoUpdate(articuloInsumo);
-    };
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
 
-    const deleteArticuloInsumo = async (id: number) => {
-        return ArticuloInsumoDelete(id);
+        return ArticuloInsumoUpdate(articuloInsumo, token);
     };
 
     const cloudinaryFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +132,13 @@ function ArticuloInsumoList() {
         if (files.length === 0) return [];
 
         try {
-            const imagenes = await Promise.all(files.map(file => CloudinaryUpload(file)));
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+
+            const imagenes = await Promise.all(files.map(file => CloudinaryUpload(file, token)));
             return imagenes.flat(); // Aplana el array de arrays
         } catch (error) {
             console.error('Error uploading the files', error);
@@ -118,7 +152,13 @@ function ArticuloInsumoList() {
         if (!publicId) return;
 
         try {
-            await CloudinaryDelete(publicId, id.toString());
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+
+            await CloudinaryDelete(publicId, id.toString(), token);
         } catch (error) {
             console.error('Error deleting the file', error);
         }
@@ -209,6 +249,7 @@ function ArticuloInsumoList() {
         }
     }
 
+<<<<<<< HEAD
     const handleDelete = async (articulo: ArticuloInsumo) => {
         //const imagenes: Imagen[] = articulo.imagenes;
 
@@ -230,6 +271,8 @@ function ArticuloInsumoList() {
         //window.location.reload();
     };
 
+=======
+>>>>>>> 17165f60923ebac94b471c747d0e6c6c15ad962f
     const deleteImages = async (imagenes: Imagen[]) => {
         try {
             for (let i = 0; i < imagenes.length; i++) {
