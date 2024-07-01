@@ -14,7 +14,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from "@mui/icons-material/Add";
 import SideBar from "../components/common/SideBar";
 import ArticuloManufacturado from "../types/ArticuloManufacturado";
-import { ArticuloManufacturadoCreate, ArticuloManufacturadoFindBySucursal, ArticuloManufacturadoDelete } from "../services/ArticuloManufacturadoService";
+import { ArticuloManufacturadoCreate, ArticuloManufacturadoFindBySucursal} from "../services/ArticuloManufacturadoService";
 import Categoria from "../types/Categoria";
 import UnidadMedida from "../types/UnidadMedida";
 import { Grid } from "@mui/material";
@@ -30,6 +30,7 @@ import ArticuloManufacturadoDetalle from "../types/ArticuloManufacturadoDetalle"
 import { ArticuloManufacturadoUpdate } from "../services/ArticuloManufacturadoService";
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -55,36 +56,67 @@ function ArticuloManufacturadoList() {
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [text, setText] = useState("Crear");
     const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
+    const { getAccessTokenSilently } = useAuth0();
 
     const getAllArticuloManufacturadoBySucursal = async () => {
-        const articulosManufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        const articulosManufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal), token);
         setArticulosManufacturados(articulosManufacturados);
     };
 
     const getAllCategoriaByEmpresa = async () => {
-        const categorias: Categoria[] = await CategoriaByEmpresaGetAll(Number(idEmpresa));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const categorias: Categoria[] = await CategoriaByEmpresaGetAll(Number(idEmpresa), token);
         setCategorias(categorias);
     };
 
     const getAllUnidadMedida = async () => {
-        const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll();
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll(token);
         setUnidadMedidas(unidadMedidas);
     };
 
     const createArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        return ArticuloManufacturadoCreate(articulo);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        return ArticuloManufacturadoCreate(articulo, token);
     };
 
     const updateArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
-        return ArticuloManufacturadoUpdate(articulo);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        return ArticuloManufacturadoUpdate(articulo, token);
     };
 
-    const deleteArticuloManufacturado = async (id: number) => {
-        return ArticuloManufacturadoDelete(id);
-    }
-
     const getAllArticuloInsumoBySucursal = async () => {
-        const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        const articulosInsumo: ArticuloInsumo[] = await ArticuloInsumoFindBySucursal(Number(idSucursal), token);
         setInsumos(articulosInsumo);
     };
 
@@ -148,7 +180,12 @@ function ArticuloManufacturadoList() {
         if (files.length === 0) return [];
 
         try {
-            const imagenes = await Promise.all(files.map(file => CloudinaryUpload(file)));
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+            const imagenes = await Promise.all(files.map(file => CloudinaryUpload(file, token)));
             return imagenes.flat(); // Aplana el array de arrays
         } catch (error) {
             console.error('Error uploading the files', error);
@@ -161,7 +198,12 @@ function ArticuloManufacturadoList() {
         if (!publicId) return;
 
         try {
-            await CloudinaryDelete(publicId, id.toString());
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+            await CloudinaryDelete(publicId, id.toString(), token);
         } catch (error) {
             console.error('Error deleting the file', error);
         }
@@ -274,27 +316,6 @@ function ArticuloManufacturadoList() {
         const nuevosDetalles = detalles.filter((_, i) => i !== index);
         setDetalles(nuevosDetalles);
     };
-
-    const handleDelete = async (articulo: ArticuloManufacturado) => {
-        //const imagenes: Imagen[] = articulo.imagenes;
-
-        try {
-            const data = await deleteArticuloManufacturado(articulo.id);
-            if (data.status !== 200) {
-                return;
-            }
-        } catch (error) {
-            console.log("Error al crear un Articulo Manufacturado.");
-        }
-
-        /*try {
-            await deleteImages(imagenes);
-        } catch (error) {
-            console.log("Error al subir las Imagenes.");
-        }*/
-
-        window.location.reload();
-    }
 
     const handleSubmit = async () => {
         const imagenes = await cloudinaryUpload();

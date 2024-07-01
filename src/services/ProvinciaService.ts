@@ -1,12 +1,12 @@
 import Provincia from "../types/Provincia";
 
-export async function ProvinciaGetAll(){
+export async function ProvinciaGetAll(token: string){
 	const urlServer = 'http://localhost:8080/provincia';
 	const response = await fetch(urlServer, {
 		method: 'GET',
         headers: {
+			'Authorization': `Bearer ${token}`,
 			'Content-type': 'application/json',
-			'Access-Control-Allow-Origin':'*'
 		},
         mode: 'cors'
 	});

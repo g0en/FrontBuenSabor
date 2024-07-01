@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Sucursal from "../types/Sucursal";
 import Categoria from "../types/Categoria";
 import { SucursalGetByEmpresaId } from "../services/SucursalService";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 
@@ -22,9 +23,15 @@ function CategoriaList() {
     const [currentCategoria, setCurrentCategoria] = useState<Categoria>({ ...emptyCategoria });
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
     const [open, setOpen] = useState(false);
+    const { getAccessTokenSilently } = useAuth0();
 
     const getAllCategoriaBySucursal = async () => {
-        const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idSucursal), token);
         setCategorias(categorias);
     };
 
@@ -34,30 +41,58 @@ function CategoriaList() {
     }, [idEmpresa, idSucursal]);
 
     const getAllSucursal = async () => {
-        const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
         setSucursales(sucursales);
     };
 
     const createCategoria = async (categoria: Categoria) => {
-        await CategoriaCreate(categoria);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+          
+        await CategoriaCreate(categoria, token);
         getAllCategoriaBySucursal();
         setOpen(false); // Close the modal after creation
     };
 
     const updateCategoria = async (categoria: Categoria) => {
-        await CategoriaUpdate(categoria);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        await CategoriaUpdate(categoria, token);
         getAllCategoriaBySucursal();
         setOpen(false); // Close the modal after update
     };
 
     const bajaCategoria = async (idCategoria: number) => {
-        await CategoriaBaja(idCategoria, Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        await CategoriaBaja(idCategoria, Number(idSucursal), token);
         getAllCategoriaBySucursal();
         window.location.reload();
     };
 
     const deleteCategoria = async (idCategoria: number) => {
-        await CategoriaDelete(idCategoria);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        await CategoriaDelete(idCategoria, token);
         getAllCategoriaBySucursal();
         window.location.reload();
     };

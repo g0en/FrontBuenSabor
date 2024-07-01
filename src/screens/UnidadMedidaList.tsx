@@ -25,6 +25,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 
@@ -34,10 +35,16 @@ function UnidadMedidaList() {
     const [isEditing, setIsEditing] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [unidadToDelete, setUnidadToDelete] = useState<UnidadMedida | null>(null);
+    const { getAccessTokenSilently } = useAuth0();
 
     const getAllUnidadMedida = async () => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
         try {
-            const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll();
+            const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll(token);
             setUnidadMedidas(unidadMedidas);
         } catch (error) {
             console.log('Error al obtener las unidades de medida', error);
@@ -47,7 +54,12 @@ function UnidadMedidaList() {
 
     const createUnidadMedida = async (unidadMedida: UnidadMedida) => {
         try {
-            await UnidadMedidaCreate(unidadMedida);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+            await UnidadMedidaCreate(unidadMedida, token);
             toast.success('Unidad de medida creada correctamente');
             getAllUnidadMedida();
         } catch (error) {
@@ -58,7 +70,12 @@ function UnidadMedidaList() {
 
     const updateUnidadMedida = async (unidadMedida: UnidadMedida) => {
         try {
-            await UnidadMedidaUpdate(unidadMedida);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+            await UnidadMedidaUpdate(unidadMedida, token);
             toast.success('Unidad de medida actualizada correctamente');
             getAllUnidadMedida();
         } catch (error) {
@@ -69,7 +86,12 @@ function UnidadMedidaList() {
 
     const deleteUnidadMedida = async (id: number) => {
         try {
-            await UnidadMedidaDelete(id);
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+              });
+            await UnidadMedidaDelete(id, token);
             toast.success('Unidad de medida eliminada correctamente');
             getAllUnidadMedida();
         } catch (error) {

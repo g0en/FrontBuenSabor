@@ -15,6 +15,7 @@ import { ArticuloInsumoGetAllParaVender } from '../../services/ArticuloInsumoSer
 import ArticuloManufacturado from '../../types/ArticuloManufacturado';
 import ArticuloInsumo from '../../types/ArticuloInsumo';
 import PromocionDetalle from '../../types/PromocionDetalle';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -61,18 +62,37 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
     const [articulos, setArticulos] = useState<Articulo[]>([]);
     const [detalles, setDetalles] = useState<PromocionDetalle[]>([]);
     const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
+    const { getAccessTokenSilently } = useAuth0();
 
     const createPromocion = async (promocion: Promocion) => {
-        return PromocionCreate(promocion);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        return PromocionCreate(promocion, token);
     };
 
     const getAllArticuloInsumoParaVender = async () => {
-        const insumos: ArticuloInsumo[] = await ArticuloInsumoGetAllParaVender(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        const insumos: ArticuloInsumo[] = await ArticuloInsumoGetAllParaVender(Number(idSucursal), token);
         setInsumos(insumos);
     };
 
     const getAllArticuloManufacturadoBySucursal = async () => {
-        const manufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        const manufacturados: ArticuloManufacturado[] = await ArticuloManufacturadoFindBySucursal(Number(idSucursal), token);
         setManufacturados(manufacturados);
     };
 
@@ -136,7 +156,12 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         if (files.length === 0) return [];
 
         try {
-            const imagenes = await Promise.all(files.map(file => CloudinaryPromocionUpload(file)));
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+            });
+            const imagenes = await Promise.all(files.map(file => CloudinaryPromocionUpload(file, token)));
             return imagenes.flat(); // Aplana el array de arrays
         } catch (error) {
             console.error('Error uploading the files', error);
@@ -149,7 +174,13 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose }) 
         if (!publicId) return;
 
         try {
-            await CloudinaryPromocionDelete(publicId, id.toString());
+            const token = await getAccessTokenSilently({
+                authorizationParams: {
+                    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                },
+            });
+
+            await CloudinaryPromocionDelete(publicId, id.toString(), token);
         } catch (error) {
             console.error('Error deleting the file', error);
         }

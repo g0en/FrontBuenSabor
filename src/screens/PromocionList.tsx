@@ -7,14 +7,21 @@ import { PromocionFindBySucursal } from '../services/PromocionService';
 import PromocionCard from '../components/Promocion/PromocionCard';
 import AddIcon from "@mui/icons-material/Add";
 import AddPromocionModal from '../components/Promocion/AddPromocionModal';
+import { useAuth0 } from '@auth0/auth0-react';
 
 function PromocionList() {
     const [promociones, setPromociones] = useState<Promocion[]>([]);
     const { idSucursal } = useParams();
     const [open, setOpen] = useState(false);
+    const { getAccessTokenSilently } = useAuth0();
 
     const getAllPromocionesBySucursal = async () => {
-        const promociones: Promocion[] = await PromocionFindBySucursal(Number(idSucursal));
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const promociones: Promocion[] = await PromocionFindBySucursal(Number(idSucursal), token);
         setPromociones(promociones);
     }
 

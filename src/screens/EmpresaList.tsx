@@ -10,6 +10,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const MySwal = withReactContent(Swal);
 
@@ -20,14 +21,26 @@ function EmpresaList() {
     const [open, setOpen] = useState(false);
     const [currentEmpresa, setCurrentEmpresa] = useState<Empresa>({ ...emptyEmpresa });
     const navigate = useNavigate();
+    const { getAccessTokenSilently } = useAuth0();
 
     const getAllEmpresa = async () => {
-        const empresas: Empresa[] = await EmpresaGetAll();
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+        const empresas: Empresa[] = await EmpresaGetAll(token);
         setEmpresas(empresas);
     };
 
     const createEmpresa = async (empresa: Empresa) => {
-        await EmpresaCreate(empresa);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        await EmpresaCreate(empresa, token);
         return MySwal.fire({
             title: 'Empresa creada',
             text: 'La empresa se ha creado correctamente',
@@ -39,7 +52,13 @@ function EmpresaList() {
     };
 
     const updateEmpresa = async (empresa: Empresa) => {
-        await EmpresaUpdate(empresa);
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+          });
+
+        await EmpresaUpdate(empresa, token);
         return MySwal.fire({
             title: 'Empresa actualizada',
             text: 'La empresa se ha actualizado correctamente',

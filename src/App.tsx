@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import Dashboard from "./screens/Dashboard";
 import Categoria from "./screens/CategoriaList";
@@ -14,7 +14,6 @@ import PedidosList from "./screens/PedidosList";
 
 function App() {
   return (
-    <BrowserRouter>
       <Routes>
         <Route element={<PreLayout />}>
           <Route path="/" element={<Empresa />} />
@@ -31,7 +30,6 @@ function App() {
           <Route path="pedidos/:idEmpresa/:idSucursal" element={<PedidosList />}/>
         </Route>
       </Routes>
-    </BrowserRouter>
   );
 }
 
