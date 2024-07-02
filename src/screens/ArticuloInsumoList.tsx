@@ -4,6 +4,7 @@ import {
     Typography,
     Grid
 } from "@mui/material";
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { Edit, Visibility, Delete, Check } from "@mui/icons-material";
@@ -403,7 +404,7 @@ function ArticuloInsumoList() {
                                                             <Edit />
                                                         </IconButton>
                                                         <IconButton aria-label="delete" onClick={() => handleBaja(articulo)} color="error">
-                                                            <Delete />
+                                                            <RemoveCircleOutlineIcon />
                                                         </IconButton>
                                                     </Box>
                                                     :

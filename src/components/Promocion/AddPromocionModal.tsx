@@ -66,9 +66,9 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     const updatePromocion = async (promocion: Promocion) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         return PromocionUpdate(promocion, token);
     };
 
@@ -97,9 +97,9 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     const getAllSucursales = async () => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         const sucursales: SucursalShortDto[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
         setSucursales(sucursales);
     }
@@ -199,7 +199,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         getAllArticuloManufacturadoBySucursal();
         getAllArticuloInsumoParaVender();
         getAllSucursales();
-        if(currentPromocion.id !== null){
+        if (promocion.id !== null) {
             detalles.forEach(detalle => {
                 setTotal(total + detalle.articulo.precioVenta * detalle.cantidad);
             });
@@ -213,9 +213,9 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     useEffect(() => {
         if (promocion.id !== null && promocion.id > 0) {
             setDetalles(JSON.parse(JSON.stringify(currentPromocion.promocionDetalles)));
+            setImages(promocion.imagenes.map(imagen => imagen.url));
+            setArticuloImages(promocion.imagenes);
         }
-        setImages(promocion.imagenes.map(imagen => imagen.url));
-        setArticuloImages(promocion.imagenes);
     }, [currentPromocion]);
 
     const handleSucursalChange = (id: number) => {
@@ -256,10 +256,12 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         setSearch("");
     };
 
-    const handleCantidadChange = (index: number, cantidad: number) => {
+    const handleCantidadChange = (index: number, nuevaCantidad: number) => {
         const nuevosDetalles = [...detalles];
-        nuevosDetalles[index].cantidad = cantidad;
-        handleTotal(nuevosDetalles[index].articulo.precioVenta, cantidad);
+        const cantidadAnterior = nuevosDetalles[index].cantidad;
+        nuevosDetalles[index].cantidad = nuevaCantidad;
+        const diferencia = nuevaCantidad - cantidadAnterior;
+        handleTotal(nuevosDetalles[index].articulo.precioVenta, diferencia);
         setDetalles(nuevosDetalles);
     };
 
@@ -282,6 +284,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         setSearch("");
         setTotal(0);
         setFiles([]);
+        setImages([]);
         setArticuloImages([]);
         setPromocion(currentPromocion);
         if (promocion.id !== null && promocion.id > 0) {

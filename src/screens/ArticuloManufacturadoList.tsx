@@ -6,11 +6,11 @@ import {
     DialogActions, TextField, MenuItem, Card, CardContent, CardActions,
     Modal
 } from "@mui/material";
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from "@mui/icons-material/Add";
 import SideBar from "../components/common/SideBar";
 import ArticuloManufacturado from "../types/ArticuloManufacturado";
@@ -55,7 +55,6 @@ function ArticuloManufacturadoList() {
     const [view, setView] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [text, setText] = useState("Crear");
-    const emptySucursal = { id: Number(idSucursal), eliminado: false, nombre: '' }
     const { getAccessTokenSilently } = useAuth0();
 
     const getAllArticuloManufacturadoBySucursal = async () => {
@@ -447,7 +446,7 @@ function ArticuloManufacturadoList() {
                                                         <VisibilityIcon />
                                                     </IconButton>
                                                     <IconButton aria-label="delete" onClick={() => handleBaja(articulo)} color="error">
-                                                        <DeleteIcon />
+                                                        <RemoveCircleOutlineIcon />
                                                     </IconButton>
                                                 </TableCell>
                                                 :

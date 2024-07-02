@@ -71,7 +71,7 @@ function PromocionList() {
                     </Button>
                 </Box>
                 <Grid container spacing={3}>
-                    {promociones.map((promocion) => (
+                    {promociones.filter(promocion => !promocion.eliminado).map((promocion) => (
                         <Grid item xs={12} sm={6} md={4} key={promocion.id}>
                             <PromocionCard onClose={handleCloseModal} promocion={promocion} />
                         </Grid>
