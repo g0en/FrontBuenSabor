@@ -9,12 +9,14 @@ import Empleado from "../types/Empleado";
 import { EmpleadoGetBySucursal } from "../services/EmpleadoService";
 import EmpleadoAddModal from "../components/Empleado/EmpleadoAddModal";
 
-const emptySucursal = {id: 1, eliminado: false, nombre: ''}
-
 const emptyEmpleado: Empleado = {
     id: null,
     eliminado: false,
-    sucursal: emptySucursal,
+    sucursal: {
+        id: 0,
+        eliminado: false,
+        nombre: ""
+    },
     nombre: "",
     apellido: "",
     telefono: "",
@@ -52,6 +54,11 @@ function EmpleadosList() {
     }
 
     const handleClose = async () => {
+        try{
+            await getEmpleadosBySucursal();
+        }catch(error){
+            console.log("Error al traer los empleados.");
+        }
         setOpen(false);
     }
 
@@ -85,8 +92,7 @@ function EmpleadosList() {
                             </Table>
                         </TableContainer>
                         :
-                    empleados.filter(empleado => !empleado.eliminado)
-                        .map(empleado =>
+                    empleados.map(empleado =>
                             <EmpleadoTable onClose={handleClose} empleado={empleado} />
                         )
                 }

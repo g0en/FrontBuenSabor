@@ -78,3 +78,19 @@ export async function EmpleadoUpdate(empleado: Empleado, token: string){
 		data: responseData as Empleado
 	};
 }
+
+export async function EmpleadoDelete(id: number, token: string){
+	const urlServer = 'http://localhost:8080/empleado/' + id;
+	const response = await fetch(urlServer, {
+		method: 'DELETE',
+        headers: {
+			'Authorization': `Bearer ${token}`,
+			'Content-type': 'application/json',
+		},
+        mode: 'cors'
+	});
+	const status = response.status;
+    const data = await response.json();
+
+    return { status, data };
+}

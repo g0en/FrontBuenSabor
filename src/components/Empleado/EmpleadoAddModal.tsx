@@ -3,9 +3,7 @@ import { TextField, Button, MenuItem, IconButton, Modal, Box, Typography, Grid }
 import Empleado from "../../types/Empleado";
 import { Rol } from '../../types/enums/Rol';
 import CloseIcon from '@mui/icons-material/Close';
-import SucursalShortDto from '../../types/SucursalShortDto';
 import { useAuth0 } from '@auth0/auth0-react';
-import { SucursalGetById } from '../../services/SucursalService';
 import { useParams } from 'react-router-dom';
 import { EmpleadoCreate, EmpleadoUpdate } from '../../services/EmpleadoService';
 
@@ -29,21 +27,8 @@ interface EmpleadoTableProps {
 const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, empleado }) => {
     const [step, setStep] = useState(1);
     const [currentEmpleado, setCurrentEmpleado] = useState<Empleado>(empleado);
-    const [sucursal, setSucursal] = useState<SucursalShortDto | null>(null);
     const { idSucursal } = useParams();
     const { getAccessTokenSilently } = useAuth0();
-    const emptySucursal: SucursalShortDto = { id: Number(idSucursal), eliminado: false, nombre: '' }
-
-    const getSucursalById = async () => {
-        const token = await getAccessTokenSilently({
-            authorizationParams: {
-                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-            },
-        });
-
-        const sucursal: SucursalShortDto = await SucursalGetById(Number(idSucursal), token);
-        setSucursal(sucursal);
-    }
 
     const createEmpleado = async () => {
         const token = await getAccessTokenSilently({
@@ -67,7 +52,6 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
 
     useEffect(() => {
         setCurrentEmpleado(empleado);
-        getSucursalById();
     }, [empleado]);
 
     const handleNext = () => setStep(2);
@@ -99,7 +83,7 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
 
     const handleSubmit = async () => {
         if (currentEmpleado.sucursal !== null) {
-            currentEmpleado.sucursal = emptySucursal;
+            currentEmpleado.sucursal.id = Number(idSucursal);
         }
         if (currentEmpleado.id !== null && currentEmpleado.id > 0) {
             try {
@@ -270,7 +254,7 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
                                     Atrás
                                 </Button>
                                 <Button onClick={handleSubmit} color="primary" variant="contained">
-                                    Crear Empleado
+                                    {empleado.id !== null && empleado.id > 0 ? "Actualizar Empleado" : "Crear Empleado"}
                                 </Button>
                             </Box>
                         </>
