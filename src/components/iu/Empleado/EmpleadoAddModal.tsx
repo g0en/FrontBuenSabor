@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, MenuItem, IconButton, Modal, Box, Typography, Grid } from '@mui/material';
-import Empleado from "../../types/Empleado";
-import { Rol } from '../../types/enums/Rol';
+import Empleado from "../../../types/Empleado";
+import { Rol } from '../../../types/enums/Rol';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useParams } from 'react-router-dom';
-import { EmpleadoCreate, EmpleadoUpdate } from '../../services/EmpleadoService';
+import { EmpleadoCreate, EmpleadoUpdate } from '../../../services/EmpleadoService';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',

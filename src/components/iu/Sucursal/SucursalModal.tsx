@@ -4,16 +4,16 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useAuth0 } from "@auth0/auth0-react";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import Sucursal from "../../types/Sucursal";
-import { SucursalCreate, SucursalUpdate } from "../../services/SucursalService";
-import Provincia from "../../types/Provincia";
-import Localidad from "../../types/Localidad";
-import { ProvinciaGetAll } from "../../services/ProvinciaService";
-import { LocalidadGetAllByProvincia } from "../../services/LocalidadService";
-import { PaisGetAll } from "../../services/PaisService";
-import Pais from "../../types/Pais";
-import { EmpresaGetById } from "../../services/EmpresaService";
-import Empresa from "../../types/Empresa";
+import Sucursal from "../../../types/Sucursal";
+import { SucursalCreate, SucursalUpdate } from "../../../services/SucursalService";
+import Provincia from "../../../types/Provincia";
+import Localidad from "../../../types/Localidad";
+import { ProvinciaGetAll } from "../../../services/ProvinciaService";
+import { LocalidadGetAllByProvincia } from "../../../services/LocalidadService";
+import { PaisGetAll } from "../../../services/PaisService";
+import Pais from "../../../types/Pais";
+import { EmpresaGetById } from "../../../services/EmpresaService";
+import Empresa from "../../../types/Empresa";
 import { useParams } from "react-router-dom";
 
 const modalStyle = {

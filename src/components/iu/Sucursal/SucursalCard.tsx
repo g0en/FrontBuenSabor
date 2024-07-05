@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate, useParams } from "react-router-dom";
 import SucursalModal from "./SucursalModal";
-import Sucursal from "../../types/Sucursal";
+import Sucursal from "../../../types/Sucursal";
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 

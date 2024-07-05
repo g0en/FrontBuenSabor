@@ -5,8 +5,8 @@ import { useParams } from "react-router-dom";
 import { Button, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { useAuth0 } from "@auth0/auth0-react";
-import SucursalCard from "../components/Sucursal/SucursalCard";
-import SucursalModal from "../components/Sucursal/SucursalModal";
+import SucursalCard from "../components/iu/Sucursal/SucursalCard";
+import SucursalModal from "../components/iu/Sucursal/SucursalModal";
 
 const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: 0 };
 

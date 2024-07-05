@@ -4,8 +4,8 @@ import Empresa from "../types/Empresa";
 import { useEffect, useState } from "react";
 import AddIcon from '@mui/icons-material/Add';
 import { useAuth0 } from "@auth0/auth0-react";
-import EmpresaCard from "../components/Empresa/EmpresaCard";
-import EmpresaModal from "../components/Empresa/EmpresaModal";
+import EmpresaCard from "../components/iu/Empresa/EmpresaCard";
+import EmpresaModal from "../components/iu/Empresa/EmpresaModal";
 
 const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: 0 };
 

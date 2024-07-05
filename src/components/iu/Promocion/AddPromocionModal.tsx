@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper, Card, CardContent, CardActions, FormControlLabel, Checkbox, MenuItem } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { TipoPromocion } from '../../types/enums/TipoPromocion';
-import Promocion from '../../types/Promocion';
-import { PromocionCreate, PromocionUpdate } from '../../services/PromocionService';
+import { TipoPromocion } from '../../../types/enums/TipoPromocion';
+import Promocion from '../../../types/Promocion';
+import { PromocionCreate, PromocionUpdate } from '../../../services/PromocionService';
 import { Delete } from "@mui/icons-material";
-import Imagen from '../../types/Imagen';
-import { CloudinaryPromocionUpload, CloudinaryPromocionDelete } from '../../services/ImagenPromocionService';
+import Imagen from '../../../types/Imagen';
+import { CloudinaryPromocionUpload, CloudinaryPromocionDelete } from '../../../services/ImagenPromocionService';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import { useParams } from 'react-router-dom';
-import Articulo from '../../types/Articulo';
-import { ArticuloManufacturadoFindBySucursal } from '../../services/ArticuloManufacturadoService';
-import { ArticuloInsumoGetAllParaVender } from '../../services/ArticuloInsumoService';
-import ArticuloManufacturado from '../../types/ArticuloManufacturado';
-import ArticuloInsumo from '../../types/ArticuloInsumo';
-import PromocionDetalle from '../../types/PromocionDetalle';
-import { SucursalGetByEmpresaId } from '../../services/SucursalService';
-import SucursalShortDto from '../../types/SucursalShortDto';
+import Articulo from '../../../types/Articulo';
+import { ArticuloManufacturadoFindBySucursal } from '../../../services/ArticuloManufacturadoService';
+import { ArticuloInsumoGetAllParaVender } from '../../../services/ArticuloInsumoService';
+import ArticuloManufacturado from '../../../types/ArticuloManufacturado';
+import ArticuloInsumo from '../../../types/ArticuloInsumo';
+import PromocionDetalle from '../../../types/PromocionDetalle';
+import { SucursalGetByEmpresaId } from '../../../services/SucursalService';
+import SucursalShortDto from '../../../types/SucursalShortDto';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const modalStyle = {

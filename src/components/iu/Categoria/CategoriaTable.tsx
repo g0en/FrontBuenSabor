@@ -5,10 +5,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CategoriaGetDto from '../../types/CategoriaGetDto';
+import CategoriaGetDto from '../../../types/CategoriaGetDto';
 import { useParams } from 'react-router-dom';
-import Categoria from '../../types/Categoria';
-import { CategoriaBaja, CategoriaDelete } from '../../services/CategoriaService';
+import Categoria from '../../../types/Categoria';
+import { CategoriaBaja, CategoriaDelete } from '../../../services/CategoriaService';
 import CategoriaModal from './CategoriaModal';
 
 interface CategoriaTableProps {
@@ -89,9 +89,9 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>{subCategoria.denominacion}</Typography>
                         <Box sx={{ marginLeft: 'auto' }}>
-                            <IconButton onClick={() => handleEdit(subCategoria)}><EditIcon /></IconButton>
-                            <IconButton onClick={() => handleBaja(subCategoria)}><ArrowCircleDownIcon /></IconButton>
-                            <IconButton onClick={() => handleDelete(subCategoria)}><DeleteIcon /></IconButton>
+                            <IconButton onClick={() => handleEdit(subCategoria)} color="primary"><EditIcon /></IconButton>
+                            <IconButton onClick={() => handleBaja(subCategoria)} color="secondary"><ArrowCircleDownIcon /></IconButton>
+                            <IconButton onClick={() => handleDelete(subCategoria)} color="error"><DeleteIcon /></IconButton>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails>

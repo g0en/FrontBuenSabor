@@ -1,12 +1,12 @@
 import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import Empleado from "../../types/Empleado";
+import Empleado from "../../../types/Empleado";
 import EditIcon from "@mui/icons-material/Edit";
 import Visibility from '@mui/icons-material/Visibility';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { useState } from "react";
 import EmpleadoAddModal from "./EmpleadoAddModal";
 import EmpleadoViewModal from "./EmpleadoViewModal";
-import { EmpleadoUpdate } from "../../services/EmpleadoService";
+import { EmpleadoUpdate } from "../../../services/EmpleadoService";
 import { useAuth0 } from "@auth0/auth0-react";
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 

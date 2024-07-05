@@ -1,8 +1,8 @@
 import { Box, Button, IconButton, Modal, TextField, Typography } from "@mui/material";
-import Empresa from "../../types/Empresa";
+import Empresa from "../../../types/Empresa";
 import { useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
-import { EmpresaCreate, EmpresaUpdate } from "../../services/EmpresaService";
+import { EmpresaCreate, EmpresaUpdate } from "../../../services/EmpresaService";
 import { useAuth0 } from "@auth0/auth0-react";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';

@@ -1,5 +1,5 @@
 import { Button, Card, CardActions, CardHeader, IconButton, Tooltip } from "@mui/material";
-import Empresa from "../../types/Empresa";
+import Empresa from "../../../types/Empresa";
 import { useState } from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';

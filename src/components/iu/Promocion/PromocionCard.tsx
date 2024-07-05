@@ -5,11 +5,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import Promocion from '../../types/Promocion';
+import Promocion from '../../../types/Promocion';
 import AddPromocionModal from './AddPromocionModal';
 import Visibility from '@mui/icons-material/Visibility';
 import ViewPromocionModal from './PromocionViewModal';
-import { PromocionUpdate } from '../../services/PromocionService';
+import { PromocionUpdate } from '../../../services/PromocionService';
 import { useAuth0 } from '@auth0/auth0-react';
 
 interface PromocionCardProps {

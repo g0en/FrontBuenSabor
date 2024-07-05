@@ -2,12 +2,12 @@ import { Box, Button, Paper, Table, TableCell, TableContainer, TableHead, TableR
 import SideBar from "../components/common/SideBar";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import EmpleadoTable from "../components/Empleado/EmpleadoTable";
+import EmpleadoTable from "../components/iu/Empleado/EmpleadoTable";
 import { useParams } from "react-router-dom";
 import { useAuth0 } from '@auth0/auth0-react';
 import Empleado from "../types/Empleado";
 import { EmpleadoGetBySucursal } from "../services/EmpleadoService";
-import EmpleadoAddModal from "../components/Empleado/EmpleadoAddModal";
+import EmpleadoAddModal from "../components/iu/Empleado/EmpleadoAddModal";
 
 const emptyEmpleado: Empleado = {
     id: null,

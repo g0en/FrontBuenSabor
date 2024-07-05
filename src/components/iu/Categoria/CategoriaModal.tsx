@@ -1,12 +1,12 @@
 import { Box, Button, Checkbox, FormControlLabel, Grid, IconButton, Modal, TextField, Typography } from "@mui/material";
-import Categoria from "../../types/Categoria";
+import Categoria from "../../../types/Categoria";
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Sucursal from "../../types/Sucursal";
+import Sucursal from "../../../types/Sucursal";
 import { useAuth0 } from "@auth0/auth0-react";
-import { SucursalGetByEmpresaId } from "../../services/SucursalService";
-import { CategoriaCreate, CategoriaUpdate } from "../../services/CategoriaService";
+import { SucursalGetByEmpresaId } from "../../../services/SucursalService";
+import { CategoriaCreate, CategoriaUpdate } from "../../../services/CategoriaService";
 
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 
@@ -138,6 +138,18 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
         <>
             <Modal open={open} onClose={handleClose}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: 700, maxHeight: '80vh', bgcolor: 'background.paper', boxShadow: 24, p: 4, overflowY: 'auto' }}>
+                <IconButton
+                        aria-label="close"
+                        onClick={handleClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
                     <Typography variant="h6" gutterBottom>
                         {currentCategoria.id === null ? 'Crear Categoría' : 'Editar Categoría'}
                     </Typography>
@@ -251,9 +263,6 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                         </Box>
                     ))}
                     <Box mt={2} display="flex" justifyContent="flex-end">
-                        <Button variant="contained" color="error" onClick={handleClose} sx={{ mr: 2 }}>
-                            Cancelar
-                        </Button>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>
                             {currentCategoria.id === null ? 'Crear' : 'Actualizar'}
                         </Button>

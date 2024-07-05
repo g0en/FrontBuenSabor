@@ -7,8 +7,8 @@ import { CategoriaByEmpresaGetAll } from "../services/CategoriaService";
 import AddIcon from "@mui/icons-material/Add";
 import Categoria from "../types/Categoria";
 import { useAuth0 } from "@auth0/auth0-react";
-import CategoriaTable from "../components/Categoria/CategoriaTable";
-import CategoriaModal from "../components/Categoria/CategoriaModal";
+import CategoriaTable from "../components/iu/Categoria/CategoriaTable";
+import CategoriaModal from "../components/iu/Categoria/CategoriaModal";
 
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 

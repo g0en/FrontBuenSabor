@@ -4,9 +4,9 @@ import { Box, Typography, Grid, Button } from '@mui/material';
 import SideBar from '../components/common/SideBar';
 import Promocion from '../types/Promocion';
 import { PromocionFindBySucursal } from '../services/PromocionService';
-import PromocionCard from '../components/Promocion/PromocionCard';
+import PromocionCard from '../components/iu/Promocion/PromocionCard';
 import AddIcon from "@mui/icons-material/Add";
-import AddPromocionModal from '../components/Promocion/AddPromocionModal';
+import AddPromocionModal from '../components/iu/Promocion/AddPromocionModal';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const emptyPromocion: Promocion = {

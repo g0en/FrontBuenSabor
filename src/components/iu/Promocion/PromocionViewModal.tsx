@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Box, Typography, CardMedia, List, ListItem, ListItemText, IconButton } from '@mui/material';
-import Promocion from '../../types/Promocion';
+import Promocion from '../../../types/Promocion';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CloseIcon from '@mui/icons-material/Close';
