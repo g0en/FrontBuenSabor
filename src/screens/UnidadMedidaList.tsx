@@ -218,7 +218,6 @@ function UnidadMedidaList() {
             </Box>
             <ToastContainer />
 
-            {/* Dialog de confirmación */}
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>Confirmar eliminación</DialogTitle>
                 <DialogContent>
@@ -227,10 +226,10 @@ function UnidadMedidaList() {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog} color="error">
+                    <Button onClick={handleCloseDialog} color="primary" variant="contained">
                         Cancelar
                     </Button>
-                    <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+                    <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
                         Eliminar
                     </Button>
                 </DialogActions>

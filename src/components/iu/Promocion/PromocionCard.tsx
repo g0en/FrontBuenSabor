@@ -11,6 +11,8 @@ import Visibility from '@mui/icons-material/Visibility';
 import ViewPromocionModal from './PromocionViewModal';
 import { PromocionUpdate } from '../../../services/PromocionService';
 import { useAuth0 } from '@auth0/auth0-react';
+import DesactivarComponent from '../Acciones/DesactivarComponent';
+import ActivarComponent from '../Acciones/ActivarComponent';
 
 interface PromocionCardProps {
     onClose: () => void;
@@ -21,6 +23,8 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [openEdit, setOpenEdit] = useState(false);
     const [openView, setOpenView] = useState(false);
+    const [openBaja, setOpenBaja] = useState(false);
+    const [openAlta, setOpenAlta] = useState(false);
     const { getAccessTokenSilently } = useAuth0();
 
     const isActiva = new Date(promocion.fechaHasta) > new Date();
@@ -63,6 +67,7 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
         }
 
         onClose();
+        handleCloseDialog();
     }
 
     const handleAlta = async () => {
@@ -78,7 +83,22 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
         }
 
         onClose();
+        handleCloseDialog();
     }
+
+    const handleOpenBaja = () => {
+        setOpenBaja(true);
+    }
+
+    const handleOpenAlta = () => {
+        setOpenAlta(true);
+    }
+
+    const handleCloseDialog = () => {
+        setOpenBaja(false);
+        setOpenAlta(false);
+    }
+
 
     return (
         <Box>
@@ -145,7 +165,7 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
                                 <IconButton aria-label="view" color='secondary' size="small" onClick={handleView}>
                                     <Visibility />
                                 </IconButton>
-                                <IconButton aria-label="baja" color='error' size="small" onClick={handleBaja}>
+                                <IconButton aria-label="baja" color='error' size="small" onClick={handleOpenBaja}>
                                     <RemoveCircleOutlineIcon fontSize="small" />
                                 </IconButton>
                             </>
@@ -154,7 +174,7 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
                                 <IconButton aria-label="view" color='secondary' size="small" onClick={handleView}>
                                     <Visibility />
                                 </IconButton>
-                                <IconButton aria-label="alta" color='success' size="small" onClick={handleAlta}>
+                                <IconButton aria-label="alta" color='success' size="small" onClick={handleOpenAlta}>
                                     <KeyboardDoubleArrowUpIcon fontSize="small" />
                                 </IconButton>
                             </>
@@ -163,6 +183,8 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
             </Card>
             <AddPromocionModal open={openEdit} onClose={handleCloseModal} currentPromocion={promocion} />
             <ViewPromocionModal open={openView} onClose={handleCloseViewModal} promocion={promocion} />
+            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={handleBaja} tipo='la promoción' entidad={promocion}/>
+            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={handleAlta} tipo='la promoción' entidad={promocion}/>
         </Box>
     );
 };

@@ -10,6 +10,8 @@ import { ArticuloInsumoUpdate } from "../../../services/ArticuloInsumoService";
 import { useAuth0 } from "@auth0/auth0-react";
 import ArticuloInsumoViewModal from "./ArticuloInsumoViewModal";
 import ArticuloInsumoAddModal from "./ArticuloInusmoAddModal";
+import DesactivarComponent from "../Acciones/DesactivarComponent";
+import ActivarComponent from "../Acciones/ActivarComponent";
 
 interface ArticuloInsumoTableProps {
     onClose: () => void;
@@ -19,6 +21,8 @@ interface ArticuloInsumoTableProps {
 const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, articulo }) => {
     const [open, setOpen] = useState(false);
     const [view, setView] = useState(false);
+    const [openBaja, setOpenBaja] = useState(false);
+    const [openAlta, setOpenAlta] = useState(false);
     const [images, setImages] = useState<string[]>([]);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>(articulo.imagenes);
     const { getAccessTokenSilently } = useAuth0();
@@ -64,6 +68,7 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
         }
 
         handleClose();
+        handleCloseDialog();
     }
 
     const handleAlta = async (articulo: ArticuloInsumo) => {
@@ -79,12 +84,26 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
         }
 
         handleClose();
+        handleCloseDialog();
     }
 
     const handleClose = () => {
         setOpen(false);
         setView(false);
         onClose();
+    }
+
+    const handleOpenBaja = () => {
+        setOpenBaja(true);
+    }
+
+    const handleOpenAlta = () => {
+        setOpenAlta(true);
+    }
+
+    const handleCloseDialog = () => {
+        setOpenBaja(false);
+        setOpenAlta(false);
     }
 
     return (
@@ -112,7 +131,7 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
                                         <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
                                             <Edit />
                                         </IconButton>
-                                        <IconButton aria-label="delete" onClick={() => handleBaja(articulo)} color="error">
+                                        <IconButton aria-label="delete" onClick={handleOpenBaja} color="error">
                                             <RemoveCircleOutlineIcon />
                                         </IconButton>
                                     </Box>
@@ -121,16 +140,17 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
                                         <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                             <Visibility />
                                         </IconButton>
-                                        <IconButton aria-label="alta" onClick={() => handleAlta(articulo)} color="success">
+                                        <IconButton aria-label="alta" onClick={handleOpenAlta} color="success">
                                             <KeyboardDoubleArrowUpIcon />
                                         </IconButton>
                                     </Box>
                             }
                         </TableCell>
                     </TableRow>
-
             <ArticuloInsumoViewModal view={view} onClose={handleClose} articulo={articulo} images={images}/>
             <ArticuloInsumoAddModal open={open} onClose={handleClose} articulo={articulo} imagenes={images} articuloImagenes={articuloImages}/>
+            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(articulo)} tipo='el insumo' entidad={articulo}/>
+            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={() => handleAlta(articulo)} tipo='el insumo' entidad={articulo}/>
         </>
     )
 };

@@ -196,27 +196,30 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     };
 
     useEffect(() => {
-        getAllArticuloManufacturadoBySucursal();
-        getAllArticuloInsumoParaVender();
-        getAllSucursales();
-        if (promocion.id !== null) {
-            detalles.forEach(detalle => {
-                setTotal(total + detalle.articulo.precioVenta * detalle.cantidad);
-            });
-        }
-    }, [idSucursal, idEmpresa]);
-
-    useEffect(() => {
-        setArticulos([...insumos, ...manufacturados]);
-    }, [insumos, manufacturados]);
-
-    useEffect(() => {
         if (promocion.id !== null && promocion.id > 0) {
             setDetalles(JSON.parse(JSON.stringify(currentPromocion.promocionDetalles)));
             setImages(promocion.imagenes.map(imagen => imagen.url));
             setArticuloImages(promocion.imagenes);
         }
     }, [currentPromocion]);
+
+    useEffect(() => {
+        getAllArticuloManufacturadoBySucursal();
+        getAllArticuloInsumoParaVender();
+        getAllSucursales();
+        if (promocion.id !== null) {
+            let newTotal = 0;
+            detalles.forEach(detalle => {
+                newTotal += detalle.articulo.precioVenta * detalle.cantidad;
+            });
+
+            setTotal(newTotal);
+        }
+    }, [idSucursal, idEmpresa, total]);
+
+    useEffect(() => {
+        setArticulos([...insumos, ...manufacturados]);
+    }, [insumos, manufacturados]);
 
     const handleSucursalChange = (id: number) => {
         const sucursalesSeleccionadas = promocion.sucursales || [];

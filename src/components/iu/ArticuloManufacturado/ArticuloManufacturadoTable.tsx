@@ -11,6 +11,8 @@ import ArticuloManufacturadoDetalle from "../../../types/ArticuloManufacturadoDe
 import { ArticuloManufacturadoUpdate } from "../../../services/ArticuloManufacturadoService";
 import ArticuloManufacturadoViewModal from "./ArticuloManufacturadoViewModal";
 import ArticuloManufacturadoAddModal from "./ArticuloManufacturadoAddModal";
+import DesactivarComponent from "../Acciones/DesactivarComponent";
+import ActivarComponent from "../Acciones/ActivarComponent";
 
 interface ArticuloManufacturadoTableProps {
     onClose: () => void;
@@ -19,6 +21,8 @@ interface ArticuloManufacturadoTableProps {
 
 const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({ onClose, articulo }) => {
     const [view, setView] = useState(false);
+    const [openBaja, setOpenBaja] = useState(false);
+    const [openAlta, setOpenAlta] = useState(false);
     const [images, setImages] = useState<string[]>([]);
     const [articuloImages, setArticuloImages] = useState<Imagen[]>(articulo.imagenes);
     const [openModal, setOpenModal] = useState(false);
@@ -70,7 +74,7 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
         }
 
         handleClose();
-
+        handleCloseDialog();
     }
 
     const handleAlta = async (articulo: ArticuloManufacturado) => {
@@ -87,6 +91,7 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
         }
 
         handleClose();
+        handleCloseDialog();
     }
 
     const handleClose = () => {
@@ -94,7 +99,19 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
         setView(false);
         onClose();
     }
-    
+
+    const handleOpenBaja = () => {
+        setOpenBaja(true);
+    }
+
+    const handleOpenAlta = () => {
+        setOpenAlta(true);
+    }
+
+    const handleCloseDialog = () => {
+        setOpenBaja(false);
+        setOpenAlta(false);
+    }
 
     return (
         <>
@@ -113,7 +130,7 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
                             <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                 <VisibilityIcon />
                             </IconButton>
-                            <IconButton aria-label="delete" onClick={() => handleBaja(articulo)} color="error">
+                            <IconButton aria-label="delete" onClick={handleOpenBaja} color="error">
                                 <RemoveCircleOutlineIcon />
                             </IconButton>
                         </TableCell>
@@ -122,7 +139,7 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
                             <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
                                 <VisibilityIcon />
                             </IconButton>
-                            <IconButton aria-label="alta" onClick={() => handleAlta(articulo)} color="success">
+                            <IconButton aria-label="alta" onClick={handleOpenAlta} color="success">
                                 <KeyboardDoubleArrowUpIcon />
                             </IconButton>
                         </TableCell>
@@ -131,6 +148,8 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
 
             <ArticuloManufacturadoViewModal view={view} onClose={handleClose} articulo={articulo} images={images}/>
             <ArticuloManufacturadoAddModal open={openModal} onClose={handleClose} articulo={articulo} imagenes={images} articuloImagenes={articuloImages} articuloDetalles={detalles}/>
+            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(articulo)} tipo='el manufacturado' entidad={articulo}/>
+            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={() => handleAlta(articulo)} tipo='el manufacturado' entidad={articulo}/>
         </>
     )
 };

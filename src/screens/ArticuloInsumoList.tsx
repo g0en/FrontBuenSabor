@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Box, Typography, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { Button, Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from "@mui/material";
 import SideBar from "../components/common/SideBar";
 import ArticuloInsumo from "../types/ArticuloInsumo";
 import { ArticuloInsumoFindBySucursal } from "../services/ArticuloInsumoService";
@@ -60,31 +60,31 @@ function ArticuloInsumoList() {
                 </Typography>
 
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>Agregar Insumo</Button>
-
-                <Table >
-                    <TableHead >
-                        <TableRow>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Nombre</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio Compra</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio Venta</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Unidad de Medida</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Actual</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Mínimo</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Máximo</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Para Elaborar</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Categoría</TableCell>
-                            <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {articulosInsumo.filter(articulo => articulo.eliminado === false)
-                            .map((articulo) => (
-                                <ArticuloInsumoTable onClose={handleClose} articulo={articulo} />
-                            )
-                            )};
-                    </TableBody>
-                </Table>
-
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
+                    <Table >
+                        <TableHead >
+                            <TableRow>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio Compra</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Precio Venta</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Unidad de Medida</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Actual</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Mínimo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Stock Máximo</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Para Elaborar</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Categoría</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {articulosInsumo.filter(articulo => articulo.eliminado === false)
+                                .map((articulo) => (
+                                    <ArticuloInsumoTable onClose={handleClose} articulo={articulo} />
+                                )
+                                )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
                 <ArticuloInsumoAddModal open={open} onClose={handleClose} articulo={currentArticuloInsumo} imagenes={images} articuloImagenes={articuloImages} />
             </Box>
