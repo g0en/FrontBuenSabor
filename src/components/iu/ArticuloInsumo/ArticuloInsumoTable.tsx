@@ -10,8 +10,8 @@ import { ArticuloInsumoUpdate } from "../../../services/ArticuloInsumoService";
 import { useAuth0 } from "@auth0/auth0-react";
 import ArticuloInsumoViewModal from "./ArticuloInsumoViewModal";
 import ArticuloInsumoAddModal from "./ArticuloInusmoAddModal";
-import DesactivarComponent from "../Acciones/DesactivarComponent";
-import ActivarComponent from "../Acciones/ActivarComponent";
+import DesactivarComponent from "../Advertencias/DesactivarComponent";
+import ActivarComponent from "../Advertencias/ActivarComponent";
 
 interface ArticuloInsumoTableProps {
     onClose: () => void;
@@ -111,7 +111,7 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
             <TableRow sx={{ backgroundColor: articulo.habilitado ? "none" : "#B0B0B0" }} key={articulo.id}>
                         <TableCell align="center">{articulo.denominacion}</TableCell>
                         <TableCell align="center">{articulo.precioCompra}</TableCell>
-                        <TableCell align="center">{articulo.precioVenta}</TableCell>
+                        <TableCell align="center">{!articulo.esParaElaborar ? articulo.precioVenta : '-'}</TableCell>
                         <TableCell align="center">{articulo.unidadMedida?.denominacion}</TableCell>
                         <TableCell align="center">{articulo.stockActual}</TableCell>
                         <TableCell align="center">{articulo.stockMinimo}</TableCell>

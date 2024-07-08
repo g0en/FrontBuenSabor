@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, FormControlLabel, Grid, IconButton, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, Modal, TextField, Typography } from "@mui/material";
 import Categoria from "../../../types/Categoria";
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useState } from "react";
@@ -21,13 +21,14 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
     const { idEmpresa } = useParams();
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
     const { getAccessTokenSilently } = useAuth0();
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const getAllSucursal = async () => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
         setSucursales(sucursales);
     };
@@ -35,19 +36,19 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
     const createCategoria = async (categoria: Categoria) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
-          
+        });
+
         await CategoriaCreate(categoria, token);
     };
 
     const updateCategoria = async (categoria: Categoria) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
 
         await CategoriaUpdate(categoria, token);
     };
@@ -57,7 +58,15 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
     }, [idEmpresa]);
 
     const handleCategoriaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCurrentCategoria({ ...currentCategoria, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        // Limitar a 20 caracteres y permitir solo letras
+        const regex = /^[A-Za-z]{0,25}$/;
+        if (regex.test(value)) {
+            setCurrentCategoria({ ...currentCategoria, [name]: value });
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
+        }
     };
 
     const handleEsInsumoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,8 +91,11 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                 });
             }
         }
+        if (errors.sucursales) {
+            setErrors({ ...errors, sucursales: '' });
+        }
     };
-    
+
     const handleAddSubCategoria = () => {
         setCurrentCategoria({
             ...currentCategoria,
@@ -93,8 +105,14 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
 
     const handleSubCategoriaChange = (index: number, denominacion: string) => {
         const subCategorias = [...(currentCategoria.subCategorias || [])];
-        subCategorias[index].denominacion = denominacion;
-        setCurrentCategoria({ ...currentCategoria, subCategorias });
+        const regex = /^[A-Za-z]{0,25}$/;
+        if (regex.test(denominacion)) {
+            subCategorias[index].denominacion = denominacion;
+            setCurrentCategoria({ ...currentCategoria, subCategorias });
+            if (errors[`subCategoria-${index}`]) {
+                setErrors({ ...errors, [`subCategoria-${index}`]: '' });
+            }
+        }
     };
 
     const handleRemoveSubCategoria = (index: number) => {
@@ -105,15 +123,39 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
 
     const handleClose = () => {
         setCurrentCategoria(categoria);
+        setErrors({});
         onClose();
     }
 
+    const validate = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+        if (!currentCategoria.denominacion) {
+            newErrors.denominacion = 'La denominación es obligatoria';
+        }
+        if (!currentCategoria.sucursales || currentCategoria.sucursales.length === 0) {
+            newErrors.sucursales = 'Debe seleccionar al menos una sucursal';
+        }
+        if (currentCategoria.subCategorias) {
+            currentCategoria.subCategorias.forEach((subCategoria, index) => {
+                if (!subCategoria.denominacion) {
+                    newErrors[`subCategoria-${index}`] = 'La denominación de la subcategoría es obligatoria';
+                }
+            });
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
+        if (!validate()) {
+            return;
+        }
+
         if (currentCategoria.id === null) {
-            try{
+            try {
                 await createCategoria(currentCategoria);
-            }catch(error){
-                console.log("No se pudo crear la categoria.");
+            } catch (error) {
+                console.log("No se pudo crear la categoría.");
             }
         } else {
             if (currentCategoria.subCategorias !== null) {
@@ -126,11 +168,10 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
             try {
                 await updateCategoria(currentCategoria);
             } catch (error) {
-                console.log("Error al cargar las categorias.");
+                console.log("Error al actualizar la categoría.");
             }
-
         }
-        
+
         handleClose();
     };
 
@@ -138,7 +179,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
         <>
             <Modal open={open} onClose={handleClose}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: 700, maxHeight: '80vh', bgcolor: 'background.paper', boxShadow: 24, p: 4, overflowY: 'auto' }}>
-                <IconButton
+                    <IconButton
                         aria-label="close"
                         onClick={handleClose}
                         sx={{
@@ -155,32 +196,20 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                     </Typography>
                     <Grid container spacing={2} mb={2}>
                         <Grid item xs={8}>
-                            <TextField
-                                fullWidth
-                                label="Denominación"
-                                name="denominacion"
-                                value={currentCategoria.denominacion}
-                                onChange={handleCategoriaChange}
-                                margin="normal"
-                            />
+                            <FormControl fullWidth error={!!errors.denominacion}>
+                                <TextField
+                                    fullWidth
+                                    label="Denominación"
+                                    name="denominacion"
+                                    value={currentCategoria.denominacion}
+                                    onChange={handleCategoriaChange}
+                                    margin="normal"
+                                />
+                                {errors.denominacion && <FormHelperText>{errors.denominacion}</FormHelperText>}
+                            </FormControl>
                         </Grid>
                         <Grid item xs={4} container justifyContent="center" alignItems="center">
-                            {currentCategoria.id !== null ?
-                                <div style={{ pointerEvents: 'none', opacity: 0.9 }}>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={currentCategoria.esInsumo}
-                                                onChange={handleEsInsumoChange}
-                                                name="esInsumo"
-                                                color="primary"
-                                                disabled={currentCategoria.id !== null}
-                                            />
-                                        }
-                                        label="Es Insumo"
-                                    />
-                                </div>
-                                :
+                            <FormControl fullWidth>
                                 <FormControlLabel
                                     control={
                                         <Checkbox
@@ -192,50 +221,30 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                                     }
                                     label="Es Insumo"
                                 />
-                            }
+                            </FormControl>
                         </Grid>
                     </Grid>
 
                     <Box mb={2}>
-                        <Typography variant="subtitle1" gutterBottom>
-                            Seleccione la/s sucursales:
-                        </Typography>
-                        {
-                            currentCategoria.id !== null ?
-                                <div>
-                                    <div>
-                                        {sucursales.map(sucursal => (
-                                            <FormControlLabel
-                                                key={sucursal.id}
-                                                control={
-                                                    <Checkbox
-                                                        checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
-                                                        onChange={() => handleSucursalChange(sucursal.id)}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label={sucursal.nombre}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                                :
-                                <div>
-                                    {sucursales.map(sucursal => (
-                                        <FormControlLabel
-                                            key={sucursal.id}
-                                            control={
-                                                <Checkbox
-                                                    checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
-                                                    onChange={() => handleSucursalChange(sucursal.id)}
-                                                    color="primary"
-                                                />
-                                            }
-                                            label={sucursal.nombre}
+                        <FormControl error={!!errors.sucursales}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Seleccione la/s sucursales:
+                            </Typography>
+                            {sucursales.map(sucursal => (
+                                <FormControlLabel
+                                    key={sucursal.id}
+                                    control={
+                                        <Checkbox
+                                            checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
+                                            onChange={() => handleSucursalChange(sucursal.id)}
+                                            color="primary"
                                         />
-                                    ))}
-                                </div>
-                        }
+                                    }
+                                    label={sucursal.nombre}
+                                />
+                            ))}
+                            {errors.sucursales && <FormHelperText>{errors.sucursales}</FormHelperText>}
+                        </FormControl>
                     </Box>
 
                     <Box display="flex" alignItems="center">
@@ -248,12 +257,15 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                     </Box>
                     {currentCategoria.subCategorias && currentCategoria.subCategorias.map((subCategoria, index) => (
                         <Box key={index} display="flex" alignItems="center" mt={2}>
-                            <TextField
-                                label="Denominación"
-                                value={subCategoria.denominacion}
-                                onChange={(e) => handleSubCategoriaChange(index, e.target.value)}
-                                margin="normal"
-                            />
+                            <FormControl error={!!errors[`subCategoria-${index}`]}>
+                                <TextField
+                                    label="Denominación"
+                                    value={subCategoria.denominacion}
+                                    onChange={(e) => handleSubCategoriaChange(index, e.target.value)}
+                                    margin="normal"
+                                />
+                                {errors[`subCategoria-${index}`] && <FormHelperText>{errors[`subCategoria-${index}`]}</FormHelperText>}
+                            </FormControl>
                             {
                                 subCategoria.id === null &&
                                 <IconButton color="secondary" onClick={() => handleRemoveSubCategoria(index)}>
@@ -264,7 +276,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                     ))}
                     <Box mt={2} display="flex" justifyContent="flex-end">
                         <Button variant="contained" color="primary" onClick={handleSubmit}>
-                            {currentCategoria.id === null ? 'Crear' : 'Actualizar'}
+                            {currentCategoria.id === null ? 'Crear Categoría' : 'Actualizar Categoría'}
                         </Button>
                     </Box>
                 </Box>

@@ -17,7 +17,7 @@ const emptySucursal = {
     horarioApertura: '',
     horarioCierre: '',
     esCasaMatriz: false,
-    domicilio: { id: 0, eliminado: false, calle: '', numero: 0, cp: 0, piso: 0, nroDpto: 0, localidad: null },
+    domicilio: { id: 0, eliminado: false, calle: '', numero: null, cp: null, piso: null, nroDpto: null, localidad: null },
     empresa: emptyEmpresa
 };
 

@@ -1,9 +1,9 @@
 import Articulo from "./Articulo";
 
 export default interface ArticuloInsumo extends Articulo{
-    precioCompra: number,
-    stockActual: number,
-    stockMaximo: number,
-    stockMinimo: number,
+    precioCompra: number | null,
+    stockActual: number | null,
+    stockMaximo: number | null,
+    stockMinimo: number | null,
     esParaElaborar: boolean
 }

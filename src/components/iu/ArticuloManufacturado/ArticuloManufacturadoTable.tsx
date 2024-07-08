@@ -11,8 +11,8 @@ import ArticuloManufacturadoDetalle from "../../../types/ArticuloManufacturadoDe
 import { ArticuloManufacturadoUpdate } from "../../../services/ArticuloManufacturadoService";
 import ArticuloManufacturadoViewModal from "./ArticuloManufacturadoViewModal";
 import ArticuloManufacturadoAddModal from "./ArticuloManufacturadoAddModal";
-import DesactivarComponent from "../Acciones/DesactivarComponent";
-import ActivarComponent from "../Acciones/ActivarComponent";
+import DesactivarComponent from "../Advertencias/DesactivarComponent";
+import ActivarComponent from "../Advertencias/ActivarComponent";
 
 interface ArticuloManufacturadoTableProps {
     onClose: () => void;

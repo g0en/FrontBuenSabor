@@ -11,8 +11,8 @@ import Visibility from '@mui/icons-material/Visibility';
 import ViewPromocionModal from './PromocionViewModal';
 import { PromocionUpdate } from '../../../services/PromocionService';
 import { useAuth0 } from '@auth0/auth0-react';
-import DesactivarComponent from '../Acciones/DesactivarComponent';
-import ActivarComponent from '../Acciones/ActivarComponent';
+import DesactivarComponent from '../Advertencias/DesactivarComponent';
+import ActivarComponent from '../Advertencias/ActivarComponent';
 
 interface PromocionCardProps {
     onClose: () => void;

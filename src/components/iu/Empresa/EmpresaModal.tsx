@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControl, FormHelperText, IconButton, Modal, TextField, Typography } from "@mui/material";
 import Empresa from "../../../types/Empresa";
 import { useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
@@ -28,6 +28,7 @@ const MySwal = withReactContent(Swal);
 
 const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) => {
     const [currentEmpresa, setCurrentEmpresa] = useState<Empresa>(empresa);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const { getAccessTokenSilently } = useAuth0();
 
     const createEmpresa = async (empresa: Empresa) => {
@@ -68,32 +69,72 @@ const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) =>
 
     const handleClose = () => {
         setCurrentEmpresa(empresa);
+        setErrors({});
         onClose();
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setCurrentEmpresa(prev => ({ ...prev, [name]: value }));
+
+        if (name === "nombre" && value.length <= 25 && /^[A-Za-z0-9\s]*$/.test(value)) {
+            setCurrentEmpresa(prev => ({ ...prev, [name]: value }));
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
+        } else if (name === "razonSocial" && value.length <= 20 && /^[A-Za-z\s]*$/.test(value)) {
+            setCurrentEmpresa(prev => ({ ...prev, [name]: value }));
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
+        } else if (name === "cuil" && value.length <= 11 && /^[0-9]*$/.test(value)) {
+            setCurrentEmpresa(prev => ({ ...prev, [name]: parseInt(value, 10) }));
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
+        }
+    };
+
+
+    const validate = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+        if (!currentEmpresa.nombre) {
+            newErrors.nombre = 'El nombre es obligatorio';
+        }
+        if (!currentEmpresa.razonSocial) {
+            newErrors.razonSocial = 'La razon social es obligatoria.';
+        }
+        if (!currentEmpresa.cuil) {
+            newErrors.cuil = 'El cuil es obligatorio.';
+        } else if(currentEmpresa.cuil.toString().length !== 11) {
+            newErrors.cuil = 'El campo cuil debe tener 11 dígitos.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSave = async () => {
+        if (!validate()) {
+            return;
+        }
+
         if (currentEmpresa.id > 0) {
-            try{
+            try {
                 await updateEmpresa(currentEmpresa);
-            }catch(error){
+            } catch (error) {
                 console.log("Error al actualizar la empresa.");
             }
         } else {
-            try{
+            try {
                 await createEmpresa(currentEmpresa);
-            }catch(error){
+            } catch (error) {
                 console.log("Error al crear la empresa.");
             }
         }
 
         handleClose();
     };
-    
+
     return (
         <Modal open={open} onClose={handleClose}>
             <Box sx={modalStyle}>
@@ -120,32 +161,44 @@ const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) =>
                         </Typography>
                 }
                 <Box mb={2}>
-                    <TextField
-                        margin="dense"
-                        label="Nombre"
-                        name="nombre"
-                        fullWidth
-                        value={currentEmpresa.nombre}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Razón Social"
-                        name="razonSocial"
-                        fullWidth
-                        value={currentEmpresa.razonSocial}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Cuil"
-                        name="cuil"
-                        fullWidth
-                        type="decimal"
-                        value={currentEmpresa.cuil}
-                        onChange={handleChange}
-                        disabled={!!currentEmpresa.id}
-                    />
+                    <FormControl fullWidth error={!!errors.nombre}>
+                        <TextField
+                            margin="dense"
+                            label="Nombre"
+                            name="nombre"
+                            fullWidth
+                            value={currentEmpresa.nombre}
+                            onChange={handleChange}
+                        />
+                        {errors.nombre && <FormHelperText>{errors.nombre}</FormHelperText>}
+                    </FormControl>
+
+                    <FormControl fullWidth error={!!errors.razonSocial}>
+                        <TextField
+                            margin="dense"
+                            label="Razón Social"
+                            name="razonSocial"
+                            fullWidth
+                            value={currentEmpresa.razonSocial}
+                            onChange={handleChange}
+                        />
+                        {errors.razonSocial && <FormHelperText>{errors.razonSocial}</FormHelperText>}
+                    </FormControl>
+
+                    <FormControl fullWidth error={!!errors.cuil}>
+                        <TextField
+                            margin="dense"
+                            label="Cuil"
+                            name="cuil"
+                            fullWidth
+                            type="decimal"
+                            value={currentEmpresa.cuil || null}
+                            onChange={handleChange}
+                            disabled={!!currentEmpresa.id}
+                        />
+                        {errors.cuil && <FormHelperText>{errors.cuil}</FormHelperText>}
+                    </FormControl>
+
                 </Box>
                 <Box mt={2} display="flex" justifyContent="space-between">
                     <Button onClick={handleSave} variant="contained" color="primary">Guardar</Button>

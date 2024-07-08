@@ -7,7 +7,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import EmpresaCard from "../components/iu/Empresa/EmpresaCard";
 import EmpresaModal from "../components/iu/Empresa/EmpresaModal";
 
-const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: 0 };
+const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: null };
 
 function EmpresaList() {
     const [empresas, setEmpresas] = useState<Empresa[]>([]);

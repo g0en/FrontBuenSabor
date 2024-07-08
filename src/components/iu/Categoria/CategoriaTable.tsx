@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import Categoria from '../../../types/Categoria';
 import { CategoriaBaja, CategoriaDelete } from '../../../services/CategoriaService';
 import CategoriaModal from './CategoriaModal';
+import EliminarComponent from '../Advertencias/EliminarComponent';
 
 interface CategoriaTableProps {
     onClose: () => void;
@@ -20,6 +21,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
     const { getAccessTokenSilently } = useAuth0();
     const { idSucursal } = useParams();
     const [open, setOpen] = useState(false);
+    const [openEliminar, setOpenEliminar] = useState(false);
     const [categoriaUpdate, setCategoriaUpdate] = useState<Categoria>(categoria);
 
     const bajaCategoria = async (idCategoria: number) => {
@@ -61,6 +63,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
         }
 
         handleClose();
+        handleCloseDialog();
     }
 
     const handleBaja = async (categoria: Categoria | CategoriaGetDto) => {
@@ -73,6 +76,14 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
         }
 
         handleClose();
+    }
+
+    const handleCloseDialog = () => {
+        setOpenEliminar(false);
+    }
+
+    const handleOpenElimarDialog = () => {
+        setOpenEliminar(true);
     }
 
     const filterSubCategoriasBySucursal = (subCategorias: CategoriaGetDto[] | null, idSucursal: number) => {
@@ -91,14 +102,16 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                         <Box sx={{ marginLeft: 'auto' }}>
                             <IconButton onClick={() => handleEdit(subCategoria)} color="primary"><EditIcon /></IconButton>
                             <IconButton onClick={() => handleBaja(subCategoria)} color="secondary"><ArrowCircleDownIcon /></IconButton>
-                            <IconButton onClick={() => handleDelete(subCategoria)} color="error"><DeleteIcon /></IconButton>
+                            <IconButton onClick={handleOpenElimarDialog} color="error"><DeleteIcon /></IconButton>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails>
                         {renderSubCategorias(subCategoria.subCategorias)}
                     </AccordionDetails>
                 </Accordion>
+                <EliminarComponent openDialog={openEliminar} onClose={handleCloseDialog} onConfirm={() => handleDelete(subCategoria)} tipo='la categoría' entidad={subCategoria} />
             </Box>
+            
         ));
     };
 
@@ -114,7 +127,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                     <Box sx={{ marginLeft: 'auto' }}>
                         <IconButton onClick={() => handleEdit(categoria)} color="primary">{categoria.sucursales !== null && <EditIcon />}</IconButton>
                         <IconButton onClick={() => handleBaja(categoria)} color="secondary"><ArrowCircleDownIcon /></IconButton>
-                        <IconButton onClick={() => handleDelete(categoria)} color="error"><DeleteIcon /></IconButton>
+                        <IconButton onClick={handleOpenElimarDialog} color="error"><DeleteIcon /></IconButton>
                     </Box>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -122,6 +135,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                 </AccordionDetails>
             </Accordion>
             <CategoriaModal open={open} onClose={handleClose} categoria={categoriaUpdate}/>
+            <EliminarComponent openDialog={openEliminar} onClose={handleCloseDialog} onConfirm={() => handleDelete(categoria)} tipo='la categoría' entidad={categoria} />
         </>
     )
 };
