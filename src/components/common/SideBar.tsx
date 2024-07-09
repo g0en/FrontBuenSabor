@@ -18,6 +18,7 @@ import MonitorIcon from '@mui/icons-material/Monitor';
 import LoginButton from "./LoginButton";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "./LogoutButton";
+import ProtectedComponent from "../auth0/ProtectedComponent";
 
 function SideBar() {
     const [openProducts, setOpenProducts] = useState(false);
@@ -65,6 +66,8 @@ function SideBar() {
                             </>
                         )}
                     </div>
+
+                    <ProtectedComponent roles={["administrador"]}>
                     <ListItemButton component={Link} to={"/dashboard/" + idEmpresa + "/" + idSucursal}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
@@ -73,6 +76,8 @@ function SideBar() {
                         </ListItemIcon>
                         <ListItemText primary="Estadisticas" />
                     </ListItemButton>
+                    </ProtectedComponent>
+
                     <ListItemButton onClick={handleProductsClick}>
                         <ListItemIcon sx={{
                             color: colorConfigs.sidebar.color
