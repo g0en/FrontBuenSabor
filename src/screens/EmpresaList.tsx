@@ -14,6 +14,7 @@ function EmpresaList() {
     const [open, setOpen] = useState(false);
     const [currentEmpresa, setCurrentEmpresa] = useState<Empresa>({ ...emptyEmpresa });
     const { getAccessTokenSilently } = useAuth0();
+    const {user} = useAuth0();
 
     const getAllEmpresa = async () => {
         const token = await getAccessTokenSilently({
@@ -77,7 +78,12 @@ function EmpresaList() {
                     <EmpresaCard key={empresa.id} onClose={handleClose} empresa={empresa} />
                 ))}
             </div>
-
+            <div>
+                <img src={user?.picture}/>
+                <h2>{user?.name}</h2>
+                <p>{user?.email}</p>
+                <p>{JSON.stringify(user)}</p>
+            </div>
             <EmpresaModal open={open} onClose={handleClose} empresa={currentEmpresa}/>
         </div>
     )

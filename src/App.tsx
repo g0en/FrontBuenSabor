@@ -11,25 +11,35 @@ import Empresa from "./screens/EmpresaList";
 import Sucursal from "./screens/SucursalList";
 import PreLayout from "./components/layout/PreLayout";
 import PedidosList from "./screens/PedidosList";
+import { useAuth0 } from "@auth0/auth0-react";
+import ProtectedRoute from "./components/auth0/ProtectedRoute";
 
 function App() {
+  const { isLoading } = useAuth0();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-      <Routes>
-        <Route element={<PreLayout />}>
-          <Route path="/" element={<Empresa />} />
+    <Routes>
+      <Route element={<PreLayout />}>
+        <Route path="/" element={<Empresa />} />
+        <Route element={<ProtectedRoute roles={['administrador']} />}>
           <Route path="empresa/:idEmpresa" element={<Sucursal />} />
         </Route>
-        <Route element={<MainLayout />}>
-          <Route path="dashboard/:idEmpresa/:idSucursal" element={<Dashboard />} />
-          <Route path="productos/:idEmpresa/:idSucursal" element={<ArticuloManufacturado />} />
-          <Route path="categorias/:idEmpresa/:idSucursal" element={<Categoria />} />
-          <Route path="promociones/:idEmpresa/:idSucursal" element={<Promocion />} />
-          <Route path="empleados/:idEmpresa/:idSucursal" element={<Empleado />} />
-          <Route path="insumos/:idEmpresa/:idSucursal" element={<ArticuloInsumo />} />
-          <Route path="unidad-medida/:idEmpresa/:idSucursal" element={<UnidadMedida />} />
-          <Route path="pedidos/:idEmpresa/:idSucursal" element={<PedidosList />}/>
-        </Route>
-      </Routes>
+      </Route>
+      <Route element={<MainLayout />}>
+        <Route path="dashboard/:idEmpresa/:idSucursal" element={<Dashboard />} />
+        <Route path="productos/:idEmpresa/:idSucursal" element={<ArticuloManufacturado />} />
+        <Route path="categorias/:idEmpresa/:idSucursal" element={<Categoria />} />
+        <Route path="promociones/:idEmpresa/:idSucursal" element={<Promocion />} />
+        <Route path="empleados/:idEmpresa/:idSucursal" element={<Empleado />} />
+        <Route path="insumos/:idEmpresa/:idSucursal" element={<ArticuloInsumo />} />
+        <Route path="unidad-medida/:idEmpresa/:idSucursal" element={<UnidadMedida />} />
+        <Route path="pedidos/:idEmpresa/:idSucursal" element={<PedidosList />} />
+      </Route>
+    </Routes>
   );
 }
 
