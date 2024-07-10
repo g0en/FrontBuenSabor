@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper, Card, CardContent, CardActions, FormControlLabel, Checkbox, MenuItem } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, Grid, TableContainer, Table, TableBody, TableRow, TableCell, Paper, Card, CardContent, CardActions, FormControlLabel, Checkbox, MenuItem, FormControl, FormHelperText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TipoPromocion } from '../../../types/enums/TipoPromocion';
 import Promocion from '../../../types/Promocion';
@@ -51,6 +51,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     const [total, setTotal] = useState(0);
     const [sucursales, setSucursales] = useState<SucursalShortDto[]>([]);
     const [currentSucursales, setCurrentSucursales] = useState<SucursalShortDto[]>(currentPromocion.sucursales);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const { getAccessTokenSilently } = useAuth0();
 
     const createPromocion = async (promocion: Promocion) => {
@@ -134,6 +135,11 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                 };
                 reader.readAsDataURL(file);
             });
+
+            const name = 'files';
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
         }
     };
 
@@ -210,7 +216,9 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         if (promocion.id !== null) {
             let newTotal = 0;
             detalles.forEach(detalle => {
-                newTotal += detalle.articulo.precioVenta * detalle.cantidad;
+                if (detalle.articulo.precioVenta !== null) {
+                    newTotal += detalle.articulo.precioVenta * detalle.cantidad;
+                }
             });
 
             setTotal(newTotal);
@@ -245,6 +253,10 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                 });
             }
         }
+
+        if (errors.sucursales) {
+            setErrors({ ...errors, sucursales: '' });
+        }
     };
 
     const handleAgregar = (articulo: Articulo) => {
@@ -255,8 +267,16 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
             articulo: articulo
         };
         setDetalles([...detalles, nuevoDetalle]);
-        handleTotal(articulo.precioVenta, nuevoDetalle.cantidad);
+        if (articulo.precioVenta !== null) {
+            handleTotal(articulo.precioVenta, nuevoDetalle.cantidad);
+        }
+
         setSearch("");
+
+        setErrors(prev => ({
+            ...prev,
+            detalles: ''
+        }));
     };
 
     const handleCantidadChange = (index: number, nuevaCantidad: number) => {
@@ -264,7 +284,10 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         const cantidadAnterior = nuevosDetalles[index].cantidad;
         nuevosDetalles[index].cantidad = nuevaCantidad;
         const diferencia = nuevaCantidad - cantidadAnterior;
-        handleTotal(nuevosDetalles[index].articulo.precioVenta, diferencia);
+        if (nuevosDetalles[index].articulo.precioVenta !== null) {
+            handleTotal(nuevosDetalles[index].articulo.precioVenta, diferencia);
+        }
+
         setDetalles(nuevosDetalles);
     };
 
@@ -285,15 +308,21 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
     const handleClose = () => {
         setStep(1);
         setSearch("");
+        setErrors({});
         setTotal(0);
         setFiles([]);
         setImages([]);
         setArticuloImages([]);
         setPromocion(currentPromocion);
+        setCurrentSucursales(currentPromocion.sucursales);
         if (promocion.id !== null && promocion.id > 0) {
             setDetalles(JSON.parse(JSON.stringify(currentPromocion.promocionDetalles)));
         } else {
             setDetalles([]);
+            setPromocion({
+                ...currentPromocion,
+                sucursales: []
+            });
         }
 
         onClose();
@@ -301,10 +330,67 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        const maxLength: Record<string, number> = {
+            denominacion: 25,
+            descripcionDescuento: 100,
+            precioPromocional: 6
+        };
+
+        if (value.length > maxLength[name]) {
+            return;
+        }
+
         setPromocion({ ...promocion, [name]: value });
+
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
+        }
+    };
+
+    const validate = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+        if (!promocion.denominacion) {
+            newErrors.denominacion = 'La denominación es obligatoria.';
+        }
+        if (!promocion.tipoPromocion) {
+            newErrors.tipoPromocion = 'El tipo de la promoción es obligatorio.';
+        }
+        if (!promocion.fechaDesde) {
+            newErrors.fechaDesde = 'La fecha desde es obligatoria.';
+        }
+        if (!promocion.fechaHasta) {
+            newErrors.fechaHasta = 'La fecha hasta es obligatoria.';
+        }
+        if (!promocion.horaDesde) {
+            newErrors.horaDesde = 'La hora desde es obligatoria.';
+        }
+        if (!promocion.horaHasta) {
+            newErrors.horaHasta = 'La hora hasta es obligatoria.';
+        }
+        if (!promocion.descripcionDescuento) {
+            newErrors.descripcionDescuento = 'La descripción es obligatoria.';
+        }
+        if (files.length === 0) {
+            newErrors.files = 'Las imagenes son obligatorias.';
+        }
+        if (detalles.length === 0) {
+            newErrors.detalles = 'Los detalles son obligatorios.';
+        }
+        if (!promocion.precioPromocional) {
+            newErrors.precioPromocional = 'El precio promocional es obligatorio.';
+        }
+        if (!promocion.sucursales || promocion.sucursales.length === 0) {
+            newErrors.sucursales = 'Debe seleccionar al menos una sucursal.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
+        if (!validate()) {
+            return;
+        }
         const imagenes = await cloudinaryUpload();
 
         if (imagenes && imagenes?.length > 0) {
@@ -351,7 +437,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
 
     return (
         <Modal open={open} onClose={handleClose}>
-            <Box sx={modalStyle}>
+            <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
                 <IconButton
                     aria-label="close"
                     onClick={handleClose}
@@ -378,95 +464,114 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                     <>
                         <Grid container spacing={2}>
                             <Grid item xs={8}>
-                                <TextField
-                                    fullWidth
-                                    label="Nombre"
-                                    name="denominacion"
-                                    value={promocion.denominacion}
-                                    onChange={handleChange}
-                                    margin="normal"
-                                />
+                                <FormControl fullWidth error={!!errors.denominacion}>
+                                    <TextField
+                                        fullWidth
+                                        label="Nombre"
+                                        name="denominacion"
+                                        value={promocion.denominacion}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                    />
+                                    {errors.denominacion && <FormHelperText>{errors.denominacion}</FormHelperText>}
+                                </FormControl>
                             </Grid>
                             <Grid item xs={4}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    label="Tipo de Promoción"
-                                    name="tipoPromocion"
-                                    value={promocion.tipoPromocion}
-                                    onChange={handleChange}
-                                    margin="normal"
-                                >
-                                    <MenuItem key={1} value={TipoPromocion.HAPPY_HOUR}>Happy Hour</MenuItem>
-                                    <MenuItem key={2} value={TipoPromocion.PROMOCION}>Promoción</MenuItem>
-                                </TextField>
+                                <FormControl fullWidth error={!!errors.tipoPromocion}>
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        label="Tipo de Promoción"
+                                        name="tipoPromocion"
+                                        value={promocion.tipoPromocion}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                    >
+                                        <MenuItem key={1} value={TipoPromocion.HAPPY_HOUR}>Happy Hour</MenuItem>
+                                        <MenuItem key={2} value={TipoPromocion.PROMOCION}>Promoción</MenuItem>
+                                    </TextField>
+                                    {errors.tipoPromocion && <FormHelperText>{errors.tipoPromocion}</FormHelperText>}
+                                </FormControl>
                             </Grid>
                         </Grid>
 
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Fecha Desde"
-                                    type="date"
-                                    name="fechaDesde"
-                                    value={promocion.fechaDesde}
-                                    onChange={handleChange}
-                                    margin="normal"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
+                                <FormControl fullWidth error={!!errors.fechaDesde}>
+                                    <TextField
+                                        fullWidth
+                                        label="Fecha Desde"
+                                        type="date"
+                                        name="fechaDesde"
+                                        value={promocion.fechaDesde}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                    {errors.fechaDesde && <FormHelperText>{errors.fechaDesde}</FormHelperText>}
+                                </FormControl>
                             </Grid>
                             <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Fecha Hasta"
-                                    type="date"
-                                    name="fechaHasta"
-                                    value={promocion.fechaHasta}
-                                    onChange={handleChange}
-                                    margin="normal"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
+                                <FormControl fullWidth error={!!errors.fechaHasta}>
+                                    <TextField
+                                        fullWidth
+                                        label="Fecha Hasta"
+                                        type="date"
+                                        name="fechaHasta"
+                                        value={promocion.fechaHasta}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                    {errors.fechaHasta && <FormHelperText>{errors.fechaHasta}</FormHelperText>}
+                                </FormControl>
                             </Grid>
                         </Grid>
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Hora Desde"
-                                    type="time"
-                                    name="horaDesde"
-                                    value={promocion.horaDesde}
-                                    onChange={handleChange}
-                                    margin="normal"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
+                                <FormControl fullWidth error={!!errors.horaDesde}>
+                                    <TextField
+                                        fullWidth
+                                        label="Hora Desde"
+                                        type="time"
+                                        name="horaDesde"
+                                        value={promocion.horaDesde}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                    {errors.horaDesde && <FormHelperText>{errors.horaDesde}</FormHelperText>}
+                                </FormControl>
                             </Grid>
                             <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Hora Hasta"
-                                    type="time"
-                                    name="horaHasta"
-                                    value={promocion.horaHasta}
-                                    onChange={handleChange}
-                                    margin="normal"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
+                                <FormControl fullWidth error={!!errors.horaHasta}>
+                                    <TextField
+                                        fullWidth
+                                        label="Hora Hasta"
+                                        type="time"
+                                        name="horaHasta"
+                                        value={promocion.horaHasta}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                    {errors.horaHasta && <FormHelperText>{errors.horaHasta}</FormHelperText>}
+                                </FormControl>
                             </Grid>
                         </Grid>
-
-
-                        <Box mt={2}>
-                            <Button variant="contained" onClick={handleNext}>
+                        <Box mt={2} display="flex" justifyContent="space-between">
+                            <Button disabled onClick={handleBack} color="secondary" variant="contained">
+                                Atrás
+                            </Button>
+                            <Button onClick={handleNext} color="primary" variant="contained">
                                 Siguiente
                             </Button>
                         </Box>
@@ -474,33 +579,39 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                 )}
                 {step === 2 && (
                     <>
-                        <TextField
-                            fullWidth
-                            label="Descripción"
-                            name="descripcionDescuento"
-                            value={promocion.descripcionDescuento}
-                            onChange={handleChange}
-                            margin="normal"
-                            multiline
-                            rows={4}
-                        />
+                        <FormControl fullWidth error={!!errors.descripcionDescuento}>
+                            <TextField
+                                fullWidth
+                                label="Descripción"
+                                name="descripcionDescuento"
+                                value={promocion.descripcionDescuento}
+                                onChange={handleChange}
+                                margin="normal"
+                                multiline
+                                rows={4}
+                            />
+                            {errors.descripcionDescuento && <FormHelperText>{errors.descripcionDescuento}</FormHelperText>}
+                        </FormControl>
                         <Box mt={3} mb={3}>
-                            <Box display="flex" alignItems="center">
-                                <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
-                                    Seleccione imágenes:
-                                </Typography>
-                                <label htmlFor="upload-button">
-                                    <input
-                                        style={{ display: 'none' }}
-                                        id="upload-button"
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={cloudinaryFileChange}
-                                    />
-                                    <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
-                                </label>
-                            </Box>
+                            <FormControl fullWidth error={!!errors.files}>
+                                <Box display="flex" alignItems="center">
+                                    <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+                                        Seleccione imágenes:
+                                    </Typography>
+                                    <label htmlFor="upload-button">
+                                        <input
+                                            style={{ display: 'none' }}
+                                            id="upload-button"
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={cloudinaryFileChange}
+                                        />
+                                        <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
+                                    </label>
+                                </Box>
+                                {errors.files && <FormHelperText>{errors.files}</FormHelperText>}
+                            </FormControl>
                             {promocion.id !== null && promocion.id > 0 ?
                                 images.length > 0 && (
                                     <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
@@ -543,14 +654,17 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                 )}
                 {step === 3 && (
                     <>
-                        <TextField
-                            fullWidth
-                            label="Buscar Artículos"
-                            name="buscarArticulos"
-                            value={search}
-                            onChange={searcher}
-                            margin="normal"
-                        />
+                        <FormControl fullWidth error={!!errors.detalles}>
+                            <TextField
+                                fullWidth
+                                label="Buscar Artículos"
+                                name="buscarArticulos"
+                                value={search}
+                                onChange={searcher}
+                                margin="normal"
+                            />
+                            {errors.detalles && <FormHelperText>{errors.detalles}</FormHelperText>}
+                        </FormControl>
                         <TableContainer component={Paper}>
                             <Table>
                                 <TableBody>
@@ -575,13 +689,28 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                             Precio neto: ${total}
                         </Typography>
                         <Box>
-                            <TextField
-                                label="Precio Promocional"
-                                name="precioPromocional"
-                                value={promocion.precioPromocional}
-                                onChange={handleChange}
-                                margin="normal"
-                            />
+                            <FormControl fullWidth error={!!errors.precioPromocional}>
+                                <Grid item xs={4}>
+                                    <TextField
+                                        label="Precio Promocional"
+                                        type='decimal'
+                                        name="precioPromocional"
+                                        value={promocion.precioPromocional}
+                                        onChange={handleChange}
+                                        margin="normal"
+                                        onInput={(e) => {
+                                            const input = e.target as HTMLInputElement;
+                                            input.value = input.value.replace(/[^0-9]/g, '');
+                                        }}
+                                        inputProps={{
+                                            inputMode: 'numeric',
+                                            pattern: '[0-9]*',
+                                            min: 0
+                                        }}
+                                    />
+                                </Grid>
+                                {errors.precioPromocional && <FormHelperText>{errors.precioPromocional}</FormHelperText>}
+                            </FormControl>
                         </Box>
                         <Box mb={4}>
                             <Typography variant="body1" gutterBottom sx={{ mt: 3 }}>
@@ -601,6 +730,15 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                                                     onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
                                                     label="Cantidad"
                                                     fullWidth
+                                                    onInput={(e) => {
+                                                        const input = e.target as HTMLInputElement;
+                                                        input.value = input.value.replace(/[^0-9]/g, '');
+                                                    }}
+                                                    inputProps={{
+                                                        inputMode: 'numeric',
+                                                        pattern: '[0-9]*',
+                                                        min: 0
+                                                    }}
                                                 />
                                             </CardContent>
                                             <CardActions>
@@ -629,19 +767,22 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                             Seleccione la/s sucursales:
                         </Typography>
                         <Box mb={3}>
-                            {sucursales.map(sucursal => (
-                                <FormControlLabel
-                                    key={sucursal.id}
-                                    control={
-                                        <Checkbox
-                                            checked={promocion.sucursales?.some(s => s.id === sucursal.id) || false}
-                                            onChange={() => handleSucursalChange(sucursal.id)}
-                                            color="primary"
-                                        />
-                                    }
-                                    label={sucursal.nombre}
-                                />
-                            ))}
+                            <FormControl fullWidth error={!!errors.sucursales}>
+                                {sucursales.map(sucursal => (
+                                    <FormControlLabel
+                                        key={sucursal.id}
+                                        control={
+                                            <Checkbox
+                                                checked={promocion.sucursales?.some(s => s.id === sucursal.id) || false}
+                                                onChange={() => handleSucursalChange(sucursal.id)}
+                                                color="primary"
+                                            />
+                                        }
+                                        label={sucursal.nombre}
+                                    />
+                                ))}
+                                {errors.sucursales && <FormHelperText>{errors.sucursales}</FormHelperText>}
+                            </FormControl>
                         </Box>
                         <Box mt={2} display="flex" justifyContent="space-between">
                             <Button variant="contained" color='secondary' onClick={handleBack}>

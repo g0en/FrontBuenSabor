@@ -413,11 +413,21 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
                                 <TextField
                                     margin="dense"
                                     label="Número"
+                                    type="decimal"
                                     name="numero"
                                     fullWidth
                                     value={currentSucursal.domicilio.numero}
                                     onChange={handleChange}
                                     disabled={!!currentSucursal.id}
+                                    onInput={(e) => {
+                                        const input = e.target as HTMLInputElement;
+                                        input.value = input.value.replace(/[^0-9]/g, '');
+                                    }}
+                                    inputProps={{
+                                        inputMode: 'numeric',
+                                        pattern: '[0-9]*',
+                                        min: 0
+                                    }}
                                 />
                                 {errors.numero && <FormHelperText>{errors.numero}</FormHelperText>}
                             </FormControl>
@@ -428,10 +438,20 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
                                     margin="dense"
                                     label="Código Postal (CP)"
                                     name="cp"
+                                    type="decimal"
                                     fullWidth
                                     value={currentSucursal.domicilio.cp}
                                     onChange={handleChange}
                                     disabled={!!currentSucursal.id}
+                                    onInput={(e) => {
+                                        const input = e.target as HTMLInputElement;
+                                        input.value = input.value.replace(/[^0-9]/g, '');
+                                    }}
+                                    inputProps={{
+                                        inputMode: 'numeric',
+                                        pattern: '[0-9]*',
+                                        min: 0
+                                    }}
                                 />
                                 {errors.cp && <FormHelperText>{errors.cp}</FormHelperText>}
                             </FormControl>
@@ -443,10 +463,20 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
                                 margin="dense"
                                 label="Piso"
                                 name="piso"
+                                type="decimal"
                                 fullWidth
                                 value={currentSucursal.domicilio.piso}
                                 onChange={handleChange}
                                 disabled={!!currentSucursal.id}
+                                onInput={(e) => {
+                                    const input = e.target as HTMLInputElement;
+                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                }}
+                                inputProps={{
+                                    inputMode: 'numeric',
+                                    pattern: '[0-9]*',
+                                    min: 0
+                                }}
                             />
                         </Grid>
                         <Grid item xs={4}>
@@ -454,10 +484,20 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
                                 margin="dense"
                                 label="Número de Departamento"
                                 name="nroDpto"
+                                type="decimal"
                                 fullWidth
                                 value={currentSucursal.domicilio.nroDpto}
                                 onChange={handleChange}
                                 disabled={!!currentSucursal.id}
+                                onInput={(e) => {
+                                    const input = e.target as HTMLInputElement;
+                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                }}
+                                inputProps={{
+                                    inputMode: 'numeric',
+                                    pattern: '[0-9]*',
+                                    min: 0
+                                }}
                             />
                         </Grid>
                         <Grid item xs={4} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

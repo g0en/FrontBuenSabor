@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, Grid, IconButton, MenuItem, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, FormControl, FormHelperText, Grid, IconButton, MenuItem, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
 import ArticuloInsumo from "../../../types/ArticuloInsumo";
 import { useEffect, useState } from "react";
 import Imagen from "../../../types/Imagen";
@@ -52,6 +52,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
     const [search, setSearch] = useState("");
     const { idEmpresa, idSucursal } = useParams();
     const [modalStep, setModalStep] = useState(1);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const { getAccessTokenSilently } = useAuth0();
 
     const createArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
@@ -122,6 +123,11 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                 };
                 reader.readAsDataURL(file);
             });
+            
+            const name = 'files';
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
         }
     };
 
@@ -226,6 +232,9 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
     const handleCantidadChange = (index: number, cantidad: number) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index].cantidad = cantidad;
+        if(nuevosDetalles[index].cantidad.toString().length > 3){
+            return;
+        }
         setDetalles(nuevosDetalles);
     };
 
@@ -238,6 +247,10 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
         };
         setDetalles([...detalles, nuevoDetalle]);
         setSearch("");
+        setErrors(prev => ({
+            ...prev,
+            detalles: ''
+        }));
     };
 
     const handleNextStep = () => {
@@ -248,8 +261,81 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
         setModalStep(modalStep - 1);
     };
 
+    const handleSelectChange = (e: React.ChangeEvent<{ value: unknown }>, name: string) => {
+        const value = e.target.value as number; // Asumiendo que el valor es un número (id)
+
+        if (name === 'unidadMedida') {
+            const unidadMedidaSeleccionada = unidadMedidas.find(u => u.id === value);
+            setCurrentArticuloManufacturado(prevState => ({
+                ...prevState,
+                unidadMedida: unidadMedidaSeleccionada || emptyUnidadMedida
+            }));
+        } else if (name === 'categoria') {
+            const categoriaSeleccionada = categorias.find(c => c.id === value);
+            setCurrentArticuloManufacturado(prevState => ({
+                ...prevState,
+                categoria: categoriaSeleccionada || emptyCategoria
+            }));
+        }
+
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
+        }
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setCurrentArticuloManufacturado({ ...currentArticuloManufacturado, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        const maxLength: Record<string, number> = {
+            denominacion: 25,
+            precioVenta: 6,
+            tiempoEstimadoMinutos: 2,
+            descripcion: 100,
+            preparacion: 250
+        };
+
+        if (value.length > maxLength[name]) {
+            return;
+        }
+
+        setCurrentArticuloManufacturado({ ...currentArticuloManufacturado, [name]: value });
+
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
+        }
+    };
+
+    const validate = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+        if (!currentArticuloManufacturado.denominacion) {
+            newErrors.denominacion = 'La denominación es obligatoria.';
+        }
+        if (!currentArticuloManufacturado.unidadMedida.id) {
+            newErrors.unidadMedida = 'La unidad de medida es obligatoria.';
+        }
+        if (!currentArticuloManufacturado.categoria.id) {
+            newErrors.categoria = 'La categoria es obligatoria.';
+        }
+        if (files.length === 0) {
+            newErrors.files = 'Las imagenes son obligatorias.';
+        }
+        if (!currentArticuloManufacturado.precioVenta) {
+            newErrors.precioVenta = 'El precio de venta es obligatorio.';
+        }
+        if (!currentArticuloManufacturado.tiempoEstimadoMinutos) {
+            newErrors.tiempoEstimadoMinutos = 'El tiempo estimado es obligatorio.';
+        }
+        if (!currentArticuloManufacturado.descripcion) {
+            newErrors.descripcion = 'La descripción es obligatoria.';
+        }
+        if (!currentArticuloManufacturado.preparacion) {
+            newErrors.preparacion = 'La preparación es obligatoria.';
+        }
+        if (detalles.length === 0) {
+            newErrors.detalles = 'Los detalles son obligatorios.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleClose = () => {
@@ -259,6 +345,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
         setInsumos([]);
         setImages(imagenes);
         setSearch("");
+        setErrors({});
         setArticuloImages(articuloImagenes);
         if (currentArticuloManufacturado.id !== null && currentArticuloManufacturado.id > 0) {
             if (currentArticuloManufacturado.id !== null && currentArticuloManufacturado.id > 0) {
@@ -273,6 +360,10 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
     }
 
     const handleSubmit = async () => {
+        if (!validate()) {
+            return;
+        }
+
         const imagenes = await cloudinaryUpload();
 
         if (imagenes && imagenes?.length > 0) {
@@ -319,7 +410,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
     return (
         <>
             <Modal open={open} onClose={handleClose}>
-                <Box sx={modalStyle}>
+                <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
                     <IconButton
                         aria-label="close"
                         onClick={handleClose}
@@ -338,78 +429,84 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                     {
                         modalStep === 1 && (
                             <Box>
-                                <TextField
-                                    name="denominacion"
-                                    label="Denominacion"
-                                    fullWidth
-                                    margin="normal"
-                                    value={currentArticuloManufacturado.denominacion}
-                                    onChange={handleChange}
-                                />
+                                <FormControl fullWidth error={!!errors.denominacion}>
+                                    <TextField
+                                        name="denominacion"
+                                        label="Denominacion"
+                                        fullWidth
+                                        margin="normal"
+                                        value={currentArticuloManufacturado.denominacion}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.denominacion && <FormHelperText>{errors.denominacion}</FormHelperText>}
+                                </FormControl>
                                 <Box>
                                     <Grid container spacing={2}>
                                         <Grid item xs={6}>
-                                            <TextField
-                                                select
-                                                name="unidadMedidaId"
-                                                label="Unidad de Medida"
-                                                fullWidth
-                                                margin="normal"
-                                                value={currentArticuloManufacturado.unidadMedida?.id || ''}
-                                                onChange={(e) => setCurrentArticuloManufacturado({
-                                                    ...currentArticuloManufacturado,
-                                                    unidadMedida: unidadMedidas.find((u) => u.id === Number(e.target.value)) || emptyUnidadMedida
-                                                })}
-                                            >
-                                                {unidadMedidas.filter(unidad => !unidad.eliminado)
-                                                    .map((unidad) => (
-                                                        <MenuItem key={unidad.id} value={unidad.id}>
-                                                            {unidad.denominacion}
-                                                        </MenuItem>
-                                                    ))}
-                                            </TextField>
+                                            <FormControl fullWidth error={!!errors.unidadMedida}>
+                                                <TextField
+                                                    select
+                                                    name="unidadMedidaId"
+                                                    label="Unidad de Medida"
+                                                    fullWidth
+                                                    margin="normal"
+                                                    value={currentArticuloManufacturado.unidadMedida?.id || ''}
+                                                    onChange={(e) => handleSelectChange(e, 'unidadMedida')}
+                                                >
+                                                    {unidadMedidas.filter(unidad => !unidad.eliminado)
+                                                        .map((unidad) => (
+                                                            <MenuItem key={unidad.id} value={unidad.id}>
+                                                                {unidad.denominacion}
+                                                            </MenuItem>
+                                                        ))}
+                                                </TextField>
+                                                {errors.unidadMedida && <FormHelperText>{errors.unidadMedida}</FormHelperText>}
+                                            </FormControl>
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <TextField
-                                                select
-                                                name="categoriaId"
-                                                label="Categoria"
-                                                fullWidth
-                                                margin="normal"
-                                                value={currentArticuloManufacturado.categoria?.id || ''}
-                                                onChange={(e) => setCurrentArticuloManufacturado({
-                                                    ...currentArticuloManufacturado,
-                                                    categoria: categorias.find((c) => c.id === Number(e.target.value)) || emptyCategoria
-                                                })}
-                                            >
-                                                {categorias.filter(categoria => !categoria.esInsumo)
-                                                    .filter(categoria => !categoria.eliminado)
-                                                    .map((categoria) => (
-                                                        <MenuItem key={categoria.id} value={categoria.id ?? ''}>
-                                                            {categoria.denominacion}
-                                                        </MenuItem>
-                                                    ))}
-                                            </TextField>
+                                            <FormControl fullWidth error={!!errors.categoria}>
+                                                <TextField
+                                                    select
+                                                    name="categoriaId"
+                                                    label="Categoria"
+                                                    fullWidth
+                                                    margin="normal"
+                                                    value={currentArticuloManufacturado.categoria?.id || ''}
+                                                    onChange={(e) => handleSelectChange(e, 'categoria')}
+                                                >
+                                                    {categorias.filter(categoria => !categoria.esInsumo)
+                                                        .filter(categoria => !categoria.eliminado)
+                                                        .map((categoria) => (
+                                                            <MenuItem key={categoria.id} value={categoria.id ?? ''}>
+                                                                {categoria.denominacion}
+                                                            </MenuItem>
+                                                        ))}
+                                                </TextField>
+                                                {errors.categoria && <FormHelperText>{errors.categoria}</FormHelperText>}
+                                            </FormControl>
                                         </Grid>
                                     </Grid>
                                 </Box>
                                 <Box mt={3} mb={3}>
-                                    <Box display="flex" alignItems="center">
-                                        <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
-                                            Seleccione imágenes:
-                                        </Typography>
-                                        <label htmlFor="upload-button">
-                                            <input
-                                                style={{ display: 'none' }}
-                                                id="upload-button"
-                                                type="file"
-                                                accept="image/*"
-                                                multiple
-                                                onChange={cloudinaryFileChange}
-                                            />
-                                            <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
-                                        </label>
-                                    </Box>
+                                    <FormControl fullWidth error={!!errors.files}>
+                                        <Box display="flex" alignItems="center">
+                                            <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+                                                Seleccione imágenes:
+                                            </Typography>
+                                            <label htmlFor="upload-button">
+                                                <input
+                                                    style={{ display: 'none' }}
+                                                    id="upload-button"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={cloudinaryFileChange}
+                                                />
+                                                <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
+                                            </label>
+                                        </Box>
+                                        {errors.files && <FormHelperText>{errors.files}</FormHelperText>}
+                                    </FormControl>
                                     {currentArticuloManufacturado.id > 0 ?
                                         images.length > 0 && (
                                             <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
@@ -442,26 +539,50 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                                 </Box>
                                 <Grid container spacing={2}>
                                     <Grid item xs={6}>
-                                        <TextField
-                                            name="precioVenta"
-                                            label="Precio de Venta"
-                                            fullWidth
-                                            margin="normal"
-                                            type="decimal"
-                                            value={currentArticuloManufacturado.precioVenta}
-                                            onChange={handleChange}
-                                        />
+                                        <FormControl fullWidth error={!!errors.precioVenta}>
+                                            <TextField
+                                                name="precioVenta"
+                                                label="Precio de Venta"
+                                                fullWidth
+                                                margin="normal"
+                                                type="decimal"
+                                                value={currentArticuloManufacturado.precioVenta}
+                                                onChange={handleChange}
+                                                onInput={(e) => {
+                                                    const input = e.target as HTMLInputElement;
+                                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                                }}
+                                                inputProps={{
+                                                    inputMode: 'numeric',
+                                                    pattern: '[0-9]*',
+                                                    min: 0,
+                                                }}
+                                            />
+                                            {errors.precioVenta && <FormHelperText>{errors.precioVenta}</FormHelperText>}
+                                        </FormControl>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <TextField
-                                            name="tiempoEstimadoMinutos"
-                                            label="Tiempo Estimado (minutos)"
-                                            fullWidth
-                                            margin="normal"
-                                            type="decimal"
-                                            value={currentArticuloManufacturado.tiempoEstimadoMinutos}
-                                            onChange={handleChange}
-                                        />
+                                        <FormControl fullWidth error={!!errors.tiempoEstimadoMinutos}>
+                                            <TextField
+                                                name="tiempoEstimadoMinutos"
+                                                label="Tiempo Estimado (minutos)"
+                                                fullWidth
+                                                margin="normal"
+                                                type="decimal"
+                                                value={currentArticuloManufacturado.tiempoEstimadoMinutos}
+                                                onChange={handleChange}
+                                                onInput={(e) => {
+                                                    const input = e.target as HTMLInputElement;
+                                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                                }}
+                                                inputProps={{
+                                                    inputMode: 'numeric',
+                                                    pattern: '[0-9]*',
+                                                    min: 0
+                                                }}
+                                            />
+                                            {errors.tiempoEstimadoMinutos && <FormHelperText>{errors.tiempoEstimadoMinutos}</FormHelperText>}
+                                        </FormControl>
                                     </Grid>
                                 </Grid>
                                 <Box mt={2} display="flex" justifyContent="space-between">
@@ -476,26 +597,32 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                         )}
                     {modalStep === 2 && (
                         <Box>
-                            <TextField
-                                name="descripcion"
-                                label="Descripcion"
-                                fullWidth
-                                margin="normal"
-                                multiline
-                                rows={3}
-                                value={currentArticuloManufacturado.descripcion}
-                                onChange={handleChange}
-                            />
-                            <TextField
-                                name="preparacion"
-                                label="Preparacion"
-                                fullWidth
-                                margin="normal"
-                                multiline
-                                rows={5}
-                                value={currentArticuloManufacturado.preparacion}
-                                onChange={handleChange}
-                            />
+                            <FormControl fullWidth error={!!errors.descripcion}>
+                                <TextField
+                                    name="descripcion"
+                                    label="Descripcion"
+                                    fullWidth
+                                    margin="normal"
+                                    multiline
+                                    rows={3}
+                                    value={currentArticuloManufacturado.descripcion}
+                                    onChange={handleChange}
+                                />
+                                {errors.descripcion && <FormHelperText>{errors.descripcion}</FormHelperText>}
+                            </FormControl>
+                            <FormControl fullWidth error={!!errors.preparacion}>
+                                <TextField
+                                    name="preparacion"
+                                    label="Preparacion"
+                                    fullWidth
+                                    margin="normal"
+                                    multiline
+                                    rows={5}
+                                    value={currentArticuloManufacturado.preparacion}
+                                    onChange={handleChange}
+                                />
+                                {errors.preparacion && <FormHelperText>{errors.preparacion}</FormHelperText>}
+                            </FormControl>
                             <Box mt={2} display="flex" justifyContent="space-between">
                                 <Button onClick={handlePreviousStep} color="secondary" variant="contained">
                                     Atrás
@@ -508,14 +635,17 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                     )}
                     {modalStep === 3 && (
                         <Box>
-                            <TextField
-                                name="buscarInsumo"
-                                label="Buscar Insumo"
-                                fullWidth
-                                margin="normal"
-                                value={search}
-                                onChange={searcher}
-                            />
+                            <FormControl fullWidth error={!!errors.detalles}>
+                                <TextField
+                                    name="buscarInsumo"
+                                    label="Buscar Insumo"
+                                    fullWidth
+                                    margin="normal"
+                                    value={search}
+                                    onChange={searcher}
+                                />
+                                {errors.detalles && <FormHelperText>{errors.detalles}</FormHelperText>}
+                            </FormControl>
                             <TableContainer component={Paper}>
                                 <Table>
                                     <TableBody>
@@ -553,6 +683,15 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                                                     onChange={(e) => handleCantidadChange(index, Number(e.target.value))}
                                                     label="Cantidad"
                                                     fullWidth
+                                                    onInput={(e) => {
+                                                        const input = e.target as HTMLInputElement;
+                                                        input.value = input.value.replace(/[^0-9]/g, '');
+                                                    }}
+                                                    inputProps={{
+                                                        inputMode: 'numeric',
+                                                        pattern: '[0-9]*',
+                                                        min: 0,
+                                                    }}
                                                 />
                                             </CardContent>
                                             <CardActions>

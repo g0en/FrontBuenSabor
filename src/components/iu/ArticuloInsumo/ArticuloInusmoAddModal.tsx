@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, MenuItem, Modal, Switch, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, MenuItem, Modal, Switch, TextField, Tooltip, Typography } from "@mui/material";
 import ArticuloInsumo from "../../../types/ArticuloInsumo";
 import { useEffect, useState } from "react";
 import Imagen from "../../../types/Imagen";
@@ -13,6 +13,7 @@ import { Delete } from "@mui/icons-material";
 import { CloudinaryDelete, CloudinaryUpload } from "../../../services/CloudinaryService";
 import { ArticuloInsumoCreate, ArticuloInsumoUpdate } from "../../../services/ArticuloInsumoService";
 import CloseIcon from '@mui/icons-material/Close';
+
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -45,6 +46,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
     const [articuloImages, setArticuloImages] = useState<Imagen[]>(articuloImagenes);
     const { idEmpresa } = useParams();
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [modalStep, setModalStep] = useState(1);
     const { getAccessTokenSilently } = useAuth0();
 
     const createArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
@@ -184,6 +186,14 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
 
     };
 
+    const handleNextStep = () => {
+        setModalStep(modalStep + 1);
+    };
+
+    const handlePreviousStep = () => {
+        setModalStep(modalStep - 1);
+    };
+
 
     const handleSelectChange = (e: React.ChangeEvent<{ value: unknown }>, name: string) => {
         const value = e.target.value as number; // Asumiendo que el valor es un número (id)
@@ -209,7 +219,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        const numericFields = ["precioCompra", "precioVenta", "stockActual", "stockMinimo", "stockMaximo"];
+        //const numericFields = ["precioCompra", "precioVenta", "stockActual", "stockMinimo", "stockMaximo"];
         const maxLength: Record<string, number> = {
             denominacion: 25,
             precioCompra: 6,
@@ -223,9 +233,9 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
             return;
         }
 
-        if (numericFields.includes(name) && !/^[0-9]*$/.test(value)) {
-            return;
-        }
+        //if (numericFields.includes(name) && !/^[0-9]*$/.test(value)) {
+        //    return;
+        //}
 
         setCurrentArticuloInsumo(prevState => ({
             ...prevState,
@@ -282,6 +292,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
     const handleClose = () => {
         setCurrentArticuloInsumo(articulo);
         setFiles([]);
+        setModalStep(1);
         setImages(imagenes);
         setArticuloImages(articuloImagenes);
         setErrors({});
@@ -338,7 +349,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
     return (
         <>
             <Modal open={open} onClose={handleClose}>
-                <Box sx={modalStyle}>
+                <Box sx={{ ...modalStyle, overflow: 'auto', maxHeight: '80vh' }}>
                     <IconButton
                         aria-label="close"
                         onClick={handleClose}
@@ -354,208 +365,303 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
                     <Typography variant="h6" gutterBottom>
                         {currentArticuloInsumo.id === 0 ? 'Crear Articulo Insumo' : 'Actualizar Articulo Insumo'}
                     </Typography>
-                    <Box mb={1}>
-                        <FormControl fullWidth error={!!errors.denominacion}>
-                            <TextField
-                                label="Denominación"
-                                name="denominacion"
-                                fullWidth
-                                margin="normal"
-                                value={currentArticuloInsumo.denominacion}
-                                onChange={handleInputChange}
-                            />
-                            {errors.denominacion && <FormHelperText>{errors.denominacion}</FormHelperText>}
-                        </FormControl>
-                    </Box>
-                    <Grid container spacing={2}>
-                        <Grid item xs={4}>
-                            <FormControl fullWidth error={!!errors.unidadMedida}>
-                                <TextField
-                                    select
-                                    label="Unidad de Medida"
-                                    name="unidadMedida"
-                                    fullWidth
-                                    value={currentArticuloInsumo.unidadMedida.id || ''}
-                                    onChange={(e) => handleSelectChange(e, 'unidadMedida')}
-                                    style={{ flex: 1, marginRight: 8 }}
-                                >
-                                    {unidadMedidas.filter(unidad => !unidad.eliminado).map((unidad) => (
-                                        <MenuItem key={unidad.id} value={unidad.id}>
-                                            {unidad.denominacion}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                                {errors.unidadMedida && <FormHelperText>{errors.unidadMedida}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={4}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={currentArticuloInsumo.esParaElaborar}
-                                        onChange={handleSwitchChange}
-                                        name="esParaElaborar"
-                                    />
-                                }
-                                label="¿Es para elaborar?"
-                                style={{ marginRight: 8, marginLeft: 'auto' }}
-                            />
-                        </Grid>
-                        <Grid item xs={4}>
-                            <FormControl fullWidth error={!!errors.categoria}>
-                                <TextField
-                                    select
-                                    label="Categoría"
-                                    name="categoria"
-                                    fullWidth
-                                    value={currentArticuloInsumo.categoria?.id || ''}
-                                    onChange={(e) => handleSelectChange(e, 'categoria')}
-                                    style={{ flex: 1 }}
-                                >
-                                    {categorias
-                                        .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
-                                        .filter(categoria => !categoria.eliminado)
-                                        .map((categoria) => (
-                                            <MenuItem key={categoria.id} value={categoria.id !== null ? Number(categoria.id) : 0}>
-                                                {categoria.denominacion}
-                                            </MenuItem>
-                                        ))}
-                                </TextField>
-                                {errors.categoria && <FormHelperText>{errors.categoria}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                    <Box mt={3} mb={3}>
-                        <FormControl fullWidth error={!!errors.files}>
-                            <Box display="flex" alignItems="center">
-                                <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
-                                    Seleccione imágenes:
-                                </Typography>
-                                <label htmlFor="upload-button">
-                                    <input
-                                        style={{ display: 'none' }}
-                                        id="upload-button"
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={cloudinaryFileChange}
-                                    />
-                                    <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
-                                </label>
-                            </Box>
-                            {errors.files && <FormHelperText>{errors.files}</FormHelperText>}
-                        </FormControl>
+                    {
+                        modalStep === 1 && (
+                            <>
+                                <Box mb={1}>
+                                    <FormControl fullWidth error={!!errors.denominacion}>
+                                        <TextField
+                                            label="Denominación"
+                                            name="denominacion"
+                                            fullWidth
+                                            margin="normal"
+                                            value={currentArticuloInsumo.denominacion}
+                                            onChange={handleInputChange}
+                                        />
+                                        {errors.denominacion && <FormHelperText>{errors.denominacion}</FormHelperText>}
+                                    </FormControl>
+                                </Box>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={4}>
+                                        <FormControl fullWidth error={!!errors.unidadMedida}>
+                                            <TextField
+                                                select
+                                                label="Unidad de Medida"
+                                                name="unidadMedida"
+                                                fullWidth
+                                                value={currentArticuloInsumo.unidadMedida.id || ''}
+                                                onChange={(e) => handleSelectChange(e, 'unidadMedida')}
+                                                style={{ flex: 1, marginRight: 8 }}
+                                            >
+                                                {unidadMedidas.filter(unidad => !unidad.eliminado).map((unidad) => (
+                                                    <MenuItem key={unidad.id} value={unidad.id}>
+                                                        {unidad.denominacion}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                            {errors.unidadMedida && <FormHelperText>{errors.unidadMedida}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={currentArticuloInsumo.esParaElaborar}
+                                                    onChange={handleSwitchChange}
+                                                    name="esParaElaborar"
+                                                />
+                                            }
+                                            label="¿Es para elaborar?"
+                                            style={{ marginRight: 8, marginLeft: 'auto' }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <FormControl fullWidth error={!!errors.categoria}>
+                                            <TextField
+                                                select
+                                                label="Categoría"
+                                                name="categoria"
+                                                fullWidth
+                                                value={currentArticuloInsumo.categoria?.id || ''}
+                                                onChange={(e) => handleSelectChange(e, 'categoria')}
+                                                style={{ flex: 1 }}
+                                            >
+                                                {categorias
+                                                    .filter(categoria => currentArticuloInsumo.esParaElaborar ? categoria.esInsumo : true)
+                                                    .filter(categoria => !categoria.eliminado)
+                                                    .map((categoria) => (
+                                                        <MenuItem key={categoria.id} value={categoria.id !== null ? Number(categoria.id) : 0}>
+                                                            {categoria.denominacion}
+                                                        </MenuItem>
+                                                    ))}
+                                            </TextField>
+                                            {errors.categoria && <FormHelperText>{errors.categoria}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+                                </Grid>
+                                <Box mt={3} mb={3}>
+                                    <FormControl fullWidth error={!!errors.files}>
+                                        <Box display="flex" alignItems="center">
+                                            <Typography variant="subtitle1" sx={{ marginRight: 2 }}>
+                                                Seleccione imágenes:
+                                            </Typography>
+                                            <label htmlFor="upload-button">
+                                                <input
+                                                    style={{ display: 'none' }}
+                                                    id="upload-button"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={cloudinaryFileChange}
+                                                />
+                                                <ImageSearchIcon sx={{ fontSize: '50px', cursor: 'pointer', '&:hover': { color: '#3B3B3B' } }} />
+                                            </label>
+                                        </Box>
+                                        {errors.files && <FormHelperText>{errors.files}</FormHelperText>}
+                                    </FormControl>
 
-                        {currentArticuloInsumo.id > 0 ?
-                            images.length > 0 && (
-                                <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                    {articuloImages.map((image, index) => (
-                                        !image.eliminado && (
-                                            <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                                <img src={image.url} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                                <IconButton onClick={() => removeImage(image.id)} size="small">
-                                                    <Delete />
-                                                </IconButton>
+                                    {currentArticuloInsumo.id > 0 ?
+                                        images.length > 0 && (
+                                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                                {articuloImages.map((image, index) => (
+                                                    !image.eliminado && (
+                                                        <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                            <img src={image.url} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                            <IconButton onClick={() => removeImage(image.id)} size="small">
+                                                                <Delete />
+                                                            </IconButton>
+                                                        </Box>
+                                                    )
+                                                ))}
                                             </Box>
                                         )
-                                    ))}
+                                        :
+                                        images.length > 0 && (
+                                            <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
+                                                {images.map((image, index) => (
+                                                    <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
+                                                        <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
+                                                        <IconButton onClick={() => removeImage(index)} size="small">
+                                                            <Delete />
+                                                        </IconButton>
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                        )
+                                    }
                                 </Box>
-                            )
-                            :
-                            images.length > 0 && (
-                                <Box mt={2} display="flex" flexDirection="row" flexWrap="wrap">
-                                    {images.map((image, index) => (
-                                        <Box key={index} display="flex" alignItems="center" flexDirection="column" mr={2} mb={2}>
-                                            <img src={image} alt={`Imagen ${index}`} style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }} />
-                                            <IconButton onClick={() => removeImage(index)} size="small">
-                                                <Delete />
-                                            </IconButton>
-                                        </Box>
-                                    ))}
+                                <Box mt={2} display="flex" justifyContent="space-between">
+                                    <Button disabled onClick={handlePreviousStep} color="secondary" variant="contained">
+                                        Atrás
+                                    </Button>
+                                    <Button onClick={handleNextStep} color="primary" variant="contained">
+                                        Siguiente
+                                    </Button>
                                 </Box>
-                            )
-                        }
-                    </Box>
-                    <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <FormControl fullWidth error={!!errors.precioCompra}>
-                                <TextField
-                                    label="Precio de Compra"
-                                    name="precioCompra"
-                                    type="decimal"
-                                    fullWidth
-                                    margin="normal"
-                                    value={currentArticuloInsumo.precioCompra}
-                                    onChange={handleInputChange}
-                                />
-                                {errors.precioCompra && <FormHelperText>{errors.precioCompra}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <FormControl fullWidth error={!!errors.precioVenta}>
-                                <TextField
-                                    label="Precio de Venta"
-                                    name="precioVenta"
-                                    type="decimal"
-                                    disabled={currentArticuloInsumo.esParaElaborar}
-                                    fullWidth
-                                    margin="normal"
-                                    value={currentArticuloInsumo.precioVenta}
-                                    onChange={handleInputChange}
-                                />
-                                {errors.precioVenta && !currentArticuloInsumo.esParaElaborar && <FormHelperText>{errors.precioVenta}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={2} mb={2}>
-                        <Grid item xs={4}>
-                            <FormControl fullWidth error={!!errors.stockActual}>
-                                <TextField
-                                    label="Stock Actual"
-                                    name="stockActual"
-                                    type="decimal"
-                                    fullWidth
-                                    margin="normal"
-                                    value={currentArticuloInsumo.stockActual}
-                                    onChange={handleInputChange}
-                                />
-                                {errors.stockActual && <FormHelperText>{errors.stockActual}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={4}>
-                            <FormControl fullWidth error={!!errors.stockMinimo}>
-                                <TextField
-                                    label="Stock Minimo"
-                                    name="stockMinimo"
-                                    type="decimal"
-                                    fullWidth
-                                    margin="normal"
-                                    value={currentArticuloInsumo.stockMinimo}
-                                    onChange={handleInputChange}
-                                />
-                                {errors.stockMinimo && <FormHelperText>{errors.stockMinimo}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={4}>
-                            <FormControl fullWidth error={!!errors.stockMaximo}>
-                                <TextField
-                                    label="Stock Maximo"
-                                    name="stockMaximo"
-                                    type="decimal"
-                                    fullWidth
-                                    margin="normal"
-                                    value={currentArticuloInsumo.stockMaximo}
-                                    onChange={handleInputChange}
-                                />
-                                {errors.stockMaximo && <FormHelperText>{errors.stockMaximo}</FormHelperText>}
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                    <Box mt={2} display="flex" justifyContent="flex-end">
-                        <Button variant="contained" color="primary" onClick={handleSubmit}>
-                            {currentArticuloInsumo.id === 0 ? 'Crear Insumo' : 'Actualizar Insumo'}
-                        </Button>
-                    </Box>
+                            </>
+                        )
+                    }
+                    {
+                        modalStep === 2 && (
+                            <>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <FormControl fullWidth error={!!errors.precioCompra}>
+                                            <TextField
+                                                label="Precio de Compra"
+                                                name="precioCompra"
+                                                type="decimal"
+                                                fullWidth
+                                                margin="normal"
+                                                value={currentArticuloInsumo.precioCompra}
+                                                onChange={handleInputChange}
+                                                onInput={(e) => {
+                                                    const input = e.target as HTMLInputElement;
+                                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                                }}
+                                                inputProps={{
+                                                    inputMode: 'numeric',
+                                                    pattern: '[0-9]*',
+                                                    min: 0,
+                                                }}
+                                            />
+                                            {errors.precioCompra && <FormHelperText>{errors.precioCompra}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        {currentArticuloInsumo.esParaElaborar ?
+                                            <Tooltip title="Insumo que es para elborar no se debe vender." arrow>
+                                                <FormControl fullWidth error={!!errors.precioVenta}>
+                                                    <TextField
+                                                        label="Precio de Venta"
+                                                        name="precioVenta"
+                                                        type="decimal"
+                                                        disabled={currentArticuloInsumo.esParaElaborar}
+                                                        fullWidth
+                                                        margin="normal"
+                                                        value={currentArticuloInsumo.precioVenta}
+                                                        onChange={handleInputChange}
+                                                        onInput={(e) => {
+                                                            const input = e.target as HTMLInputElement;
+                                                            input.value = input.value.replace(/[^0-9]/g, '');
+                                                        }}
+                                                        inputProps={{
+                                                            inputMode: 'numeric',
+                                                            pattern: '[0-9]*',
+                                                            min: 0,
+                                                        }}
+                                                    />
+                                                    {errors.precioVenta && !currentArticuloInsumo.esParaElaborar && <FormHelperText>{errors.precioVenta}</FormHelperText>}
+                                                </FormControl>
+                                            </Tooltip>
+                                            :
+                                            <FormControl fullWidth error={!!errors.precioVenta}>
+                                                <TextField
+                                                    label="Precio de Venta"
+                                                    name="precioVenta"
+                                                    type="decimal"
+                                                    disabled={currentArticuloInsumo.esParaElaborar}
+                                                    fullWidth
+                                                    margin="normal"
+                                                    value={currentArticuloInsumo.precioVenta}
+                                                    onChange={handleInputChange}
+                                                    onInput={(e) => {
+                                                        const input = e.target as HTMLInputElement;
+                                                        input.value = input.value.replace(/[^0-9]/g, '');
+                                                    }}
+                                                    inputProps={{
+                                                        inputMode: 'numeric',
+                                                        pattern: '[0-9]*',
+                                                        min: 0,
+                                                    }}
+                                                />
+                                                {errors.precioVenta && !currentArticuloInsumo.esParaElaborar && <FormHelperText>{errors.precioVenta}</FormHelperText>}
+                                            </FormControl>
+                                        }
+                                    </Grid>
+                                </Grid>
+                                <Grid container spacing={2} mb={2}>
+                                    <Grid item xs={4}>
+                                        <FormControl fullWidth error={!!errors.stockActual}>
+                                            <TextField
+                                                label="Stock Actual"
+                                                name="stockActual"
+                                                type="decimal"
+                                                fullWidth
+                                                margin="normal"
+                                                value={currentArticuloInsumo.stockActual}
+                                                onChange={handleInputChange}
+                                                onInput={(e) => {
+                                                    const input = e.target as HTMLInputElement;
+                                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                                }}
+                                                inputProps={{
+                                                    inputMode: 'numeric',
+                                                    pattern: '[0-9]*',
+                                                    min: 0,
+                                                }}
+                                            />
+                                            {errors.stockActual && <FormHelperText>{errors.stockActual}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <FormControl fullWidth error={!!errors.stockMinimo}>
+                                            <TextField
+                                                label="Stock Minimo"
+                                                name="stockMinimo"
+                                                fullWidth
+                                                margin="normal"
+                                                type="decimal"
+                                                value={currentArticuloInsumo.stockMinimo}
+                                                onChange={handleInputChange}
+                                                onInput={(e) => {
+                                                    const input = e.target as HTMLInputElement;
+                                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                                }}
+                                                inputProps={{
+                                                    inputMode: 'numeric',
+                                                    pattern: '[0-9]*',
+                                                    min: 0,
+                                                }}
+                                            />
+                                            {errors.stockMinimo && <FormHelperText>{errors.stockMinimo}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <FormControl fullWidth error={!!errors.stockMaximo}>
+                                            <TextField
+                                                label="Stock Maximo"
+                                                name="stockMaximo"
+                                                type="decimal"
+                                                fullWidth
+                                                margin="normal"
+                                                value={currentArticuloInsumo.stockMaximo}
+                                                onChange={handleInputChange}
+                                                onInput={(e) => {
+                                                    const input = e.target as HTMLInputElement;
+                                                    input.value = input.value.replace(/[^0-9]/g, '');
+                                                }}
+                                                inputProps={{
+                                                    inputMode: 'numeric',
+                                                    pattern: '[0-9]*',
+                                                    min: 0,
+                                                }}
+                                            />
+                                            {errors.stockMaximo && <FormHelperText>{errors.stockMaximo}</FormHelperText>}
+                                        </FormControl>
+                                    </Grid>
+                                </Grid>
+                                <Box mt={2} display="flex" justifyContent="space-between">
+                                    <Button onClick={handlePreviousStep} color="secondary" variant="contained">
+                                        Atrás
+                                    </Button>
+                                    <Button onClick={handleSubmit} color="primary" variant="contained">
+                                        {currentArticuloInsumo.id !== null && currentArticuloInsumo.id > 0 ? "Actualizar Insumo" : "Crear Insumo"}
+                                    </Button>
+                                </Box>
+                            </>
+                        )
+                    }
                 </Box>
             </Modal>
         </>

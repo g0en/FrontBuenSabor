@@ -91,6 +91,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                 });
             }
         }
+        
         if (errors.sucursales) {
             setErrors({ ...errors, sucursales: '' });
         }
@@ -130,15 +131,15 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
     const validate = (): boolean => {
         const newErrors: { [key: string]: string } = {};
         if (!currentCategoria.denominacion) {
-            newErrors.denominacion = 'La denominación es obligatoria';
+            newErrors.denominacion = 'La denominación es obligatoria.';
         }
         if (!currentCategoria.sucursales || currentCategoria.sucursales.length === 0) {
-            newErrors.sucursales = 'Debe seleccionar al menos una sucursal';
+            newErrors.sucursales = 'Debe seleccionar al menos una sucursal.';
         }
         if (currentCategoria.subCategorias) {
             currentCategoria.subCategorias.forEach((subCategoria, index) => {
                 if (!subCategoria.denominacion) {
-                    newErrors[`subCategoria-${index}`] = 'La denominación de la subcategoría es obligatoria';
+                    newErrors[`subCategoria-${index}`] = 'La denominación de la subcategoría es obligatoria.';
                 }
             });
         }

@@ -13,12 +13,13 @@ import PreLayout from "./components/layout/PreLayout";
 import PedidosList from "./screens/PedidosList";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProtectedRoute from "./components/auth0/ProtectedRoute";
+import Loading from "./screens/Loading";
 
 function App() {
   const { isLoading } = useAuth0();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />
   }
 
   return (
@@ -30,11 +31,13 @@ function App() {
         </Route>
       </Route>
       <Route element={<MainLayout />}>
-        <Route path="dashboard/:idEmpresa/:idSucursal" element={<Dashboard />} />
+        <Route element={<ProtectedRoute roles={['administrador']} />}>
+          <Route path="dashboard/:idEmpresa/:idSucursal" element={<Dashboard />} />
+          <Route path="empleados/:idEmpresa/:idSucursal" element={<Empleado />} />
+        </Route>
         <Route path="productos/:idEmpresa/:idSucursal" element={<ArticuloManufacturado />} />
         <Route path="categorias/:idEmpresa/:idSucursal" element={<Categoria />} />
         <Route path="promociones/:idEmpresa/:idSucursal" element={<Promocion />} />
-        <Route path="empleados/:idEmpresa/:idSucursal" element={<Empleado />} />
         <Route path="insumos/:idEmpresa/:idSucursal" element={<ArticuloInsumo />} />
         <Route path="unidad-medida/:idEmpresa/:idSucursal" element={<UnidadMedida />} />
         <Route path="pedidos/:idEmpresa/:idSucursal" element={<PedidosList />} />

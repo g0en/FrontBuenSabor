@@ -18,7 +18,7 @@ const emptyPromocion: Promocion = {
     horaDesde: '',
     horaHasta: '',
     descripcionDescuento: '',
-    precioPromocional: 0,
+    precioPromocional: null,
     habilitado: true,
     tipoPromocion: null,
     imagenes: [],

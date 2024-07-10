@@ -195,6 +195,15 @@ const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) =>
                             value={currentEmpresa.cuil || null}
                             onChange={handleChange}
                             disabled={!!currentEmpresa.id}
+                            onInput={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                input.value = input.value.replace(/[^0-9]/g, '');
+                            }}
+                            inputProps={{
+                                inputMode: 'numeric',
+                                pattern: '[0-9]*',
+                                min: 0
+                            }}
                         />
                         {errors.cuil && <FormHelperText>{errors.cuil}</FormHelperText>}
                     </FormControl>

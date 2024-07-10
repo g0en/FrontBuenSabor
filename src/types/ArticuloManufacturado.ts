@@ -3,7 +3,7 @@ import ArticuloManufacturadoDetalle from "./ArticuloManufacturadoDetalle";
 
 export default interface ArticuloManufacturado extends Articulo{
     descripcion: string,
-    tiempoEstimadoMinutos: number,
+    tiempoEstimadoMinutos: number | null,
     preparacion: string,
     articuloManufacturadoDetalles: ArticuloManufacturadoDetalle[] | null
 }

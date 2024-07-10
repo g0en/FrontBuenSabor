@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, MenuItem, IconButton, Modal, Box, Typography, Grid } from '@mui/material';
+import { TextField, Button, MenuItem, IconButton, Modal, Box, Typography, Grid, FormControl, FormHelperText } from '@mui/material';
 import Empleado from "../../../types/Empleado";
 import { Rol } from '../../../types/enums/Rol';
 import CloseIcon from '@mui/icons-material/Close';
@@ -28,6 +28,7 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
     const [step, setStep] = useState(1);
     const [currentEmpleado, setCurrentEmpleado] = useState<Empleado>(empleado);
     const { idSucursal } = useParams();
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const { getAccessTokenSilently } = useAuth0();
 
     const createEmpleado = async () => {
@@ -59,19 +60,42 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
 
     const handleClose = () => {
         onClose();
+        setErrors({});
         setStep(1);
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
+        const maxLength: Record<string, number> = {
+            nombre: 15,
+            apellido: 15,
+            telefono: 15
+        };
+
+        if (value.length > maxLength[name]) {
+            return;
+        }
         setCurrentEmpleado(prevState => ({
             ...prevState,
             [name]: value,
         }));
+
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
+        }
     };
 
     const handleUsuarioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
+        const maxLength: Record<string, number> = {
+            email: 50,
+            userName: 10,
+        };
+
+        if (value.length > maxLength[name]) {
+            return;
+        }
+
         setCurrentEmpleado(prevState => ({
             ...prevState,
             usuario: {
@@ -79,9 +103,47 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
                 [name]: value,
             },
         }));
+
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
+        }
+    };
+
+    const validate = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+        if (!currentEmpleado.nombre) {
+            newErrors.nombre = 'El nombre es obligatorio.';
+        }
+        if (!currentEmpleado.apellido) {
+            newErrors.apellido = 'El apellido es obligatorio.';
+        }
+        if (!currentEmpleado.telefono) {
+            newErrors.telefono = 'El telefono es obligatorio.';
+        }
+        if (!currentEmpleado.fechaNacimiento) {
+            newErrors.fechaNacimiento = 'La fecha de nacimiento es obligatoria.';
+        }
+        if (!currentEmpleado.usuario.email) {
+            newErrors.email = 'El email es obligatorio.';
+        }else if(!currentEmpleado.usuario.email.includes('@' && '.')){
+            newErrors.email = 'El email tiene un formato incorrecto.';
+        }
+        if (!currentEmpleado.usuario.userName) {
+            newErrors.userName = 'El username es obligatorio.';
+        }
+        if (!currentEmpleado.usuario.rol) {
+            newErrors.rol = 'El rol es obligatorio.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
+        if (!validate()) {
+            return;
+        }
+
         if (currentEmpleado.sucursal !== null) {
             currentEmpleado.sucursal.id = Number(idSucursal);
         }
@@ -138,54 +200,76 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
                         <>
                             <Grid container spacing={2}>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        label="Nombre"
-                                        name="nombre"
-                                        value={currentEmpleado.nombre}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        onChange={handleChange}
-                                    />
+                                    <FormControl fullWidth error={!!errors.nombre}>
+                                        <TextField
+                                            label="Nombre"
+                                            name="nombre"
+                                            value={currentEmpleado.nombre}
+                                            fullWidth
+                                            margin="normal"
+                                            variant="outlined"
+                                            onChange={handleChange}
+                                        />
+                                        {errors.nombre && <FormHelperText>{errors.nombre}</FormHelperText>}
+                                    </FormControl>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        label="Apellido"
-                                        name="apellido"
-                                        value={currentEmpleado.apellido}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        onChange={handleChange}
-                                    />
+                                    <FormControl fullWidth error={!!errors.apellido}>
+                                        <TextField
+                                            label="Apellido"
+                                            name="apellido"
+                                            value={currentEmpleado.apellido}
+                                            fullWidth
+                                            margin="normal"
+                                            variant="outlined"
+                                            onChange={handleChange}
+                                        />
+                                        {errors.apellido && <FormHelperText>{errors.apellido}</FormHelperText>}
+                                    </FormControl>
                                 </Grid>
                             </Grid>
                             <Grid container spacing={2}>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        label="Teléfono"
-                                        name="telefono"
-                                        value={currentEmpleado.telefono}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        onChange={handleChange}
-                                    />
+                                    <FormControl fullWidth error={!!errors.telefono}>
+                                        <TextField
+                                            label="Teléfono"
+                                            name="telefono"
+                                            type='decimal'
+                                            value={currentEmpleado.telefono}
+                                            fullWidth
+                                            margin="normal"
+                                            variant="outlined"
+                                            onChange={handleChange}
+                                            onInput={(e) => {
+                                                const input = e.target as HTMLInputElement;
+                                                input.value = input.value.replace(/[^0-9]/g, '');
+                                            }}
+                                            inputProps={{
+                                                inputMode: 'numeric',
+                                                pattern: '[0-9]*',
+                                                min: 0
+                                            }}
+                                        />
+                                        {errors.telefono && <FormHelperText>{errors.telefono}</FormHelperText>}
+                                    </FormControl>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        label="Fecha de Nacimiento"
-                                        name="fechaNacimiento"
-                                        value={currentEmpleado.fechaNacimiento}
-                                        type="date"
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        onChange={handleChange}
-                                    />
+                                    <FormControl fullWidth error={!!errors.fechaNacimiento}>
+                                        <TextField
+                                            label="Fecha de Nacimiento"
+                                            name="fechaNacimiento"
+                                            value={currentEmpleado.fechaNacimiento}
+                                            type="date"
+                                            fullWidth
+                                            margin="normal"
+                                            variant="outlined"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            onChange={handleChange}
+                                        />
+                                        {errors.fechaNacimiento && <FormHelperText>{errors.fechaNacimiento}</FormHelperText>}
+                                    </FormControl>
                                 </Grid>
                             </Grid>
 
@@ -200,52 +284,61 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
                         </>
                     ) : (
                         <>
-                            <TextField
-                                label="Email"
-                                name="email"
-                                value={currentEmpleado.usuario.email}
-                                fullWidth
-                                margin="normal"
-                                variant="outlined"
-                                onChange={handleUsuarioChange}
-                            />
+                            <FormControl fullWidth error={!!errors.email}>
+                                <TextField
+                                    label="Email"
+                                    name="email"
+                                    value={currentEmpleado.usuario.email}
+                                    fullWidth
+                                    margin="normal"
+                                    variant="outlined"
+                                    onChange={handleUsuarioChange}
+                                />
+                                {errors.email && <FormHelperText>{errors.email}</FormHelperText>}
+                            </FormControl>
 
                             <Grid container spacing={2} mb={2}>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        label="Username"
-                                        name="userName"
-                                        value={currentEmpleado.usuario.userName}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        onChange={handleUsuarioChange}
-                                    />
+                                    <FormControl fullWidth error={!!errors.userName}>
+                                        <TextField
+                                            label="Username"
+                                            name="userName"
+                                            value={currentEmpleado.usuario.userName}
+                                            fullWidth
+                                            margin="normal"
+                                            variant="outlined"
+                                            onChange={handleUsuarioChange}
+                                        />
+                                        {errors.userName && <FormHelperText>{errors.userName}</FormHelperText>}
+                                    </FormControl>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        label="Rol"
-                                        name="rol"
-                                        value={currentEmpleado.usuario.rol}
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        select
-                                        onChange={handleUsuarioChange}
-                                    >
-                                        <MenuItem key={1} value={Rol.ADMIN}>
-                                            Administrador
-                                        </MenuItem>
-                                        <MenuItem key={2} value={Rol.CAJERO}>
-                                            Cajero
-                                        </MenuItem>
-                                        <MenuItem key={3} value={Rol.COCINERO}>
-                                            Cocinero
-                                        </MenuItem>
-                                        <MenuItem key={4} value={Rol.DELIVERY}>
-                                            Delivery
-                                        </MenuItem>
-                                    </TextField>
+                                    <FormControl fullWidth error={!!errors.rol}>
+                                        <TextField
+                                            label="Rol"
+                                            name="rol"
+                                            value={currentEmpleado.usuario.rol}
+                                            fullWidth
+                                            margin="normal"
+                                            variant="outlined"
+                                            select
+                                            onChange={handleUsuarioChange}
+                                        >
+                                            <MenuItem key={1} value={Rol.ADMIN}>
+                                                Administrador
+                                            </MenuItem>
+                                            <MenuItem key={2} value={Rol.CAJERO}>
+                                                Cajero
+                                            </MenuItem>
+                                            <MenuItem key={3} value={Rol.COCINERO}>
+                                                Cocinero
+                                            </MenuItem>
+                                            <MenuItem key={4} value={Rol.DELIVERY}>
+                                                Delivery
+                                            </MenuItem>
+                                        </TextField>
+                                        {errors.rol && <FormHelperText>{errors.rol}</FormHelperText>}
+                                    </FormControl>
                                 </Grid>
                             </Grid>
 
