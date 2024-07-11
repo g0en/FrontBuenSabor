@@ -370,7 +370,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
         if (!promocion.descripcionDescuento) {
             newErrors.descripcionDescuento = 'La descripción es obligatoria.';
         }
-        if (files.length === 0) {
+        if (files.length === 0 && promocion.imagenes.length === 0) {
             newErrors.files = 'Las imagenes son obligatorias.';
         }
         if (detalles.length === 0) {

@@ -1,17 +1,60 @@
+import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import {
+  Avatar,
+  Menu,
+  MenuItem,
+  Typography,
+  Box
+} from "@mui/material";
 
 const LogoutButton = () => {
-  const { logout } = useAuth0();
+  const { user, logout } = useAuth0();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
-    <button
-      onClick={() =>
-        logout({ logoutParams: { returnTo: window.location.origin } })
-      }
-      className="inline-block px-4 py-3 text-sm font-semibold text-center text-gray-500 transition duration-100 rounded-lg outline-none ring-indigo-300 hover:text-indigo-500 focus-visible:ring active:text-indigo-600 md:text-base"
-    >
-      Log Out
-    </button>
+    <div>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          cursor: "pointer"
+        }}
+        onClick={handleClick}
+      >
+        <Avatar
+          src={user?.picture}
+          alt={user?.name}
+          sx={{ width: 30, height: 30, mr: 2 }}
+        />
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography variant="body2">{user?.name}</Typography>
+          <KeyboardArrowDownIcon sx={{ width: "17px", ml: 0.9 }} />
+        </Box>
+      </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem
+          onClick={() =>
+            logout({ logoutParams: { returnTo: window.location.origin } })
+          }
+        >
+          Cerrar Sesión
+        </MenuItem>
+      </Menu>
+    </div>
   );
 };
 

@@ -12,6 +12,7 @@ import ArticuloInsumoViewModal from "./ArticuloInsumoViewModal";
 import ArticuloInsumoAddModal from "./ArticuloInusmoAddModal";
 import DesactivarComponent from "../Advertencias/DesactivarComponent";
 import ActivarComponent from "../Advertencias/ActivarComponent";
+import { toast } from "react-toastify";
 
 interface ArticuloInsumoTableProps {
     onClose: () => void;
@@ -30,9 +31,9 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
     const updateArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
 
         return ArticuloInsumoUpdate(articuloInsumo, token);
     };
@@ -60,6 +61,16 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
             const data = await updateArticuloInsumo(articulo);
             if (data.status !== 200) {
                 articulo.habilitado = true;
+                toast.error(data.responseData.message, {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
                 return;
             }
 
@@ -106,51 +117,79 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
         setOpenAlta(false);
     }
 
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
+
     return (
         <>
             <TableRow sx={{ backgroundColor: articulo.habilitado ? "none" : "#B0B0B0" }} key={articulo.id}>
-                        <TableCell align="center">{articulo.denominacion}</TableCell>
-                        <TableCell align="center">{articulo.precioCompra}</TableCell>
-                        <TableCell align="center">{!articulo.esParaElaborar ? articulo.precioVenta : '-'}</TableCell>
-                        <TableCell align="center">{articulo.unidadMedida?.denominacion}</TableCell>
-                        <TableCell align="center">{articulo.stockActual}</TableCell>
-                        <TableCell align="center">{articulo.stockMinimo}</TableCell>
-                        <TableCell align="center">{articulo.stockMaximo}</TableCell>
-                        <TableCell align="center">
-                            {articulo.esParaElaborar ? <Check color="success" /> : <RemoveIcon color="error" />}
-                        </TableCell>
-                        <TableCell align="center">{articulo.categoria?.denominacion}</TableCell>
-                        <TableCell>
+                <TableCell align="center">{articulo.denominacion}</TableCell>
+                <TableCell align="center">{articulo.precioCompra}</TableCell>
+                <TableCell align="center">{!articulo.esParaElaborar ? articulo.precioVenta : '-'}</TableCell>
+                <TableCell align="center">{articulo.unidadMedida?.denominacion}</TableCell>
+                <TableCell align="center">{articulo.stockActual}</TableCell>
+                <TableCell align="center">{articulo.stockMinimo}</TableCell>
+                <TableCell align="center">{articulo.stockMaximo}</TableCell>
+                <TableCell align="center">
+                    {articulo.esParaElaborar ? <Check color="success" /> : <RemoveIcon color="error" />}
+                </TableCell>
+                <TableCell align="center">{articulo.categoria?.denominacion}</TableCell>
+                <TableCell>
 
-                            {
-                                articulo.habilitado === true ?
-                                    <Box>
-                                        <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
-                                            <Visibility />
-                                        </IconButton>
-                                        <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
-                                            <Edit />
-                                        </IconButton>
-                                        <IconButton aria-label="delete" onClick={handleOpenBaja} color="error">
-                                            <RemoveCircleOutlineIcon />
-                                        </IconButton>
-                                    </Box>
-                                    :
-                                    <Box>
-                                        <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
-                                            <Visibility />
-                                        </IconButton>
-                                        <IconButton aria-label="alta" onClick={handleOpenAlta} color="success">
-                                            <KeyboardDoubleArrowUpIcon />
-                                        </IconButton>
-                                    </Box>
-                            }
-                        </TableCell>
-                    </TableRow>
-            <ArticuloInsumoViewModal view={view} onClose={handleClose} articulo={articulo} images={images}/>
-            <ArticuloInsumoAddModal open={open} onClose={handleClose} articulo={articulo} imagenes={images} articuloImagenes={articuloImages}/>
-            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(articulo)} tipo='el insumo' entidad={articulo}/>
-            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={() => handleAlta(articulo)} tipo='el insumo' entidad={articulo}/>
+                    {
+                        articulo.habilitado === true ?
+                            <Box>
+                                <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
+                                    <Visibility />
+                                </IconButton>
+                                <IconButton aria-label="edit" onClick={() => handleEdit(articulo)} color="primary">
+                                    <Edit />
+                                </IconButton>
+                                <IconButton aria-label="delete" onClick={handleOpenBaja} color="error">
+                                    <RemoveCircleOutlineIcon />
+                                </IconButton>
+                            </Box>
+                            :
+                            <Box>
+                                <IconButton aria-label="view" onClick={() => handleView(articulo)} color="secondary">
+                                    <Visibility />
+                                </IconButton>
+                                <IconButton aria-label="alta" onClick={handleOpenAlta} color="success">
+                                    <KeyboardDoubleArrowUpIcon />
+                                </IconButton>
+                            </Box>
+                    }
+                </TableCell>
+            </TableRow>
+
+            <ArticuloInsumoViewModal view={view} onClose={handleClose} articulo={articulo} images={images} />
+            <ArticuloInsumoAddModal open={open} onClose={handleClose} articulo={articulo} imagenes={images} articuloImagenes={articuloImages} success={handleSuccess} error={handleError} />
+            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(articulo)} tipo='el insumo' entidad={articulo} />
+            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={() => handleAlta(articulo)} tipo='el insumo' entidad={articulo} />
         </>
     )
 };

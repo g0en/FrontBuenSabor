@@ -315,7 +315,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
         if (!currentArticuloManufacturado.categoria.id) {
             newErrors.categoria = 'La categoria es obligatoria.';
         }
-        if (files.length === 0) {
+        if (files.length === 0 && currentArticuloManufacturado.imagenes.length === 0) {
             newErrors.files = 'Las imagenes son obligatorias.';
         }
         if (!currentArticuloManufacturado.precioVenta) {

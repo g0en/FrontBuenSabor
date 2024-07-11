@@ -1,21 +1,23 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import { Button } from "@mui/material";
 
 const LoginButton = () => {
   const { loginWithRedirect } = useAuth0();
 
   return (
-    <button
-      className="inline-block px-4 py-3 text-sm font-semibold text-center text-gray-500 transition duration-100 rounded-lg outline-none ring-indigo-300 hover:text-indigo-500 focus-visible:ring active:text-indigo-600 md:text-base"
+    <Button
+      variant="contained"
+      color="primary"
       onClick={() =>
         loginWithRedirect({
           appState: {
-            returnTo: window.location.pathname,
+            returnTo: '/empresa',
           },
         })
       }
     >
-      Log In
-    </button>
+      Ingresar
+    </Button>
   );
 };
 

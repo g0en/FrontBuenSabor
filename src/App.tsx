@@ -14,6 +14,7 @@ import PedidosList from "./screens/PedidosList";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProtectedRoute from "./components/auth0/ProtectedRoute";
 import Loading from "./screens/Loading";
+import Ingreso from "./screens/Ingreso";
 
 function App() {
   const { isLoading } = useAuth0();
@@ -24,9 +25,10 @@ function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<Ingreso />}></Route>
       <Route element={<PreLayout />}>
-        <Route path="/" element={<Empresa />} />
         <Route element={<ProtectedRoute roles={['administrador']} />}>
+          <Route path="/empresa" element={<Empresa />} />
           <Route path="empresa/:idEmpresa" element={<Sucursal />} />
         </Route>
       </Route>

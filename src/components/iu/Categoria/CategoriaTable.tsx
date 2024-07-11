@@ -11,6 +11,7 @@ import Categoria from '../../../types/Categoria';
 import { CategoriaBaja, CategoriaDelete } from '../../../services/CategoriaService';
 import CategoriaModal from './CategoriaModal';
 import EliminarComponent from '../Advertencias/EliminarComponent';
+import BajaSucursalComponent from '../Advertencias/BajaSucursal';
 
 interface CategoriaTableProps {
     onClose: () => void;
@@ -22,23 +23,26 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
     const { idSucursal } = useParams();
     const [open, setOpen] = useState(false);
     const [openEliminar, setOpenEliminar] = useState(false);
+    const [openEliminarSub, setOpenEliminarSub] = useState(false);
+    const [openBaja, setOpenBaja] = useState(false);
+    const [openBajaSub, setOpenBajaSub] = useState(false);
     const [categoriaUpdate, setCategoriaUpdate] = useState<Categoria>(categoria);
 
     const bajaCategoria = async (idCategoria: number) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         await CategoriaBaja(idCategoria, Number(idSucursal), token);
     };
 
     const deleteCategoria = async (idCategoria: number) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
 
         await CategoriaDelete(idCategoria, token);
     };
@@ -55,9 +59,9 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
 
     const handleDelete = async (categoria: Categoria | CategoriaGetDto) => {
         if (categoria.id !== null) {
-            try{
+            try {
                 await deleteCategoria(categoria.id);
-            }catch(error){
+            } catch (error) {
                 console.log("Error al eliminar la categoria.");
             }
         }
@@ -68,9 +72,9 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
 
     const handleBaja = async (categoria: Categoria | CategoriaGetDto) => {
         if (categoria.id !== null) {
-            try{
+            try {
                 await bajaCategoria(categoria.id);
-            }catch(error){
+            } catch (error) {
                 console.log("Error al dar de baja la categoria.");
             }
         }
@@ -80,11 +84,27 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
 
     const handleCloseDialog = () => {
         setOpenEliminar(false);
+        setOpenEliminarSub(false);
+        setOpenBaja(false);
+        setOpenBajaSub(false);
     }
 
-    const handleOpenElimarDialog = () => {
+    const handleOpenEliminarDialog = () => {
         setOpenEliminar(true);
     }
+
+    const handleOpenEliminarSubDialog = () => {
+        setOpenEliminarSub(true);
+    }
+
+    const handleOpenBajaDialog = () => {
+        setOpenBaja(true);
+    }
+
+    const handleOpenBajaSubDialog = () => {
+        setOpenBajaSub(true);
+    }
+
 
     const filterSubCategoriasBySucursal = (subCategorias: CategoriaGetDto[] | null, idSucursal: number) => {
         return subCategorias ? subCategorias.filter(subCategoria =>
@@ -101,17 +121,19 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                         <Typography>{subCategoria.denominacion}</Typography>
                         <Box sx={{ marginLeft: 'auto' }}>
                             <IconButton onClick={() => handleEdit(subCategoria)} color="primary"><EditIcon /></IconButton>
-                            <IconButton onClick={() => handleBaja(subCategoria)} color="secondary"><ArrowCircleDownIcon /></IconButton>
-                            <IconButton onClick={handleOpenElimarDialog} color="error"><DeleteIcon /></IconButton>
+                            <IconButton onClick={handleOpenBajaSubDialog} color="secondary"><ArrowCircleDownIcon /></IconButton>
+                            <IconButton onClick={handleOpenEliminarSubDialog} color="error"><DeleteIcon /></IconButton>
+
                         </Box>
                     </AccordionSummary>
+                    <EliminarComponent openDialog={openEliminarSub} onClose={handleCloseDialog} onConfirm={() => handleDelete(subCategoria)} tipo='la categoría' entidad={subCategoria} />
+                    <BajaSucursalComponent openDialog={openBajaSub} onClose={handleCloseDialog} onConfirm={() => handleBaja(subCategoria)} tipo='la categoría' entidad={subCategoria} />
                     <AccordionDetails>
                         {renderSubCategorias(subCategoria.subCategorias)}
                     </AccordionDetails>
                 </Accordion>
-                <EliminarComponent openDialog={openEliminar} onClose={handleCloseDialog} onConfirm={() => handleDelete(subCategoria)} tipo='la categoría' entidad={subCategoria} />
             </Box>
-            
+
         ));
     };
 
@@ -126,16 +148,17 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                     }</Typography>
                     <Box sx={{ marginLeft: 'auto' }}>
                         <IconButton onClick={() => handleEdit(categoria)} color="primary">{categoria.sucursales !== null && <EditIcon />}</IconButton>
-                        <IconButton onClick={() => handleBaja(categoria)} color="secondary"><ArrowCircleDownIcon /></IconButton>
-                        <IconButton onClick={handleOpenElimarDialog} color="error"><DeleteIcon /></IconButton>
+                        <IconButton onClick={handleOpenBajaDialog} color="secondary"><ArrowCircleDownIcon /></IconButton>
+                        <IconButton onClick={handleOpenEliminarDialog} color="error"><DeleteIcon /></IconButton>
                     </Box>
                 </AccordionSummary>
+                <EliminarComponent openDialog={openEliminar} onClose={handleCloseDialog} onConfirm={() => handleDelete(categoria)} tipo='la categoría' entidad={categoria} />
+                <BajaSucursalComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(categoria)} tipo='la categoría' entidad={categoria} />
                 <AccordionDetails>
                     {renderSubCategorias(categoria.subCategorias)}
                 </AccordionDetails>
             </Accordion>
-            <CategoriaModal open={open} onClose={handleClose} categoria={categoriaUpdate}/>
-            <EliminarComponent openDialog={openEliminar} onClose={handleCloseDialog} onConfirm={() => handleDelete(categoria)} tipo='la categoría' entidad={categoria} />
+            <CategoriaModal open={open} onClose={handleClose} categoria={categoriaUpdate} />
         </>
     )
 };

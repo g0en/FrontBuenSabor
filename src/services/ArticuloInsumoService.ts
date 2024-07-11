@@ -82,7 +82,7 @@ export async function ArticuloInsumoUpdate(articuloInsumo: ArticuloInsumo, token
 		},
         mode: 'cors'
 	});
-	const responseData = await response.json() as ArticuloInsumo;
+	const responseData = await response.json();
 	const status = response.status;
 	return {
 		status,

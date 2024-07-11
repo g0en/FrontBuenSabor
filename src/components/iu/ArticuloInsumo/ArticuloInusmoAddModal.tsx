@@ -35,9 +35,11 @@ interface ArticuloInsumoAddModalProps {
     articulo: ArticuloInsumo;
     imagenes: string[];
     articuloImagenes: Imagen[];
+    success: () => void;
+    error: () => void;
 }
 
-const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, onClose, articulo, imagenes, articuloImagenes }) => {
+const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, onClose, articulo, imagenes, articuloImagenes, success, error }) => {
     const [currentArticuloInsumo, setCurrentArticuloInsumo] = useState<ArticuloInsumo>(articulo);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [unidadMedidas, setUnidadMedidas] = useState<UnidadMedida[]>([]);
@@ -47,6 +49,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
     const { idEmpresa } = useParams();
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [modalStep, setModalStep] = useState(1);
+    
     const { getAccessTokenSilently } = useAuth0();
 
     const createArticuloInsumo = async (articuloInsumo: ArticuloInsumo) => {
@@ -219,7 +222,6 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        //const numericFields = ["precioCompra", "precioVenta", "stockActual", "stockMinimo", "stockMaximo"];
         const maxLength: Record<string, number> = {
             denominacion: 25,
             precioCompra: 6,
@@ -232,10 +234,6 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
         if (value.length > maxLength[name]) {
             return;
         }
-
-        //if (numericFields.includes(name) && !/^[0-9]*$/.test(value)) {
-        //    return;
-        //}
 
         setCurrentArticuloInsumo(prevState => ({
             ...prevState,
@@ -266,7 +264,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
         if (!currentArticuloInsumo.categoria.id) {
             newErrors.categoria = 'La categoria es obligatoria.';
         }
-        if (files.length === 0) {
+        if (files.length === 0 && currentArticuloInsumo.imagenes.length === 0) {
             newErrors.files = 'Las imagenes son obligatorias.';
         }
         if (!currentArticuloInsumo.precioCompra) {
@@ -297,12 +295,14 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
         setArticuloImages(articuloImagenes);
         setErrors({});
         onClose();
+        success();
     }
 
     const handleSubmit = async () => {
         if (!validate()) {
             return;
         }
+
         const imagenes = await cloudinaryUpload();
 
         if (imagenes && imagenes?.length > 0) {
@@ -321,6 +321,7 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
                 const data = await updateArticuloInsumo(currentArticuloInsumo);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
+                    error();
                     return;
                 }
 
