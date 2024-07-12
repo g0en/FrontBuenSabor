@@ -27,6 +27,7 @@ function SucursalList() {
     const [open, setOpen] = useState(false);
     const [currentSucursal, setCurrentSucursal] = useState<Sucursal>({ ...emptySucursal });
     const { idEmpresa } = useParams();
+    const [hasCasaMatriz, setHasCasaMatriz] = useState(false);
     const { getAccessTokenSilently } = useAuth0();
 
     const getAllSucursal = async () => {
@@ -50,6 +51,9 @@ function SucursalList() {
         } else {
             setCurrentSucursal({ ...emptySucursal });
         }
+        const hasCasaMatriz = sucursales.some(sucursal => sucursal.esCasaMatriz);
+        setHasCasaMatriz(hasCasaMatriz);
+
         setOpen(true);
     };
 
@@ -119,7 +123,7 @@ function SucursalList() {
                 ))}
             </div>
 
-            <SucursalModal open={open} onClose={handleClose} sucursal={currentSucursal} success={handleSuccess} error={handleError}/>
+            <SucursalModal open={open} onClose={handleClose} sucursal={currentSucursal} success={handleSuccess} error={handleError} hasCasaMatriz={hasCasaMatriz}/>
             <ToastContainer />
         </div>
     );

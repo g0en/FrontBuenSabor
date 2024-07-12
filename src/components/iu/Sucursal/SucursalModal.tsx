@@ -34,9 +34,10 @@ interface EmpresaCardProps {
     sucursal: Sucursal;
     success: () => void;
     error: () => void;
+    hasCasaMatriz: boolean;
 }
 
-const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal, success, error }) => {
+const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal, success, error, hasCasaMatriz }) => {
     const [currentSucursal, setCurrentSucursal] = useState<Sucursal>(sucursal);
     const [currentEmpresa, setCurrentEmpresa] = useState<Empresa>();
     const [paises, setPaises] = useState<Pais[]>([]);
@@ -499,7 +500,7 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal, su
                                             checked={currentSucursal.esCasaMatriz}
                                             onChange={handleCheckboxChange}
                                             name="esCasaMatriz"
-                                            disabled={!estado}
+                                            disabled={hasCasaMatriz && !estado}
                                         />
                                     }
                                     label="Casa Matriz"

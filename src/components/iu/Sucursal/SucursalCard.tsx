@@ -1,5 +1,5 @@
 import { Button, Card, CardActions, CardHeader, IconButton, Tooltip } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,6 +8,8 @@ import Sucursal from "../../../types/Sucursal";
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from "react-toastify";
+import { useAuth0 } from "@auth0/auth0-react";
+import { SucursalGetByEmpresaId } from "../../../services/SucursalService";
 
 interface EmpresaCardProps {
     onClose: () => void;
@@ -17,13 +19,29 @@ interface EmpresaCardProps {
 const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
     const [editOpen, setEditOpen] = useState(false);
     const navigate = useNavigate();
+    const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+    const [hasCasaMatriz, setHasCasaMatriz] = useState(false);
     const { idEmpresa } = useParams();
+    const { getAccessTokenSilently } = useAuth0();
+
+    const getAllSucursal = async () => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
+        setSucursales(sucursales);
+    };
 
     const redirectDashboard = (id: number) => {
         navigate('/dashboard/' + idEmpresa + "/" + id);
     }
 
     const handleOpen = () => {
+        const hasCasaMatriz = sucursales.some(sucursal => sucursal.esCasaMatriz);
+        setHasCasaMatriz(hasCasaMatriz);
         setEditOpen(true);
     };
 
@@ -59,6 +77,10 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
         });
     }
 
+    useEffect(() => {
+        getAllSucursal();
+    }, [])
+
     return (
         <>
             <Card key={sucursal.id} style={{ width: '300px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', borderRadius: '8px' }}>
@@ -87,7 +109,7 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
                 </CardActions>
             </Card>
 
-            <SucursalModal open={editOpen} onClose={handleClose} sucursal={sucursal} success={handleSuccess} error={handleError} />
+            <SucursalModal open={editOpen} onClose={handleClose} sucursal={sucursal} success={handleSuccess} error={handleError} hasCasaMatriz={hasCasaMatriz}/>
         </>
     )
 }
