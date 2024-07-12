@@ -20,6 +20,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    TablePagination,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -35,6 +36,8 @@ function UnidadMedidaList() {
     const [isEditing, setIsEditing] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [unidadToDelete, setUnidadToDelete] = useState<UnidadMedida | null>(null);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const { getAccessTokenSilently } = useAuth0();
 
     const getAllUnidadMedida = async () => {
@@ -165,6 +168,16 @@ function UnidadMedidaList() {
         }
     };
 
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+        console.log(event);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
     return (
         <>
             <SideBar />
@@ -183,7 +196,7 @@ function UnidadMedidaList() {
                     />
                     <Button
                         variant="contained"
-                        color="info"
+                        color="primary"
                         onClick={isEditing ? handleUpdate : handleSave}
                     >
                         {isEditing ? "Actualizar" : "Crear"}
@@ -199,7 +212,9 @@ function UnidadMedidaList() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {unidadMedidas.map((unidad) => (
+                            {unidadMedidas
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((unidad) => (
                                 <TableRow key={unidad.id}>
                                     <TableCell>{unidad.denominacion}</TableCell>
                                     <TableCell>
@@ -215,6 +230,15 @@ function UnidadMedidaList() {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5]}
+                    component="div"
+                    count={unidadMedidas.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
             </Box>
             <ToastContainer />
 

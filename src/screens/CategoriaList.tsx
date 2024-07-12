@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Typography, Box, Button, TableCell, TableBody, Table, TableContainer, TableRow, TableHead, Paper } from "@mui/material";
+import { Typography, Box, Button, TableCell, TableBody, Table, TableContainer, TableRow, TableHead, Paper, TablePagination } from "@mui/material";
 import SideBar from "../components/common/SideBar";
 import CategoriaGetDto from "../types/CategoriaGetDto";
 import { CategoriaByEmpresaGetAll } from "../services/CategoriaService";
@@ -17,14 +17,16 @@ function CategoriaList() {
     const { idSucursal } = useParams();
     const [currentCategoria, setCurrentCategoria] = useState<Categoria>({ ...emptyCategoria });
     const [open, setOpen] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const { getAccessTokenSilently } = useAuth0();
 
     const getAllCategoriaBySucursal = async () => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         const categorias: CategoriaGetDto[] = await CategoriaByEmpresaGetAll(Number(idSucursal), token);
         setCategorias(categorias);
     };
@@ -42,6 +44,17 @@ function CategoriaList() {
         setOpen(false);
         await getAllCategoriaBySucursal();
         setCurrentCategoria(emptyCategoria);
+    };
+
+    
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+        console.log(event);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
     };
 
     return (
@@ -64,15 +77,27 @@ function CategoriaList() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {categorias.filter(categoria => categoria.categoriaPadre === null && !categoria.eliminado).map((categoria) => (
+                            {categorias
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .filter(categoria => categoria.categoriaPadre === null && !categoria.eliminado)
+                            .map((categoria) => (
                                 <CategoriaTable onClose={handleClose} categoria={categoria} />
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5]}
+                    component="div"
+                    count={categorias.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
 
             </Box>
-            <CategoriaModal open={open} onClose={handleClose} categoria={currentCategoria}/>
+            <CategoriaModal open={open} onClose={handleClose} categoria={currentCategoria} />
         </>
     );
 }

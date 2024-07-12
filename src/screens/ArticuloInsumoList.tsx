@@ -27,7 +27,7 @@ function ArticuloInsumoList() {
     const { getAccessTokenSilently } = useAuth0();
 
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(6);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const getAllArticuloInsumoBySucursal = async () => {
         const token = await getAccessTokenSilently({

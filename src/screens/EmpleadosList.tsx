@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Table, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
 import SideBar from "../components/common/SideBar";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
@@ -35,6 +35,8 @@ function EmpleadosList() {
     const [empleado, setEmpleado] = useState<Empleado>({ ...emptyEmpleado });
     const [empleados, setEmpleados] = useState<Empleado[]>([]);
     const [open, setOpen] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const { getAccessTokenSilently } = useAuth0();
 
     const getEmpleadosBySucursal = async () => {
@@ -54,9 +56,9 @@ function EmpleadosList() {
     }
 
     const handleClose = async () => {
-        try{
+        try {
             await getEmpleadosBySucursal();
-        }catch(error){
+        } catch (error) {
             console.log("Error al traer los empleados.");
         }
         setOpen(false);
@@ -65,6 +67,16 @@ function EmpleadosList() {
     useEffect(() => {
         getEmpleadosBySucursal();
     }, [idSucursal]);
+
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+        console.log(event);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     return (
         <>
@@ -76,26 +88,36 @@ function EmpleadosList() {
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()} sx={{ mb: 2 }}>
                     Agregar Empleado
                 </Button>
-                {
-                    empleados.length <= 0 ?
-                        <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
-                            <Table >
-                                <TableHead >
-                                    <TableRow>
-                                        <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Nombre</TableCell>
-                                        <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Apellido</TableCell>
-                                        <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Rol</TableCell>
-                                        <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Estado</TableCell>
-                                        <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Acciones</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                            </Table>
-                        </TableContainer>
-                        :
-                    empleados.map(empleado =>
-                            <EmpleadoTable onClose={handleClose} empleado={empleado} />
-                        )
-                }
+                <TableContainer component={Paper} style={{ maxHeight: '400px', marginBottom: '10px', marginTop: '20px' }}>
+                    <Table >
+                        <TableHead >
+                            <TableRow>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Nombre</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Apellido</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Rol</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Estado</TableCell>
+                                <TableCell style={{ color: 'black', fontWeight: 'bold' }} align="center">Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {empleados
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((empleado) => (
+                                    <EmpleadoTable key={empleado.id} onClose={handleClose} empleado={empleado} />
+                                )
+                                )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5]}
+                    component="div"
+                    count={empleados.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
             </Box>
             <EmpleadoAddModal open={open} onClose={handleClose} empleado={empleado} />
         </>
