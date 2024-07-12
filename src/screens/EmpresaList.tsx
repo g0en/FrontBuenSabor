@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAuth0 } from "@auth0/auth0-react";
 import EmpresaCard from "../components/iu/Empresa/EmpresaCard";
 import EmpresaModal from "../components/iu/Empresa/EmpresaModal";
+import { toast, ToastContainer } from "react-toastify";
 
 const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: null };
 
@@ -45,6 +46,33 @@ function EmpresaList() {
         getAllEmpresa();
     }, []);
 
+    const handleSuccess = () => {
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al crear la empresa, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
+
     return (
         <div style={{ backgroundColor: '#E0E0E0', padding: '20px', borderRadius: '8px' }}>
             <Typography
@@ -78,7 +106,8 @@ function EmpresaList() {
                 ))}
             </div>
 
-            <EmpresaModal open={open} onClose={handleClose} empresa={currentEmpresa}/>
+            <EmpresaModal open={open} onClose={handleClose} empresa={currentEmpresa} success={handleSuccess} error={handleError}/>
+            <ToastContainer />
         </div>
     )
 

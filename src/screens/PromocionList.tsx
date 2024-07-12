@@ -8,6 +8,7 @@ import PromocionCard from '../components/iu/Promocion/PromocionCard';
 import AddIcon from "@mui/icons-material/Add";
 import AddPromocionModal from '../components/iu/Promocion/AddPromocionModal';
 import { useAuth0 } from '@auth0/auth0-react';
+import { toast, ToastContainer } from 'react-toastify';
 
 const emptyPromocion: Promocion = {
     id: null,
@@ -58,6 +59,33 @@ function PromocionList() {
         setCurrentPromocion({ ...emptyPromocion });
     }
 
+    const handleSuccess = () => {
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al crear la categoría, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
+
     return (
         <>
             <SideBar />
@@ -78,7 +106,8 @@ function PromocionList() {
                     ))}
                 </Grid>
             </Box>
-            <AddPromocionModal open={open} onClose={handleCloseModal} currentPromocion={currentPromocion} />
+            <AddPromocionModal open={open} onClose={handleCloseModal} currentPromocion={currentPromocion} success={handleSuccess} error={handleError}/>
+            <ToastContainer />
         </>
     )
 }

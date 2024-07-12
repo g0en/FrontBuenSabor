@@ -13,6 +13,7 @@ import ArticuloManufacturadoViewModal from "./ArticuloManufacturadoViewModal";
 import ArticuloManufacturadoAddModal from "./ArticuloManufacturadoAddModal";
 import DesactivarComponent from "../Advertencias/DesactivarComponent";
 import ActivarComponent from "../Advertencias/ActivarComponent";
+import { toast } from "react-toastify";
 
 interface ArticuloManufacturadoTableProps {
     onClose: () => void;
@@ -32,9 +33,9 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
     const updateArticuloManufacturado = async (articulo: ArticuloManufacturado) => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
+        });
         return ArticuloManufacturadoUpdate(articulo, token);
     };
 
@@ -59,19 +60,40 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
         setView(true);
     };
 
-    
+
     const handleBaja = async (articulo: ArticuloManufacturado) => {
         articulo.habilitado = false;
         try {
             const data = await updateArticuloManufacturado(articulo);
             if (data.status !== 200) {
                 articulo.habilitado = true;
+                toast.error(data.responseData.message, {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
                 return;
             }
 
         } catch (error) {
             console.log("Error al dar de baja un articulo manufacturado");
         }
+
+        toast.success("Se deshabilitó correctamente", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
 
         handleClose();
         handleCloseDialog();
@@ -83,6 +105,16 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
             const data = await updateArticuloManufacturado(articulo);
             if (data.status !== 200) {
                 articulo.habilitado = false;
+                toast.error("No se pudo habilitar el articulo, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
                 return;
             }
 
@@ -90,6 +122,16 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
             console.log("Error al dar de baja un articulo manufacturado");
         }
 
+        toast.success("Se habilitó el articulo", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
         handleClose();
         handleCloseDialog();
     }
@@ -111,6 +153,33 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
     const handleCloseDialog = () => {
         setOpenBaja(false);
         setOpenAlta(false);
+    }
+
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar el manufacturado, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
     }
 
     return (
@@ -146,10 +215,10 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
                 }
             </TableRow>
 
-            <ArticuloManufacturadoViewModal view={view} onClose={handleClose} articulo={articulo} images={images}/>
-            <ArticuloManufacturadoAddModal open={openModal} onClose={handleClose} articulo={articulo} imagenes={images} articuloImagenes={articuloImages} articuloDetalles={detalles}/>
-            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(articulo)} tipo='el manufacturado' entidad={articulo}/>
-            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={() => handleAlta(articulo)} tipo='el manufacturado' entidad={articulo}/>
+            <ArticuloManufacturadoViewModal view={view} onClose={handleClose} articulo={articulo} images={images} />
+            <ArticuloManufacturadoAddModal open={openModal} onClose={handleClose} articulo={articulo} imagenes={images} articuloImagenes={articuloImages} articuloDetalles={detalles} success={handleSuccess} error={handleError} />
+            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={() => handleBaja(articulo)} tipo='el manufacturado' entidad={articulo} />
+            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={() => handleAlta(articulo)} tipo='el manufacturado' entidad={articulo} />
         </>
     )
 };

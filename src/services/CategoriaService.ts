@@ -92,7 +92,7 @@ export async function CategoriaBaja(idCategoria: number, idSucursal: number, tok
 
 	return {
 		status: response.status,
-		data: responseData as string
+		data: responseData
 	};
 }
 
@@ -110,6 +110,6 @@ export async function CategoriaDelete(idCategoria: number, token: string){
 
 	return {
 		status: response.status,
-		data: responseData as string
+		data: responseData
 	};
 }

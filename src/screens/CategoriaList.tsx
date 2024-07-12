@@ -9,6 +9,7 @@ import Categoria from "../types/Categoria";
 import { useAuth0 } from "@auth0/auth0-react";
 import CategoriaTable from "../components/iu/Categoria/CategoriaTable";
 import CategoriaModal from "../components/iu/Categoria/CategoriaModal";
+import { toast, ToastContainer } from "react-toastify";
 
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
 
@@ -46,7 +47,7 @@ function CategoriaList() {
         setCurrentCategoria(emptyCategoria);
     };
 
-    
+
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
         console.log(event);
@@ -56,6 +57,33 @@ function CategoriaList() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    const handleSuccess = () => {
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al crear la categoría, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
 
     return (
         <>
@@ -78,11 +106,11 @@ function CategoriaList() {
                         </TableHead>
                         <TableBody>
                             {categorias
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .filter(categoria => categoria.categoriaPadre === null && !categoria.eliminado)
-                            .map((categoria) => (
-                                <CategoriaTable onClose={handleClose} categoria={categoria} />
-                            ))}
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .filter(categoria => categoria.categoriaPadre === null && !categoria.eliminado)
+                                .map((categoria) => (
+                                    <CategoriaTable onClose={handleClose} categoria={categoria} />
+                                ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -97,7 +125,8 @@ function CategoriaList() {
                 />
 
             </Box>
-            <CategoriaModal open={open} onClose={handleClose} categoria={currentCategoria} />
+            <CategoriaModal open={open} onClose={handleClose} categoria={currentCategoria} success={handleSuccess} error={handleError} />
+            <ToastContainer />
         </>
     );
 }

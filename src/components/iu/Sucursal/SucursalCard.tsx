@@ -7,6 +7,7 @@ import SucursalModal from "./SucursalModal";
 import Sucursal from "../../../types/Sucursal";
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from "react-toastify";
 
 interface EmpresaCardProps {
     onClose: () => void;
@@ -29,6 +30,33 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
     const handleClose = () => {
         setEditOpen(false);
         onClose();
+    }
+
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar la sucursal, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
     }
 
     return (
@@ -59,7 +87,7 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
                 </CardActions>
             </Card>
 
-            <SucursalModal open={editOpen} onClose={handleClose} sucursal={sucursal}/>
+            <SucursalModal open={editOpen} onClose={handleClose} sucursal={sucursal} success={handleSuccess} error={handleError} />
         </>
     )
 }

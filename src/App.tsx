@@ -37,7 +37,7 @@ function App() {
           <Route path="dashboard/:idEmpresa/:idSucursal" element={<Dashboard />} />
           <Route path="empleados/:idEmpresa/:idSucursal" element={<Empleado />} />
         </Route>
-        <Route path="productos/:idEmpresa/:idSucursal" element={<ArticuloManufacturado />} />
+        <Route path="manufacturados/:idEmpresa/:idSucursal" element={<ArticuloManufacturado />} />
         <Route path="categorias/:idEmpresa/:idSucursal" element={<Categoria />} />
         <Route path="promociones/:idEmpresa/:idSucursal" element={<Promocion />} />
         <Route path="insumos/:idEmpresa/:idSucursal" element={<ArticuloInsumo />} />

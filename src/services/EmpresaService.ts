@@ -11,7 +11,12 @@ export async function EmpresaCreate(empresa: Empresa, token: string){
 		},
         mode: 'cors'
 	});
-	return await response.json() as Empresa;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as Empresa
+	};
 }
 
 export async function EmpresaGetAll(token: string){
@@ -51,7 +56,12 @@ export async function EmpresaUpdate(empresa: Empresa, token: string){
 		},
         mode: 'cors'
 	});
-	return await response.json() as Empresa;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as Empresa
+	};
 }
 
 export async function EmpresaAddSucursal(idEmpresa: number, idSucursal: number, token: string){

@@ -69,7 +69,7 @@ function ArticuloInsumoList() {
     }
 
     const handleError = () => {
-        toast.error("Error al actualizar, intente más tarde", {
+        toast.error("Error al crear el insumo, intente más tarde", {
             position: "top-right",
             autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
             hideProgressBar: false,

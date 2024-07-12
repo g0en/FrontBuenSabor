@@ -4,8 +4,6 @@ import { useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { EmpresaCreate, EmpresaUpdate } from "../../../services/EmpresaService";
 import { useAuth0 } from "@auth0/auth0-react";
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -22,11 +20,11 @@ interface EmpresaCardProps {
     open: boolean;
     onClose: () => void;
     empresa: Empresa;
+    success: () => void;
+    error: () => void;
 }
 
-const MySwal = withReactContent(Swal);
-
-const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) => {
+const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa, success, error }) => {
     const [currentEmpresa, setCurrentEmpresa] = useState<Empresa>(empresa);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const { getAccessTokenSilently } = useAuth0();
@@ -38,15 +36,7 @@ const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) =>
             },
         });
 
-        await EmpresaCreate(empresa, token);
-        return MySwal.fire({
-            title: 'Empresa creada',
-            text: 'La empresa se ha creado correctamente',
-            icon: 'success',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true,
-        });
+        return EmpresaCreate(empresa, token);
     };
 
     const updateEmpresa = async (empresa: Empresa) => {
@@ -56,15 +46,7 @@ const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) =>
             },
         });
 
-        await EmpresaUpdate(empresa, token);
-        return MySwal.fire({
-            title: 'Empresa actualizada',
-            text: 'La empresa se ha actualizado correctamente',
-            icon: 'success',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true,
-        });
+        return EmpresaUpdate(empresa, token);
     };
 
     const handleClose = () => {
@@ -120,18 +102,27 @@ const EmpresaModal: React.FC<EmpresaCardProps> = ({ open, onClose, empresa }) =>
 
         if (currentEmpresa.id > 0) {
             try {
-                await updateEmpresa(currentEmpresa);
+                const data = await updateEmpresa(currentEmpresa);
+                if(data.status !== 200){
+                    error();
+                    return;
+                }
             } catch (error) {
                 console.log("Error al actualizar la empresa.");
             }
         } else {
             try {
-                await createEmpresa(currentEmpresa);
+                const data = await createEmpresa(currentEmpresa);
+                if(data.status !== 200){
+                    error();
+                    return;
+                }
             } catch (error) {
                 console.log("Error al crear la empresa.");
             }
         }
 
+        success();
         handleClose();
     };
 

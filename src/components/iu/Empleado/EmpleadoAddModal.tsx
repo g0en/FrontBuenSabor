@@ -22,9 +22,11 @@ interface EmpleadoTableProps {
     open: boolean;
     onClose: () => void;
     empleado: Empleado;
+    success: () => void;
+    error: () => void;
 }
 
-const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, empleado }) => {
+const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, empleado, success, error }) => {
     const [step, setStep] = useState(1);
     const [currentEmpleado, setCurrentEmpleado] = useState<Empleado>(empleado);
     const { idSucursal } = useParams();
@@ -151,6 +153,7 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
             try {
                 const data = await updateEmpleado();
                 if (data.status !== 200) {
+                    error();
                     return;
                 }
             } catch (error) {
@@ -160,6 +163,7 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
             try {
                 const data = await createEmpleado();
                 if (data.status !== 200) {
+                    error();
                     return;
                 }
             } catch (error) {
@@ -167,6 +171,7 @@ const EmpleadoAddModal: React.FC<EmpleadoTableProps> = ({ open, onClose, emplead
             }
         }
 
+        success();
         handleClose();
     }
 

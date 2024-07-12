@@ -34,9 +34,11 @@ interface AddPromocionModalProps {
     open: boolean;
     onClose: () => void;
     currentPromocion: Promocion;
+    success: () => void;
+    error: () => void;
 }
 
-const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, currentPromocion }) => {
+const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, currentPromocion, success, error }) => {
     const [step, setStep] = useState(1);
     const [promocion, setPromocion] = useState<Promocion>(currentPromocion);
     const [files, setFiles] = useState<File[]>([]);
@@ -412,6 +414,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                 const data = await updatePromocion(promocion);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
+                    error();
                     return;
                 }
 
@@ -423,6 +426,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
                 const data = await createPromocion(promocion);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
+                    error();
                     return;
                 }
 
@@ -432,6 +436,7 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
 
         }
 
+        success();
         handleClose();
     }
 

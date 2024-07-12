@@ -9,6 +9,7 @@ import EmpleadoViewModal from "./EmpleadoViewModal";
 import { EmpleadoUpdate } from "../../../services/EmpleadoService";
 import { useAuth0 } from "@auth0/auth0-react";
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import { toast } from "react-toastify";
 
 interface EmpleadoTableProps {
     onClose: () => void;
@@ -72,6 +73,33 @@ const EmpleadoTable: React.FC<EmpleadoTableProps> = ({ onClose, empleado }) => {
         onClose();
     }
 
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar el empleado, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
+
     return (
         <>
             <TableRow sx={{ backgroundColor: !empleado.eliminado ? "none" : "#B0B0B0" }}>
@@ -97,7 +125,7 @@ const EmpleadoTable: React.FC<EmpleadoTableProps> = ({ onClose, empleado }) => {
                     </Box>
                 </TableCell>
             </TableRow>
-            <EmpleadoAddModal open={editOpen} onClose={handleClose} empleado={empleado} />
+            <EmpleadoAddModal open={editOpen} onClose={handleClose} empleado={empleado} success={handleSuccess} error={handleError}/>
             <EmpleadoViewModal open={view} onClose={handleClose} empleado={empleado} />
         </>
     );

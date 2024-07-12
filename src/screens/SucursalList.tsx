@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useAuth0 } from "@auth0/auth0-react";
 import SucursalCard from "../components/iu/Sucursal/SucursalCard";
 import SucursalModal from "../components/iu/Sucursal/SucursalModal";
+import { toast, ToastContainer } from "react-toastify";
 
 const emptyEmpresa = { id: 0, eliminado: false, nombre: '', razonSocial: '', cuil: 0 };
 
@@ -58,6 +59,33 @@ function SucursalList() {
         setCurrentSucursal({ ...emptySucursal });
     };
 
+    const handleSuccess = () => {
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al crear la sucursal, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
+
     return (
         <div style={{ backgroundColor: '#E0E0E0', padding: '20px', borderRadius: '8px' }}>
             <Typography
@@ -91,7 +119,8 @@ function SucursalList() {
                 ))}
             </div>
 
-            <SucursalModal open={open} onClose={handleClose} sucursal={currentSucursal}/>
+            <SucursalModal open={open} onClose={handleClose} sucursal={currentSucursal} success={handleSuccess} error={handleError}/>
+            <ToastContainer />
         </div>
     );
 

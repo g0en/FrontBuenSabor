@@ -71,7 +71,7 @@ export async function ArticuloManufacturadoUpdate(articuloManufacturado: Articul
         mode: 'cors'
 	});
 
-	const responseData = await response.json() as ArticuloManufacturado;
+	const responseData = await response.json();
 	const status = response.status;
 	return {
 		status,

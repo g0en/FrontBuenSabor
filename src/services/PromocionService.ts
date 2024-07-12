@@ -71,7 +71,7 @@ export async function PromocionUpdate(promocion: Promocion, token: string){
         mode: 'cors'
 	});
 
-	const responseData = await response.json() as Promocion;
+	const responseData = await response.json();
 	const status = response.status;
 	return {
 		status,

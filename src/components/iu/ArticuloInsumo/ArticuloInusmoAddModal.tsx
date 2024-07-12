@@ -295,7 +295,6 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
         setArticuloImages(articuloImagenes);
         setErrors({});
         onClose();
-        success();
     }
 
     const handleSubmit = async () => {
@@ -336,14 +335,17 @@ const ArticuloInsumoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, o
                 const data = await createArticuloInsumo(currentArticuloInsumo);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
+                    error();
                     return;
                 }
 
             } catch (error) {
                 console.log("Error al crear un articulo insumo");
             }
+
         }
 
+        success();
         handleClose();
     };
 

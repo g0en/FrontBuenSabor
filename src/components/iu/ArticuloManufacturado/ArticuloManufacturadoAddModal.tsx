@@ -38,9 +38,11 @@ interface ArticuloInsumoAddModalProps {
     imagenes: string[];
     articuloImagenes: Imagen[];
     articuloDetalles: ArticuloManufacturadoDetalle[];
+    success: () => void;
+    error: () => void;
 }
 
-const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, onClose, articulo, imagenes, articuloImagenes, articuloDetalles }) => {
+const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ open, onClose, articulo, imagenes, articuloImagenes, articuloDetalles, success, error }) => {
     const [currentArticuloManufacturado, setCurrentArticuloManufacturado] = useState<ArticuloManufacturado>(articulo);
     const [insumos, setInsumos] = useState<ArticuloInsumo[]>([]);
     const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -383,6 +385,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                 const data = await updateArticuloManufacturado(currentArticuloManufacturado);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
+                    error();
                     return;
                 }
 
@@ -396,6 +399,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                 const data = await createArticuloManufacturado(currentArticuloManufacturado);
                 if (data.status !== 200) {
                     deleteImages(imagenes);
+                    error();
                     return;
                 }
 
@@ -404,6 +408,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
             }
         }
 
+        success();
         handleClose();
     }
 

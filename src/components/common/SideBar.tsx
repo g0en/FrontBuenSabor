@@ -74,7 +74,7 @@ function SideBar() {
                     </ListItemButton>
                     <Collapse in={openProducts} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                            <ListItemButton component={Link} to={"/productos/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
+                            <ListItemButton component={Link} to={"/manufacturados/" + idEmpresa + "/" + idSucursal} sx={{ pl: 4 }}>
                                 <ListItemIcon sx={{
                                     color: colorConfigs.sidebar.color
                                 }}>

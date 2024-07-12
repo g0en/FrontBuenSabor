@@ -13,6 +13,7 @@ import { PromocionUpdate } from '../../../services/PromocionService';
 import { useAuth0 } from '@auth0/auth0-react';
 import DesactivarComponent from '../Advertencias/DesactivarComponent';
 import ActivarComponent from '../Advertencias/ActivarComponent';
+import { toast } from 'react-toastify';
 
 interface PromocionCardProps {
     onClose: () => void;
@@ -63,8 +64,32 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
 
         if (promocion.id !== null) {
             promocion.habilitado = false;
-            await PromocionUpdate(promocion, token);
+            const data = await PromocionUpdate(promocion, token);
+            if (data.status !== 200) {
+                toast.error("No se pudo dar deshabilitar la promoción, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
+                return;
+            }
         }
+
+        toast.success("Se deshabilitó correctamente", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
 
         onClose();
         handleCloseDialog();
@@ -79,8 +104,32 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
 
         if (promocion.id !== null) {
             promocion.habilitado = true;
-            await PromocionUpdate(promocion, token);
+            const data = await PromocionUpdate(promocion, token);
+            if (data.status !== 200) {
+                toast.error("No se pudo habilitar la promoción, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
+                return;
+            }
         }
+
+        toast.success("Se habilito correctamente", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
 
         onClose();
         handleCloseDialog();
@@ -97,6 +146,33 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
     const handleCloseDialog = () => {
         setOpenBaja(false);
         setOpenAlta(false);
+    }
+
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar la categoría, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
     }
 
 
@@ -181,10 +257,10 @@ const PromocionCard: React.FC<PromocionCardProps> = ({ onClose, promocion }) => 
                     }
                 </CardContent>
             </Card>
-            <AddPromocionModal open={openEdit} onClose={handleCloseModal} currentPromocion={promocion} />
+            <AddPromocionModal open={openEdit} onClose={handleCloseModal} currentPromocion={promocion} success={handleSuccess} error={handleError} />
             <ViewPromocionModal open={openView} onClose={handleCloseViewModal} promocion={promocion} />
-            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={handleBaja} tipo='la promoción' entidad={promocion}/>
-            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={handleAlta} tipo='la promoción' entidad={promocion}/>
+            <DesactivarComponent openDialog={openBaja} onClose={handleCloseDialog} onConfirm={handleBaja} tipo='la promoción' entidad={promocion} />
+            <ActivarComponent openDialog={openAlta} onClose={handleCloseDialog} onConfirm={handleAlta} tipo='la promoción' entidad={promocion} />
         </Box>
     );
 };

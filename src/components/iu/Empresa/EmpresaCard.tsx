@@ -5,6 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from "react-router-dom";
 import EmpresaModal from "./EmpresaModal";
+import { toast } from "react-toastify";
 
 interface EmpresaCardProps {
     onClose: () => void;
@@ -24,7 +25,35 @@ const EmpresaCard: React.FC<EmpresaCardProps> = ({ onClose, empresa }) => {
     };
 
     const handleClose = () => {
+        setEditOpen(false);
         onClose();
+    }
+
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar la empresa, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
     }
 
     return (
@@ -55,7 +84,7 @@ const EmpresaCard: React.FC<EmpresaCardProps> = ({ onClose, empresa }) => {
                 </CardActions>
             </Card>
 
-            <EmpresaModal open={editOpen} onClose={handleClose} empresa={empresa} />
+            <EmpresaModal open={editOpen} onClose={handleClose} empresa={empresa} success={handleSuccess} error={handleError}/>
         </>
     )
 }

@@ -43,36 +43,57 @@ function UnidadMedidaList() {
     const getAllUnidadMedida = async () => {
         const token = await getAccessTokenSilently({
             authorizationParams: {
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
-          });
-        try {
-            const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll(token);
-            setUnidadMedidas(unidadMedidas);
-        } catch (error) {
-            console.log('Error al obtener las unidades de medida', error);
-            toast.error('Error al obtener las unidades de medida');
-        }
+        });
+
+        const unidadMedidas: UnidadMedida[] = await UnidadMedidaGetAll(token);
+        setUnidadMedidas(unidadMedidas);
     };
 
     const createUnidadMedida = async (unidadMedida: UnidadMedida) => {
         try {
             const token = await getAccessTokenSilently({
                 authorizationParams: {
-                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
                 },
-              });
-            await UnidadMedidaCreate(unidadMedida, token);
-            toast.success('Unidad de medida creada correctamente');
+            });
+            const data = await UnidadMedidaCreate(unidadMedida, token);
+            if (data.status !== 200) {
+                toast.error("Error al crear la unidad de medida, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
+
+                return;
+            }
+
         } catch (error) {
             console.log('Error al crear la unidad de medida', error);
-            toast.error('Error al crear la unidad de medida');
         }
 
-        try{
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+
+        try {
             await getAllUnidadMedida();
-        }catch(error){
-            console.log("Error al traer las unidades de medida.");
+        } catch (error) {
+            console.log("asd");
         }
     };
 
@@ -80,20 +101,44 @@ function UnidadMedidaList() {
         try {
             const token = await getAccessTokenSilently({
                 authorizationParams: {
-                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
                 },
-              });
-            await UnidadMedidaUpdate(unidadMedida, token);
-            toast.success('Unidad de medida actualizada correctamente');
+            });
+            const data = await UnidadMedidaUpdate(unidadMedida, token);
+            if (data.status !== 200) {
+                toast.error("Error al actualizar la unidad de medida, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
+
+                return;
+            }
         } catch (error) {
-            console.log('Error al actualizar la unidad de medida', error);
-            toast.error('Error al actualizar la unidad de medida');
+            console.log('Error al actualizar la unidad de medida');
         }
 
-        try{
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+
+        try {
             await getAllUnidadMedida();
-        }catch(error){
-            console.log("Error al traer las unidades de medida.");
+        } catch (error) {
+            console.log("asd");
         }
     };
 
@@ -101,21 +146,44 @@ function UnidadMedidaList() {
         try {
             const token = await getAccessTokenSilently({
                 authorizationParams: {
-                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                    audience: import.meta.env.VITE_AUTH0_AUDIENCE,
                 },
-              });
-            await UnidadMedidaDelete(id, token);
-            toast.success('Unidad de medida eliminada correctamente');
-            getAllUnidadMedida();
+            });
+            const data = await UnidadMedidaDelete(id, token);
+            if (data.status !== 200) {
+                toast.success("Error al eliminar la unidad de medida, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    toastId: 'success-toast' // Asegura que el toast tenga un ID único
+                });
+                return;
+            }
         } catch (error) {
-            console.log('Error al eliminar la unidad de medida', error);
-            //toast.error('Error al eliminar la unidad de medida');
+            console.log('Error al eliminar la unidad de medida');
         }
 
-        try{
+        toast.success("Se eliminó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+
+        try {
             await getAllUnidadMedida();
-        }catch(error){
-            console.log("Error al traer las unidades de medida.");
+        } catch (error) {
+            console.log("asd");
         }
     };
 
@@ -127,18 +195,36 @@ function UnidadMedidaList() {
         setCurrentUnidadMedida({ ...currentUnidadMedida, denominacion: event.target.value });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!currentUnidadMedida.denominacion.trim()) {
-            toast.error('Este campo no puede estar vacío');
+            toast.warning("El campo denominación es obligatorio", {
+                position: "top-right",
+                autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored"
+            });
             return;
         }
         createUnidadMedida(currentUnidadMedida);
         setCurrentUnidadMedida({ ...emptyUnidadMedida });
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         if (!currentUnidadMedida.denominacion.trim()) {
-            toast.error('Este campo no puede estar vacío');
+            toast.warning("El campo denominación es obligatorio", {
+                position: "top-right",
+                autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored"
+            });
             return;
         }
         updateUnidadMedida(currentUnidadMedida);
@@ -213,20 +299,20 @@ function UnidadMedidaList() {
                         </TableHead>
                         <TableBody>
                             {unidadMedidas
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((unidad) => (
-                                <TableRow key={unidad.id}>
-                                    <TableCell>{unidad.denominacion}</TableCell>
-                                    <TableCell>
-                                        <IconButton onClick={() => handleEdit(unidad)} color="primary">
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton onClick={() => handleOpenDialog(unidad)} color="error">
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((unidad) => (
+                                    <TableRow key={unidad.id}>
+                                        <TableCell>{unidad.denominacion}</TableCell>
+                                        <TableCell>
+                                            <IconButton onClick={() => handleEdit(unidad)} color="primary">
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleOpenDialog(unidad)} color="error">
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
                         </TableBody>
                     </Table>
                 </TableContainer>

@@ -78,6 +78,17 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
             console.log("Error al dar de baja un articulo insumo");
         }
 
+        toast.success("Se deshabilitó correctamente", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+        
         handleClose();
         handleCloseDialog();
     }
@@ -87,12 +98,33 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
         try {
             const data = await updateArticuloInsumo(articulo);
             if (data.status !== 200) {
+                toast.error("No se pudo habilitar el articulo, intente más tarde", {
+                    position: "top-right",
+                    autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored"
+                });
                 return;
             }
 
         } catch (error) {
             console.log("Error al dar de baja un articulo insumo");
         }
+
+        toast.success("Se habilitó el articulo", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
 
         handleClose();
         handleCloseDialog();
@@ -132,7 +164,7 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
     }
 
     const handleError = () => {
-        toast.error("Error al actualizar, intente más tarde", {
+        toast.error("Error al actualizar el insumo, intente más tarde", {
             position: "top-right",
             autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
             hideProgressBar: false,

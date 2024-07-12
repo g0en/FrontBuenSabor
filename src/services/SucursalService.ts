@@ -11,7 +11,12 @@ export async function SucursalCreate(sucursal: Sucursal, token: string){
 		},
         mode: 'cors'
 	});
-	return await response.json() as Sucursal;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as Sucursal
+	};
 }
 
 export async function SucursalGetByEmpresaId(id: number, token: string){
@@ -64,5 +69,10 @@ export async function SucursalUpdate(sucursal: Sucursal, token: string){
 		},
         mode: 'cors'
 	});
-	return await response.json() as Sucursal;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData as Sucursal
+	};
 }

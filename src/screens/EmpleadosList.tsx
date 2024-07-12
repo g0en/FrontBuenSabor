@@ -8,6 +8,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import Empleado from "../types/Empleado";
 import { EmpleadoGetBySucursal } from "../services/EmpleadoService";
 import EmpleadoAddModal from "../components/iu/Empleado/EmpleadoAddModal";
+import { toast, ToastContainer } from "react-toastify";
 
 const emptyEmpleado: Empleado = {
     id: null,
@@ -78,6 +79,33 @@ function EmpleadosList() {
         setPage(0);
     };
 
+    const handleSuccess = () => {
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al crear el empleado, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
+
     return (
         <>
             <SideBar />
@@ -119,7 +147,8 @@ function EmpleadosList() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Box>
-            <EmpleadoAddModal open={open} onClose={handleClose} empleado={empleado} />
+            <EmpleadoAddModal open={open} onClose={handleClose} empleado={empleado} success={handleSuccess} error={handleError}/>
+            <ToastContainer />
         </>
     )
 }

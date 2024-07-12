@@ -11,7 +11,12 @@ export async function UnidadMedidaCreate(unidadMedida: UnidadMedida, token: stri
 		},
         mode: 'cors'
 	});
-	return await response.json() as UnidadMedida;
+	const responseData = await response.json();
+	const status = response.status;
+	return {
+		status,
+		responseData
+	};
 }
 
 export async function UnidadMedidaGetAll(token: string){
@@ -51,7 +56,12 @@ export async function UnidadMedidaUpdate(unidadMedida: UnidadMedida, token: stri
 		},
         mode: 'cors'
 	});
-	return await response.json() as UnidadMedida;
+	const responseData = await response.json();
+	const status = response.status;
+	return {
+		status,
+		responseData
+	};
 }
 
 export async function UnidadMedidaDelete(id: number, token: string){
@@ -64,5 +74,10 @@ export async function UnidadMedidaDelete(id: number, token: string){
 		},
         mode: 'cors'
 	});
-	return await response.json() as string;
+	const responseData = await response.json();
+
+	return {
+		status: response.status,
+		data: responseData
+	};
 }

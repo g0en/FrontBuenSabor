@@ -2,8 +2,6 @@ import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, G
 import { useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth0 } from "@auth0/auth0-react";
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
 import Sucursal from "../../../types/Sucursal";
 import { SucursalCreate, SucursalUpdate } from "../../../services/SucursalService";
 import Provincia from "../../../types/Provincia";
@@ -34,11 +32,11 @@ interface EmpresaCardProps {
     open: boolean;
     onClose: () => void;
     sucursal: Sucursal;
+    success: () => void;
+    error: () => void;
 }
 
-const MySwal = withReactContent(Swal);
-
-const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) => {
+const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal, success, error }) => {
     const [currentSucursal, setCurrentSucursal] = useState<Sucursal>(sucursal);
     const [currentEmpresa, setCurrentEmpresa] = useState<Empresa>();
     const [paises, setPaises] = useState<Pais[]>([]);
@@ -60,15 +58,7 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
             },
         });
 
-        await SucursalCreate(sucursal, token);
-        return MySwal.fire({
-            title: 'Empresa creada',
-            text: 'La empresa se ha creado correctamente',
-            icon: 'success',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true,
-        });
+        return SucursalCreate(sucursal, token);
     };
 
     const updateSucursal = async (sucursal: Sucursal) => {
@@ -78,15 +68,7 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
             },
         });
 
-        await SucursalUpdate(sucursal, token);
-        return MySwal.fire({
-            title: 'Empresa actualizada',
-            text: 'La empresa se ha actualizado correctamente',
-            icon: 'success',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true,
-        });
+        return SucursalUpdate(sucursal, token);
     };
 
     const getAllProvincias = async () => {
@@ -310,19 +292,28 @@ const SucursalModal: React.FC<EmpresaCardProps> = ({ open, onClose, sucursal }) 
 
         if (currentSucursal.id > 0) {
             try {
-                await updateSucursal(currentSucursal);
+                const data = await updateSucursal(currentSucursal);
+                if(data.status !== 200){
+                    error();
+                    return;
+                }
             } catch (error) {
                 console.log("Error al actualizar la sucursal.");
             }
         } else {
             try {
                 currentSucursal.empresa = currentEmpresa ?? null;
-                await createSucursal(currentSucursal);
+                const data = await createSucursal(currentSucursal);
+                if(data.status !== 200){
+                    error();
+                    return;
+                }
             } catch (error) {
                 console.log("Error al crear la sucursal.");
             }
         }
 
+        success();
         handleClose();
     };
 

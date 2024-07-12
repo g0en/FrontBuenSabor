@@ -14,9 +14,11 @@ interface CategoriaModalProps {
     open: boolean;
     onClose: () => void;
     categoria: Categoria;
+    success: () => void;
+    error: () => void;
 }
 
-const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categoria }) => {
+const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categoria, success, error }) => {
     const [currentCategoria, setCurrentCategoria] = useState<Categoria>(categoria);
     const { idEmpresa } = useParams();
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
@@ -40,7 +42,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
             },
         });
 
-        await CategoriaCreate(categoria, token);
+        return CategoriaCreate(categoria, token);
     };
 
     const updateCategoria = async (categoria: Categoria) => {
@@ -50,7 +52,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
             },
         });
 
-        await CategoriaUpdate(categoria, token);
+        return CategoriaUpdate(categoria, token);
     };
 
     useEffect(() => {
@@ -91,7 +93,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                 });
             }
         }
-        
+
         if (errors.sucursales) {
             setErrors({ ...errors, sucursales: '' });
         }
@@ -154,7 +156,12 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
 
         if (currentCategoria.id === null) {
             try {
-                await createCategoria(currentCategoria);
+                const data = await createCategoria(currentCategoria);
+                if (data.status !== 200) {
+                    error();
+                    return;
+                }
+
             } catch (error) {
                 console.log("No se pudo crear la categoría.");
             }
@@ -167,12 +174,18 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
             }
 
             try {
-                await updateCategoria(currentCategoria);
+                const data = await updateCategoria(currentCategoria);
+                if (data.status !== 200) {
+                    error();
+                    return;
+                }
+                
             } catch (error) {
                 console.log("Error al actualizar la categoría.");
             }
         }
 
+        success();
         handleClose();
     };
 

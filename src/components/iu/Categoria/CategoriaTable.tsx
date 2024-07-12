@@ -12,6 +12,7 @@ import { CategoriaBaja, CategoriaDelete } from '../../../services/CategoriaServi
 import CategoriaModal from './CategoriaModal';
 import EliminarComponent from '../Advertencias/EliminarComponent';
 import BajaSucursalComponent from '../Advertencias/BajaSucursal';
+import { toast } from 'react-toastify';
 
 interface CategoriaTableProps {
     onClose: () => void;
@@ -34,7 +35,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                 audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
         });
-        await CategoriaBaja(idCategoria, Number(idSucursal), token);
+        return CategoriaBaja(idCategoria, Number(idSucursal), token);
     };
 
     const deleteCategoria = async (idCategoria: number) => {
@@ -44,7 +45,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
             },
         });
 
-        await CategoriaDelete(idCategoria, token);
+        return CategoriaDelete(idCategoria, token);
     };
 
     const handleEdit = (categoria: Categoria | CategoriaGetDto) => {
@@ -60,11 +61,36 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
     const handleDelete = async (categoria: Categoria | CategoriaGetDto) => {
         if (categoria.id !== null) {
             try {
-                await deleteCategoria(categoria.id);
+                const data = await deleteCategoria(categoria.id);
+                if(data.status !== 200){
+                    toast.error(data.data.message, {
+                        position: "top-right",
+                        autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored"
+                    });
+
+                    return;
+                }
             } catch (error) {
                 console.log("Error al eliminar la categoria.");
             }
         }
+
+        toast.success("Se elimino correctamente", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
 
         handleClose();
         handleCloseDialog();
@@ -73,11 +99,36 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
     const handleBaja = async (categoria: Categoria | CategoriaGetDto) => {
         if (categoria.id !== null) {
             try {
-                await bajaCategoria(categoria.id);
+                const data = await bajaCategoria(categoria.id);
+                if (data.status !== 200) {
+                    toast.error(data.data.message, {
+                        position: "top-right",
+                        autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored"
+                    });
+
+                    return;
+                }
             } catch (error) {
                 console.log("Error al dar de baja la categoria.");
             }
         }
+
+        toast.success("Se dio de baja correctamente", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
 
         handleClose();
     }
@@ -103,6 +154,33 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
 
     const handleOpenBajaSubDialog = () => {
         setOpenBajaSub(true);
+    }
+
+    const handleSuccess = () => {
+        toast.success("Se actualizó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al actualizar la categoría, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
     }
 
 
@@ -158,7 +236,7 @@ const CategoriaTable: React.FC<CategoriaTableProps> = ({ onClose, categoria }) =
                     {renderSubCategorias(categoria.subCategorias)}
                 </AccordionDetails>
             </Accordion>
-            <CategoriaModal open={open} onClose={handleClose} categoria={categoriaUpdate} />
+            <CategoriaModal open={open} onClose={handleClose} categoria={categoriaUpdate} success={handleSuccess} error={handleError} />
         </>
     )
 };

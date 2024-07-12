@@ -13,6 +13,7 @@ import ArticuloManufacturadoDetalle from "../types/ArticuloManufacturadoDetalle"
 import { useAuth0 } from "@auth0/auth0-react";
 import ArticuloManufacturadoTable from "../components/iu/ArticuloManufacturado/ArticuloManufacturadoTable";
 import ArticuloManufacturadoAddModal from "../components/iu/ArticuloManufacturado/ArticuloManufacturadoAddModal";
+import { toast, ToastContainer } from "react-toastify";
 
 const emptyUnidadMedida = { id: 0, eliminado: false, denominacion: '' };
 const emptyCategoria = { id: null, eliminado: false, denominacion: '', esInsumo: false, sucursales: [], subCategorias: [] };
@@ -72,8 +73,34 @@ function ArticuloManufacturadoList() {
         } else {
             setDetalles([]);
         }
-
     };
+
+    const handleSuccess = () => {
+        toast.success("Se creó correctamente", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            toastId: 'success-toast' // Asegura que el toast tenga un ID único
+        });
+    }
+
+    const handleError = () => {
+        toast.error("Error al crear el manufacturado, intente más tarde", {
+            position: "top-right",
+            autoClose: 5000, // Tiempo en milisegundos antes de que se cierre automáticamente
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored"
+        });
+    }
 
     return (
         <>
@@ -120,7 +147,8 @@ function ArticuloManufacturadoList() {
                 />
             </Box>
 
-            <ArticuloManufacturadoAddModal open={openModal} onClose={handleCloseModal} articulo={currentArticuloManufacturado} imagenes={images} articuloImagenes={articuloImages} articuloDetalles={detalles} />
+            <ArticuloManufacturadoAddModal open={openModal} onClose={handleCloseModal} articulo={currentArticuloManufacturado} imagenes={images} articuloImagenes={articuloImages} articuloDetalles={detalles} success={handleSuccess} error={handleError}/>
+            <ToastContainer />
         </>
     );
 }
