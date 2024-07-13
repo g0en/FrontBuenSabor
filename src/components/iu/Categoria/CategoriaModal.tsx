@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, Modal, TextField, Tooltip, Typography } from "@mui/material";
 import Categoria from "../../../types/Categoria";
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useState } from "react";
@@ -179,7 +179,7 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                     error();
                     return;
                 }
-                
+
             } catch (error) {
                 console.log("Error al actualizar la categoría.");
             }
@@ -223,19 +223,40 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                             </FormControl>
                         </Grid>
                         <Grid item xs={4} container justifyContent="center" alignItems="center">
-                            <FormControl fullWidth>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={currentCategoria.esInsumo}
-                                            onChange={handleEsInsumoChange}
-                                            name="esInsumo"
-                                            color="primary"
+                            {
+                                categoria.id !== null && categoria.id > 0 ?
+                                    <Tooltip title="No se puede modificar esta opción." arrow>
+                                        <FormControl fullWidth>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={currentCategoria.esInsumo}
+                                                        onChange={handleEsInsumoChange}
+                                                        name="esInsumo"
+                                                        color="primary"
+                                                        disabled={categoria.id !== null && categoria.id > 0}
+                                                    />
+                                                }
+                                                label="Es Insumo"
+                                            />
+                                        </FormControl>
+                                    </Tooltip>
+                                    :
+                                    <FormControl fullWidth>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={currentCategoria.esInsumo}
+                                                    onChange={handleEsInsumoChange}
+                                                    name="esInsumo"
+                                                    color="primary"
+                                                    disabled={categoria.id !== null && categoria.id > 0}
+                                                />
+                                            }
+                                            label="Es Insumo"
                                         />
-                                    }
-                                    label="Es Insumo"
-                                />
-                            </FormControl>
+                                    </FormControl>
+                            }
                         </Grid>
                     </Grid>
 
@@ -244,19 +265,30 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ open, onClose, categori
                             <Typography variant="subtitle1" gutterBottom>
                                 Seleccione la/s sucursales:
                             </Typography>
-                            {sucursales.map(sucursal => (
-                                <FormControlLabel
-                                    key={sucursal.id}
-                                    control={
-                                        <Checkbox
-                                            checked={currentCategoria.sucursales?.some(s => s.id === sucursal.id) || false}
-                                            onChange={() => handleSucursalChange(sucursal.id)}
-                                            color="primary"
-                                        />
-                                    }
-                                    label={sucursal.nombre}
-                                />
-                            ))}
+                            {sucursales.map((sucursal) => {
+                                const isDisabled = categoria.sucursales?.some((s) => s.id === sucursal.id) || false;
+                                return (
+                                    <Tooltip
+                                        key={sucursal.id}
+                                        title={isDisabled ? "Si se desea dar de baja de esta sucursal hay un botón para ello en el apartado de acciones." : ""}
+                                        arrow
+                                    >
+                                        <span>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={currentCategoria.sucursales?.some((s) => s.id === sucursal.id) || false}
+                                                        onChange={() => handleSucursalChange(sucursal.id)}
+                                                        color="primary"
+                                                        disabled={isDisabled}
+                                                    />
+                                                }
+                                                label={sucursal.nombre}
+                                            />
+                                        </span>
+                                    </Tooltip>
+                                );
+                            })}
                             {errors.sucursales && <FormHelperText>{errors.sucursales}</FormHelperText>}
                         </FormControl>
                     </Box>
