@@ -125,7 +125,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
                 };
                 reader.readAsDataURL(file);
             });
-            
+
             const name = 'files';
             if (errors[name]) {
                 setErrors({ ...errors, [name]: '' });
@@ -234,7 +234,7 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
     const handleCantidadChange = (index: number, cantidad: number) => {
         const nuevosDetalles = [...detalles];
         nuevosDetalles[index].cantidad = cantidad;
-        if(nuevosDetalles[index].cantidad.toString().length > 3){
+        if (nuevosDetalles[index].cantidad.toString().length > 3) {
             return;
         }
         setDetalles(nuevosDetalles);
@@ -247,12 +247,16 @@ const ArticuloManufacturadoAddModal: React.FC<ArticuloInsumoAddModalProps> = ({ 
             cantidad: 1,
             articuloInsumo: insumo
         };
-        setDetalles([...detalles, nuevoDetalle]);
-        setSearch("");
-        setErrors(prev => ({
-            ...prev,
-            detalles: ''
-        }));
+        const existe = detalles.some(detalle => detalle.articuloInsumo.id === insumo.id);
+
+        if (!existe) {
+            setDetalles([...detalles, nuevoDetalle]);
+            setSearch("");
+            setErrors(prev => ({
+                ...prev,
+                detalles: ''
+            }));
+        }
     };
 
     const handleNextStep = () => {

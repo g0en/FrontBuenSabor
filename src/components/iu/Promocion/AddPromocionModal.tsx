@@ -268,17 +268,21 @@ const AddPromocionModal: React.FC<AddPromocionModalProps> = ({ open, onClose, cu
             cantidad: 1,
             articulo: articulo
         };
-        setDetalles([...detalles, nuevoDetalle]);
-        if (articulo.precioVenta !== null) {
-            handleTotal(articulo.precioVenta, nuevoDetalle.cantidad);
+
+        const existe = detalles.some(detalle => detalle.articulo.id === articulo.id);
+        if (!existe) {
+            setDetalles([...detalles, nuevoDetalle]);
+            if (articulo.precioVenta !== null) {
+                handleTotal(articulo.precioVenta, nuevoDetalle.cantidad);
+            }
+
+            setSearch("");
+
+            setErrors(prev => ({
+                ...prev,
+                detalles: ''
+            }));
         }
-
-        setSearch("");
-
-        setErrors(prev => ({
-            ...prev,
-            detalles: ''
-        }));
     };
 
     const handleCantidadChange = (index: number, nuevaCantidad: number) => {
