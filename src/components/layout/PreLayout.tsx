@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Box, Toolbar } from "@mui/material";
 import colorConfigs from "../../configs/colorConfig";
 import sizeConfigs from "../../configs/sizeConfig";
-import Topbar from "../common/TopBar";
+import Topbar from "../common/Topbar";
 
 const PreLayout = () => {
   return (

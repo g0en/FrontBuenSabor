@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, Box, Select, MenuItem, FormControl, SelectChangeEvent } from "@mui/material";
+import { AppBar, Toolbar, Typography, Box, Select, MenuItem, FormControl, SelectChangeEvent, Avatar, Stack } from "@mui/material";
 import colorConfigs from "../../configs/colorConfig";
 import sizeConfigs from "../../configs/sizeConfig";
 import LoginButton from "./LoginButton";
@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import Sucursal from "../../types/Sucursal";
 import { SucursalGetByEmpresaId } from "../../services/SucursalService";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import avatarImage from '../../assets/images/logo.png'
+
 
 const Topbar = () => {
   const { isAuthenticated } = useAuth0();
@@ -42,6 +44,7 @@ const Topbar = () => {
   }, []);
 
   const isSucursalOrEmpresa = location.pathname.includes('empresa');
+  const showSucursalSelect = location.pathname.includes('empresa') || location.pathname.includes('empresa/:idEmpresa') || location.pathname.includes('/');
 
   return (
     <AppBar
@@ -63,8 +66,19 @@ const Topbar = () => {
         }}
       >
         <Typography variant="h6"></Typography>
+
         {
-          !isSucursalOrEmpresa && (
+        showSucursalSelect ? (
+        <Toolbar sx={{ marginBottom: "20px" }}>
+           <Stack
+              sx={{ width: "100%" }}
+              direction="row"
+              justifyContent="center"
+                                          >
+           <Avatar src={avatarImage} sx={{ width: 100, height: 100 }} />
+         </Stack>
+       </Toolbar>
+         ):( !isSucursalOrEmpresa && (
             <Box
               sx={{
                 display: "flex",
@@ -91,6 +105,7 @@ const Topbar = () => {
                 </Select>
               </FormControl>
             </Box>
+          )
           )}
         <Box
           sx={{
