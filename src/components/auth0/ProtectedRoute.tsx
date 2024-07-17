@@ -11,9 +11,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ roles }) => {
 
     const userHasRequiredRole = user && roles.some(role => JSON.stringify(user).includes(role));
 //!!!!!!!!!!descomentar abajo antes de commit!!!!!!!!!!!
-  //  if (!isAuthenticated || !userHasRequiredRole) {
-  //      return <Navigate to="/unauthorized" />;
-   // }
+   if (!isAuthenticated || !userHasRequiredRole) {
+      return <Navigate to="/unauthorized" />;
+    }
 
     return <Outlet />;
 };

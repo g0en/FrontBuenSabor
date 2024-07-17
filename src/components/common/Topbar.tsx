@@ -44,7 +44,7 @@ const Topbar = () => {
   }, []);
 
   const isSucursalOrEmpresa = location.pathname.includes('empresa');
-  const showSucursalSelect = location.pathname.includes('empresa') || location.pathname.includes('empresa/:idEmpresa') || location.pathname.includes('/');
+  const showSucursalSelect = location.pathname.includes('empresa') || location.pathname.includes('vistaCiudadano') ;
 
   return (
     <AppBar
@@ -69,13 +69,17 @@ const Topbar = () => {
 
         {
         showSucursalSelect ? (
-        <Toolbar sx={{ marginBottom: "20px" }}>
+        <Toolbar sx={{ marginBottom: "5px",marginTop:"5px" }}>
            <Stack
               sx={{ width: "100%" }}
               direction="row"
               justifyContent="center"
                                           >
            <Avatar src={avatarImage} sx={{ width: 100, height: 100 }} />
+           <Typography variant="h6" noWrap style={{fontStyle:''}}>
+                  El buen sabor
+                </Typography>
+
          </Stack>
        </Toolbar>
          ):( !isSucursalOrEmpresa && (
