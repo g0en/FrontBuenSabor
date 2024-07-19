@@ -63,17 +63,3 @@ export async function EmpresaUpdate(empresa: Empresa, token: string){
 		data: responseData as Empresa
 	};
 }
-
-export async function EmpresaAddSucursal(idEmpresa: number, idSucursal: number, token: string){
-	const urlServer = 'http://localhost:8080/empresa/addSucursal/' + idEmpresa + "/" + idSucursal;
-	const response = await fetch(urlServer, {
-		method: 'PUT',
-		//body: JSON.stringify(empresa),
-        headers: {
-			'Authorization': `Bearer ${token}`,
-			'Content-type': 'application/json',
-		},
-        mode: 'cors'
-	});
-	return await response.json() as Empresa;
-}
