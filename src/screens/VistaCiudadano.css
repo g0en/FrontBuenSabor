@@ -1,17 +1,14 @@
 /* Estilos personalizados para el carousel y sus elementos */
 .carousel-inner {
-    border-radius: 20px; /* Redondeo de los bordes del carousel */
     overflow: hidden; /* Oculta contenido que sobresalga del carousel */
   }
 
   
   .carousel-control-prev-icon, .carousel-control-next-icon {
-    filter: invert(100%); /* Invierte el color del icono para que sea visible en el fondo oscuro */
+    filter: invert(0%); /* Invierte el color del icono para que sea visible en el fondo oscuro */
   }
   
-  .carousel{
-    background-color: #375177;
-  }
+ 
 
   .title {
     text-align: center;
@@ -19,4 +16,6 @@
     padding-bottom: 20px;
   }
   
-  
+  .css-1sc6bmh {
+    background-color: #4c607e !important;
+  }

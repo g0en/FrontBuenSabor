@@ -54,7 +54,9 @@ const Topbar = () => {
         ml: sizeConfigs.sidebar.width,
         boxShadow: "unset",
         backgroundColor: colorConfigs.topbar.bg,
-        color: colorConfigs.topbar.color
+        color: colorConfigs.topbar.color,
+        borderBottomLeftRadius: '20px', // Ajusta este valor según lo necesario
+        borderBottomRightRadius: '20px' // Ajusta este valor según lo necesario
       }}
     >
       <Toolbar
@@ -74,6 +76,7 @@ const Topbar = () => {
               sx={{ width: "100%" }}
               direction="row"
               justifyContent="right"
+              
 
                                           >
            <Avatar src={avatarImage} sx={{ width: 70, height: 70 }} />
