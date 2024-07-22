@@ -1,4 +1,3 @@
-import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './VistaCiudadano.css';
 import imgprincipal from '../assets/images/imgprincipalCarrousel.png';
