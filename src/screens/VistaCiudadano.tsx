@@ -2,14 +2,26 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './VistaCiudadano.css';
 import imgprincipal from '../assets/images/imgprincipalCarrousel.png';
 import fondoNegro from '../assets/images/fondoNegroCarrousel.jpg';
+import portada from '../assets/images/imgPortada.png';
+import { useState } from 'react';
+import Sucursal from '../types/Sucursal';
+import SucursalCard from '../components/iu/Sucursal/SucursalCard';
 
 const VistaCiudadano = () => {
+
+  
+    const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+//revisar y aplicar metodo handleclose
+    function handleClose(): void {
+        throw new Error('Function not implemented.');
+    }
+
     return (
         <>
          {//IMAGEN PRINCIPAL
                         }
             <div style={{ position: 'relative', width: '100%' }}>
-                <img src={imgprincipal} alt="Imagen principal" style={{ height: 'auto', width: '100%' }} />
+                <img src={portada} alt="Imagen principal" style={{ height: 'auto', width: '100%' }} />
                  {//banner de CATEGORIAS
                         }
                 <div style={{
@@ -98,7 +110,34 @@ const VistaCiudadano = () => {
                     zIndex: 100 /* Asegura que el banner esté sobre el carrousel */
 
                 }}>
-                 <h1 style={{  marginLeft: '30px', color: 'white', fontSize: '1.7rem', textAlign: 'left' }}>Sucursales</h1>
+                <h1 style={{ marginLeft: '30px', color: 'white', fontSize: '1.7rem', textAlign: 'left' }}>Sucursales</h1>
+            </div>
+            <div>
+               
+            <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
+                justifyContent: 'center',
+                marginTop: '16px',
+                padding: '10px',
+            }}>
+                {sucursales.map((sucursal) => (
+                    <SucursalCard key={sucursal.id} onClose={handleClose} sucursal={sucursal}/>
+                ))}
+            </div>
+               
+                {/*
+                <div className="card" style={{ width: '18rem'}}>
+                    <img src="..." className="card-img-top" alt="..." />
+                    <div className="card-body">
+                        <h5 className="card-title">Card title</h5>
+                        <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <a href="#" className="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+*/}
+
                 </div>
 
         </>
