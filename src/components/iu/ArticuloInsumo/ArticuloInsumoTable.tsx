@@ -1,4 +1,4 @@
-import { Box, IconButton, TableCell, TableRow } from "@mui/material";
+import { Box, Chip, IconButton, TableCell, TableRow } from "@mui/material";
 import ArticuloInsumo from "../../../types/ArticuloInsumo";
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Edit, Visibility, Check } from "@mui/icons-material";
@@ -88,7 +88,7 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
             progress: undefined,
             theme: "colored"
         });
-        
+
         handleClose();
         handleCloseDialog();
     }
@@ -182,14 +182,28 @@ const ArticuloInsumoTable: React.FC<ArticuloInsumoTableProps> = ({ onClose, arti
                 <TableCell align="center">{articulo.denominacion}</TableCell>
                 <TableCell align="center">{articulo.precioCompra}</TableCell>
                 <TableCell align="center">{!articulo.esParaElaborar ? articulo.precioVenta : '-'}</TableCell>
-                <TableCell align="center">{articulo.unidadMedida?.denominacion}</TableCell>
+                <TableCell align="center">
+                    <Chip
+                        size="small"
+                        color="success"
+                        sx={{ ml: 1 }}
+                        label={articulo.unidadMedida?.denominacion}
+                    />
+                </TableCell>
                 <TableCell align="center">{articulo.stockActual}</TableCell>
                 <TableCell align="center">{articulo.stockMinimo}</TableCell>
                 <TableCell align="center">{articulo.stockMaximo}</TableCell>
                 <TableCell align="center">
                     {articulo.esParaElaborar ? <Check color="success" /> : <RemoveIcon color="error" />}
                 </TableCell>
-                <TableCell align="center">{articulo.categoria?.denominacion}</TableCell>
+                <TableCell align="center">
+                    <Chip
+                        size="small"
+                        color="secondary"
+                        sx={{ ml: 1 }}
+                        label={articulo.categoria?.denominacion}
+                    />
+                </TableCell>
                 <TableCell>
 
                     {

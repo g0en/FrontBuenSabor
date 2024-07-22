@@ -44,7 +44,7 @@ const Topbar = () => {
   }, []);
 
   const isSucursalOrEmpresa = location.pathname.includes('empresa');
-  const showSucursalSelect = location.pathname.includes('empresa') || location.pathname.includes('vistaCiudadano') ;
+  const showSucursalSelect = location.pathname.includes('inicio');
 
   return (
     <AppBar
@@ -70,43 +70,43 @@ const Topbar = () => {
         <Typography variant="h6"></Typography>
 
         {
-        showSucursalSelect ? (
-        <Toolbar sx={{ marginBottom: "7px",marginTop:"5px" }}>
-           <Stack
-              sx={{ width: "100%" }}
-              direction="row"
-              justifyContent="right"
-              
+          showSucursalSelect ? (
+            <Toolbar sx={{ marginBottom: "7px", marginTop: "5px" }}>
+              <Stack
+                sx={{ width: "100%" }}
+                direction="row"
+                justifyContent="right"
 
-                                          >
-           <Avatar src={avatarImage} sx={{ width: 70, height: 70 }} />
-           <Typography  variant="h5" noWrap style={{cursor: 'pointer' ,marginLeft:'20px',alignContent:'center',color:'#EEEEEE',fontWeight:'bold', letterSpacing :'3px', fontFamily: 'Cascadia code, sans-serif'}}onClick={() => window.location.href = '/vistaCiudadano'}>
-              El Buen Sabor|
+
+              >
+                <Avatar src={avatarImage} sx={{ width: 70, height: 70 }} />
+                <Typography variant="h5" noWrap style={{ cursor: 'pointer', marginLeft: '20px', alignContent: 'center', color: '#EEEEEE', fontWeight: 'bold', letterSpacing: '3px', fontFamily: 'Cascadia code, sans-serif' }} onClick={() => window.location.href = '/vistaCiudadano'}>
+                  El Buen Sabor|
                 </Typography>
 
-         </Stack>
-         <ListItemButton onClick={() => window.location.href = '/menu'}
-          sx={{
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)', // Cambia el color de fondo al hacer hover
-            }
-          }}
-         >
-  <ListItemText
-    primary="MENÚ"
-    primaryTypographyProps={{
-      style: {
-        fontSize: '15px',
-        fontWeight: 'bold',
-        fontFamily: 'century, sans-serif',
-        marginRight:'5px'
-                
-      }
-    }}
-  />
-</ListItemButton>
-       </Toolbar>
-         ):( !isSucursalOrEmpresa && (
+              </Stack>
+              <ListItemButton onClick={() => window.location.href = '/menu'}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Cambia el color de fondo al hacer hover
+                  }
+                }}
+              >
+                <ListItemText
+                  primary="MENÚ"
+                  primaryTypographyProps={{
+                    style: {
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                      fontFamily: 'century, sans-serif',
+                      marginRight: '5px'
+
+                    }
+                  }}
+                />
+              </ListItemButton>
+            </Toolbar>
+          ) : (!isSucursalOrEmpresa && (
             <Box
               sx={{
                 display: "flex",

@@ -2,7 +2,7 @@ import ArticuloManufacturado from "../../../types/ArticuloManufacturado";
 import { useState } from "react";
 import Imagen from "../../../types/Imagen";
 import { useAuth0 } from "@auth0/auth0-react";
-import { IconButton, TableCell, TableRow } from "@mui/material";
+import { Chip, IconButton, TableCell, TableRow } from "@mui/material";
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -186,10 +186,24 @@ const ArticuloManufacturadoTable: React.FC<ArticuloManufacturadoTableProps> = ({
         <>
             <TableRow sx={{ backgroundColor: articulo.habilitado === true ? "none" : "#B0B0B0" }} key={articulo.id}>
                 <TableCell align="center">{articulo.denominacion}</TableCell>
-                <TableCell align="center">{articulo.unidadMedida.denominacion}</TableCell>
+                <TableCell align="center">
+                    <Chip
+                        size="small"
+                        color="success"
+                        sx={{ ml: 1 }}
+                        label={articulo.unidadMedida.denominacion}
+                    />
+                </TableCell>
                 <TableCell align="center">{articulo.precioVenta}</TableCell>
                 <TableCell align="center">{articulo.tiempoEstimadoMinutos}</TableCell>
-                <TableCell align="center">{articulo.categoria && articulo.categoria.denominacion}</TableCell>
+                <TableCell align="center">
+                    <Chip
+                        size="small"
+                        color="error"
+                        sx={{ ml: 1 }}
+                        label={articulo.categoria?.denominacion}
+                    />
+                </TableCell>
                 {
                     articulo.habilitado === true ?
                         <TableCell align="center">

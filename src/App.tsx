@@ -26,9 +26,9 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/Login" element={<Ingreso />}></Route>
+      <Route path="/login" element={<Ingreso />}></Route>
       <Route element={<PreLayout />}>
-      <Route path="/VistaCiudadano" element={<VistaCiudadano />}></Route>
+        <Route path="/inicio" element={<VistaCiudadano />}></Route>
         <Route element={<ProtectedRoute roles={['administrador']} />}>
           <Route path="/empresa" element={<Empresa />} />
           <Route path="empresa/:idEmpresa" element={<Sucursal />} />
