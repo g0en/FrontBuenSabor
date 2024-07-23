@@ -80,7 +80,7 @@ const Topbar = () => {
 
               >
                 <Avatar src={avatarImage} sx={{ width: 70, height: 70 }} />
-                <Typography variant="h5" noWrap style={{ cursor: 'pointer', marginLeft: '20px', alignContent: 'center', color: '#EEEEEE', fontWeight: 'bold', letterSpacing: '3px', fontFamily: 'Cascadia code, sans-serif' }} onClick={() => window.location.href = '/vistaCiudadano'}>
+                <Typography variant="h5" noWrap style={{ cursor: 'pointer', marginLeft: '20px', alignContent: 'center', color: '#EEEEEE', fontWeight: 'bold', letterSpacing: '3px', fontFamily: 'Cascadia code, sans-serif' }} onClick={() => window.location.href = '/inicio'}>
                   El Buen Sabor|
                 </Typography>
 

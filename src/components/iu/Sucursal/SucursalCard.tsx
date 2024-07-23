@@ -23,6 +23,7 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
     const [hasCasaMatriz, setHasCasaMatriz] = useState(false);
     const { idEmpresa } = useParams();
     const { getAccessTokenSilently } = useAuth0();
+    const estaInicio = location.pathname.includes('inicio');
 
     const getAllSucursal = async () => {
         const token = await getAccessTokenSilently({
@@ -30,7 +31,6 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
                 audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             },
         });
-
         const sucursales: Sucursal[] = await SucursalGetByEmpresaId(Number(idEmpresa), token);
         setSucursales(sucursales);
     };
@@ -95,16 +95,20 @@ const SucursalCard: React.FC<EmpresaCardProps> = ({ onClose, sucursal }) => {
                         Casa Matriz: {sucursal.esCasaMatriz ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
                     </span>
                     <div>
-                        <Tooltip title="Editar">
-                            <IconButton onClick={handleOpen} color="primary">
-                                <EditIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Ver">
-                            <Button variant="contained" color="success" sx={{ height: "30px", width: "90px" }} onClick={() => redirectDashboard(sucursal.id)}>
-                                <VisibilityIcon /> Ver
-                            </Button>
-                        </Tooltip>
+                    {!estaInicio && (
+                        <div>
+                            <Tooltip title="Editar">
+                                <IconButton onClick={handleOpen} color="primary">
+                                    <EditIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Ver">
+                                <Button variant="contained" color="success" sx={{ height: "30px", width: "90px" }} onClick={() => redirectDashboard(sucursal.id)}>
+                                    <VisibilityIcon /> Ver
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    )}
                     </div>
                 </CardActions>
             </Card>

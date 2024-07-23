@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import {
-  Avatar,
-  Menu,
-  MenuItem,
-  Typography,
-  Box
-} from "@mui/material";
+import { Avatar, Menu, MenuItem, Typography, Box } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
 
 const LogoutButton = () => {
   const { user, logout } = useAuth0();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
+
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -19,6 +17,11 @@ const LogoutButton = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout({ logoutParams: { returnTo: window.location.origin } });
+    navigate('/inicio');
   };
 
   return (
@@ -46,11 +49,7 @@ const LogoutButton = () => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem
-          onClick={() =>
-            logout({ logoutParams: { returnTo: window.location.origin } })
-          }
-        >
+        <MenuItem onClick={handleLogout}>
           Cerrar Sesión
         </MenuItem>
       </Menu>

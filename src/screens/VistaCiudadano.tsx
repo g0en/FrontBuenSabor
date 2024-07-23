@@ -1,19 +1,38 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './VistaCiudadano.css';
-import imgprincipal from '../assets/images/imgprincipalCarrousel.png';
 import fondoNegro from '../assets/images/fondoNegroCarrousel.jpg';
 import portada from '../assets/images/imgPortada.png';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sucursal from '../types/Sucursal';
 import SucursalCard from '../components/iu/Sucursal/SucursalCard';
+import { SucursalGetAll } from '../services/SucursalService';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const VistaCiudadano = () => {
 
   
     const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+    const { getAccessTokenSilently } = useAuth0();
+
+    
+    const getAllSucursal = async () => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            },
+        });
+
+        const sucursales: Sucursal[] = await SucursalGetAll(token);
+        setSucursales(sucursales);
+    };
+
+    useEffect(() => {
+        getAllSucursal();
+    }, []);
+
 //revisar y aplicar metodo handleclose
     function handleClose(): void {
-        throw new Error('Function not implemented.');
+        throw new Error('Function not implemented / not available.');
     }
 
     return (
@@ -126,17 +145,6 @@ const VistaCiudadano = () => {
                     <SucursalCard key={sucursal.id} onClose={handleClose} sucursal={sucursal}/>
                 ))}
             </div>
-               
-                {/*
-                <div className="card" style={{ width: '18rem'}}>
-                    <img src="..." className="card-img-top" alt="..." />
-                    <div className="card-body">
-                        <h5 className="card-title">Card title</h5>
-                        <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                        <a href="#" className="btn btn-primary">Go somewhere</a>
-                    </div>
-                </div>
-*/}
 
                 </div>
 
